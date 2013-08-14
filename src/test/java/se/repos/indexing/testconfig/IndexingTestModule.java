@@ -10,7 +10,6 @@ import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.ItemContentsBufferStrategy;
 import se.repos.indexing.item.ItemPathinfo;
-import se.repos.indexing.testing.TestIndexOptions;
 import se.repos.indexing.twophases.ItemContentsNocache;
 import se.repos.indexing.twophases.ReposIndexingImpl;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLook;
