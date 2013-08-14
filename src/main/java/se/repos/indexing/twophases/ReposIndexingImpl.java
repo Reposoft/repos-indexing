@@ -40,7 +40,6 @@ import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.inspection.CmsChangesetReader;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
-import se.simonsoft.cms.testing.svn.CmsTestRepository;
 
 public class ReposIndexingImpl implements ReposIndexing {
 
@@ -408,7 +407,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 
 	@Override
-	public RepoRevision getRevProgress(CmsTestRepository repo) {
+	public RepoRevision getRevProgress(CmsRepository repo) {
 		return null;
 	}
 
