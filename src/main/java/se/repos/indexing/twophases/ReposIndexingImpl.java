@@ -225,6 +225,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	 * Needs either access to an "inspection" backed CmsItem,
 	 * with the drawback that it provides contents as OutputStream,
 	 * or to {@link CmsChangesetItem}, item properties buffer {@link CmsItemProperties}, {@link ItemContentsBuffer}.
+	 * @deprecated or maybe not future, see {@link se.simonsoft.cms.item.events.ItemEventListener}
 	 */
 	void indexItemVisit(CmsChangesetItemVisit itemVisit) {
 	}
@@ -234,12 +235,21 @@ public class ReposIndexingImpl implements ReposIndexing {
 	 * @param progress
 	 * 
 	 */
-	private void indexItemVisit(CmsRepository repository, RepoRevision revision, CmsChangesetItem item) {
-		indexItemMarkPrevious(repository, revision, item);
+	void indexItemVisit(CmsRepository repository, RepoRevision revision, CmsChangesetItem item) {
+		
 		
 		IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
 		
 		IndexingItemProgressPhases progress = new IndexingItemProgressPhases(repository, revision, item, doc);
+		
+		// Only use head flag on files for now because we don't have the revision to make the update safely on folders
+		if (item.isFile()) {
+			if (!item.isAdd()) {
+				indexItemMarkPrevious(repository, revision, item);
+			}
+			// TODO with HEAD reference we could index as non-head immediately, see CmsChangesetReader#read(CmsRepositoryInspection, RepoRevision, RepoRevision) and CmsChangesetItem#isOverwritten()
+			doc.addField("head", item.isDelete() ? false : true);
+		}
 		
 		// TODO by setting contents here we do NOT limit access to the background phase, meaning that buffers may live for very long during high indexing load for example reindexing
 		// - on the other hand current strategy for tests is to run everything in blocking phase, so could we instead make the background phase synchronous there?
@@ -250,8 +260,6 @@ public class ReposIndexingImpl implements ReposIndexing {
 			progress.setContents(new ItemContentsFolder());
 		}
 		
-		// TODO with HEAD reference we could index as non-head immediately, see CmsChangesetReader#read(CmsRepositoryInspection, RepoRevision, RepoRevision) and CmsChangesetItem#isOverwritten()
-		doc.addField("head", item.isDelete() ? false : true);
 		
 		Executor blocking = getExecutorBlocking();
 		indexItemProcess(blocking, progress, itemBlocking);
@@ -269,12 +277,17 @@ public class ReposIndexingImpl implements ReposIndexing {
 		// TODO run the end handler after all items
 	}
 	
-	private void indexItemMarkPrevious(CmsRepository repository, RepoRevision revision, CmsChangesetItem item) {
+	protected void indexItemMarkPrevious(CmsRepository repository, RepoRevision revision, CmsChangesetItem item) {
 		if (item.isFolder()) {
 			logger.warn("Flagging !head on folder is unreliable, see issue in SvnlookItem");
 		}
 		CmsItemPath path = item.getPath();
-		String query = repository.getHost() + repository.getUrlAtHost() + (path == null ? "" : path) + "@" + item.getRevisionObsoleted(); // From ItemPathInfo
+		RepoRevision revisionObsoleted = item.getRevisionObsoleted();
+		if (revisionObsoleted == null) {
+			logger.warn("Unknown obsoleted revision for {}, no existing item will be marked as non-HEAD", item);
+			return;
+		}
+		String query = repository.getHost() + repository.getUrlAtHost() + (path == null ? "" : path) + "@" + revisionObsoleted.getNumber(); // From ItemPathInfo
 		IndexingDocIncrementalSolrj mark = new IndexingDocIncrementalSolrj();
 		mark.addField("id", query);		
 		mark.setUpdateMode(true);
@@ -346,6 +359,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 	
 	protected String escape(String fieldValue) {
+		logger.debug("Escaping {}", fieldValue);
 		return fieldValue.replaceAll("([:^\\(\\)!~/ ])", "\\\\$1");
 	}
 	
@@ -354,6 +368,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 	
 	protected RepoRevision getIndexedRevisionHighestCompleted(CmsRepository repository) {
+		logger.debug("Checking higest clompleted revision for {}", repository);
 		return getIndexedRevision(repository, "true", ORDER.desc);
 	}
 	
@@ -366,15 +381,21 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 	
 	private RepoRevision getIndexedRevision(CmsRepository repository, String valComplete, ORDER order) {
-		SolrQuery query = new SolrQuery("type:commit AND complete:" + valComplete + " AND id:" + escape(getIdRepository(repository)) + "*");
+		logger.debug("Running revision query for {}, {}, {}", repository, valComplete, order);
+		String idPrefix = getIdRepository(repository);
+		String idPrefixEscaped = escape(idPrefix);
+		logger.debug("Repository's ID prefix is {} ({})", idPrefix, idPrefixEscaped);
+		SolrQuery query = new SolrQuery("type:commit AND complete:" + valComplete + " AND id:" + idPrefixEscaped + "*");
+		logger.debug("Created query {}", query);
 		query.setRows(1);
 		query.setFields("rev", "revt");
 		query.setSort("rev", order); // the timestamp might be in a different order in svn, if revprops or loading has been used irregularly
 		QueryResponse resp;
 		try {
+			logger.debug("Running revision query {}", query);
 			resp = repositem.query(query);
 		} catch (SolrServerException e) {
-			throw new IndexWriteException(e);
+			throw new RuntimeException("Error not handled", e);
 		}
 		SolrDocumentList results = resp.getResults();
 		if (results.getNumFound() == 0) {

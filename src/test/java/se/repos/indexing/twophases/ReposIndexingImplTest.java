@@ -4,13 +4,17 @@
 package se.repos.indexing.twophases;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
+import java.io.File;
 import java.util.Date;
 
 import org.junit.Test;
 
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
+import se.simonsoft.cms.item.events.change.CmsChangesetItem;
+import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 
 public class ReposIndexingImplTest {
 
@@ -26,6 +30,23 @@ public class ReposIndexingImplTest {
 		// TODO move to IdStrategy impl assertEquals("repo root", "host.name/svn/repo@123", impl.getId(repo, rev, null));
 		assertEquals("commit ids should not be confused with root items", "host.name/svn/repo#123", impl.getIdCommit(repo, rev));
 		assertEquals("repository ids are not used directly but useful for query on commit status", "host.name/svn/repo#", impl.getIdRepository(repo));
+	}
+	
+	@Test
+	public void testDontMarkPreviousAtAdd() {
+		CmsRepositoryInspection repo = new CmsRepositoryInspection("http://host.name/svn/repo", new File("/tmp/repo"));
+		RepoRevision rev = new RepoRevision(123, new Date(123456));
+		ReposIndexingImpl impl = new ReposIndexingImpl();
+		CmsChangesetItem item = mock(CmsChangesetItem.class);
+		when(item.getRevisionObsoleted()).thenThrow(new AssertionError("For add operation there should be no check for previous revision"));
+		when(item.isAdd()).thenReturn(true);
+		when(item.isFile()).thenReturn(true);
+		try {
+			impl.indexItemVisit(repo, rev, item);
+		} catch (NullPointerException e) {
+			// expected
+		}
+		verify(item).isAdd();
 	}
 	
 }
