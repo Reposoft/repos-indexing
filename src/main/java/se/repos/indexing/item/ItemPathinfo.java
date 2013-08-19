@@ -3,7 +3,11 @@
  */
 package se.repos.indexing.item;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Set;
+
+import org.apache.http.client.utils.URLEncodedUtils;
 
 import se.repos.indexing.IndexingDoc;
 import se.simonsoft.cms.item.CmsItemPath;
@@ -17,16 +21,78 @@ import se.simonsoft.cms.item.events.change.CmsChangesetItem;
  */
 public class ItemPathinfo implements IndexingItemHandler {
 
+	private static final String URLENCODE_CHARSET = "UTF-8";
+	public static final String TYPE_FILE = "file";
+	public static final String TYPE_FOLDER = "folder";
+	
+	public static final char STAT_ADD = 'A';
+	public static final char STAT_REPLACE = 'R';
+	public static final char STAT_MODIFY = 'M';
+	public static final char STAT_DELETE = 'D';
+	
 	@Override
 	public void handle(IndexingItemProgress progress) {
 		CmsChangesetItem item = progress.getItem();
 		IndexingDoc d = progress.getFields();
-		String id = getId(progress.getRepository(), progress.getRevision(), item.getPath());
+		
+		CmsRepository repository = progress.getRepository();
+		RepoRevision revision = progress.getRevision();
+		CmsItemPath path = item.getPath();
+		String id = getId(repository, revision, path);
+		
 		d.setField("id", id);
-		d.setField("path", item.getPath().toString());
-		d.setField("pathname", item.getPath().getName());
+		d.setField("path", path.toString());
+		d.setField("pathname", path.getName());
+		d.setField("pathext", path.getExtension());
+		
+		String repopath = repository.getPath();
+		d.setField("pathfull", repopath + path.toString());
+		CmsItemPath parent = path.getParent();
+		if (parent != null) {
+			d.setField("pathdir", parent.toString());
+		}
+		while (parent != null) {
+			d.addField("pathin", parent.toString());
+			d.addField("pathfullin", repopath + parent.toString());
+			parent = parent.getParent();
+		}
+		CmsItemPath repopathparent = new CmsItemPath(repopath);
+		while (repopathparent != null) {
+			d.addField("pathfullin", repopathparent.getPath());
+			repopathparent = repopathparent.getParent();
+		}
+		
+		if (item.isFile()) {
+			d.setField("type", TYPE_FILE);
+		}
+		if (item.isFolder()) {
+			d.setField("type", TYPE_FOLDER);
+		}
+		
+		d.setField("rev", revision.getNumber());
+		d.setField("revt", revision.getDate());
+		d.setField("revc", item.getRevision().getNumber());
+		d.setField("revct", item.getRevision().getDate());
+		
+		if (item.isAdd()) {
+			d.setField("pathstat", STAT_ADD);
+		} else if (item.isReplace()) {
+			d.setField("pathstat", STAT_REPLACE);
+		} else if (item.isDelete()) {
+			d.setField("pathstat", STAT_DELETE);
+		} else if (item.isContent()) {
+			d.setField("pathstat", STAT_MODIFY);
+		}
+		
+		if (item.isPropertiesModified()) {
+			d.setField("pathstatprop", STAT_MODIFY);
+		}
+		
+		String pathurl = urlencode(path);
+		d.setField("url", repository.getUrl() + pathurl);
+		d.setField("urlpath", repository.getUrlAtHost() + pathurl);
 	}
-
+	
 	@Override
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 		return null;
@@ -40,5 +106,21 @@ public class ItemPathinfo implements IndexingItemHandler {
 	private String getIdRevision(RepoRevision revision) {
 		return Long.toString(revision.getNumber());
 	}	
+	
+	private String urlencode(CmsItemPath path) {
+		StringBuffer b = new StringBuffer();
+		for (String p : path.getPathSegments()) {
+			b.append('/').append(urlencode(p));
+		}
+		return b.toString();
+	}
+	
+	private String urlencode(String str) {
+		try {
+			return URLEncoder.encode(str, URLENCODE_CHARSET);
+		} catch (UnsupportedEncodingException e) {
+			throw new IllegalStateException("Server does not support charset " + URLENCODE_CHARSET, e);
+		}
+	}
 	
 }
