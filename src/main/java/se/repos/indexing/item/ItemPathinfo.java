@@ -88,6 +88,10 @@ public class ItemPathinfo implements IndexingItemHandler {
 			d.setField("pathstatprop", STAT_MODIFY);
 		}
 		
+		if (item.isCopy()) { // TODO is this flag set for deletions that are copy-from sources in the same commit? no- do we need hasCopy?
+			d.setField("copyhas", true); // or pathcopyhas?
+		}
+		
 		String pathurl = urlencode(path);
 		d.setField("url", repository.getUrl() + pathurl);
 		d.setField("urlpath", repository.getUrlAtHost() + pathurl);
