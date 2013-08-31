@@ -73,17 +73,35 @@
 		<field name="pathdir"  type="string" indexed="true"  stored="false" multiValued="false"/>
 		<!-- all parent folders -->
 		<field name="pathin"   type="string" indexed="true"  stored="false" multiValued="true"/>
+		<!-- all path components -->
+		<field name="pathpart" type="string" indexed="true"  stored="false" multiValued="true"/>
 		
 		<!-- path from server root, URL-encoded?, url-at-host/urlpath? -->
 		<field name="pathfull"  type="string" indexed="true"  stored="false" multiValued="false"/>
 		<!-- all parent folders from server root -->
 		<field name="pathfullin"   type="string" indexed="true"  stored="false" multiValued="true"/>
-
+		
 		<!-- classifies item as belonging to 1+ areas of the file hierarchy, such as "trunk"/"branch"/"tag"/"release"/"translation"/"template" -->
 		<field name="patharea" type="string" indexed="true" stored="true" multiValued="true" />
+		<!-- identifies the "main" area, i.e. main branch, i.e trunk with the purpose of filtering out endless amount of copies, but does not recognize if copies have changed or not -->
+		<field name="pathmain" type="boolean" indexed="true" stored="true" multiValued="false" />
+		
+		<!-- copy and move information -->
+		<field name="copyfrom" type="string" indexed="true" stored="true" multiValued="false" />
+		<field name="copyfromrev" type="long" indexed="true" stored="true" multiValued="false" />
+		<field name="copyfromrevt" type="date" indexed="true" stored="true" multiValued="false" />
+		<!-- true if the source was deleted -->
+		<field name="copymove" type="boolean" indexed="true" stored="true" multiValued="false" />
+		<!-- true for sources of a copy in same revision -->
+		<field name="copyhas" type="boolean" indexed="true" stored="true" multiValued="false" />
+		
+		<!-- properties, colon (:) in prop name replaced with dot (.) -->
+		<field name="prop_*" type="string" indexed="true" stored="true" multiValued="true" />
 		
 		<!-- From fulltext extraction -->
 		<field name="text" type="text_general" indexed="true" stored="false" multiValued="false" />
+		<!-- General field for extracted metadata, colon on field name replaced with dot  -->
+		<field name="meta_*" type="string" indexed="true" stored="true" multiValued="true" />
 		
 		<!-- References, unresolved, including external -->
 		<field name="ref" type="string" indexed="true" stored="true" multiValued="true"/>

@@ -61,6 +61,9 @@ public class ItemPathinfo implements IndexingItemHandler {
 			d.addField("pathfullin", repopathparent.getPath());
 			repopathparent = repopathparent.getParent();
 		}
+		for (String segment : path.getPathSegments()) {
+			d.addField("pathpart", segment);
+		}
 		
 		if (item.isFile()) {
 			d.setField("type", TYPE_FILE);

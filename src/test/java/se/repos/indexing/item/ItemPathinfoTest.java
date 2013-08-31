@@ -60,6 +60,13 @@ public class ItemPathinfoTest {
 		assertEquals("/svn/repo1/my", finit.next());
 		assertEquals("/svn/repo1", finit.next());
 		assertEquals("/svn", finit.next());
+		// everything could be derived with copyFrom with pathfull, but for now we don't have all that analysis in Solr
+		Collection<Object> part = f.getFieldValues("pathpart");
+		Iterator<Object> partit = part.iterator();
+		assertEquals("my", partit.next());
+		assertEquals("dir", partit.next());
+		assertEquals("file.txt", partit.next());
+		assertEquals(3, part.size());
 		
 		assertEquals('A', f.getFieldValue("pathstat"));
 		assertEquals(null, f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but it does it matter to search?
