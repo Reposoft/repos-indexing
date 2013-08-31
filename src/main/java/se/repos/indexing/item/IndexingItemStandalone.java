@@ -115,6 +115,11 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 		}
 
 		@Override
+		public boolean isCopySource() {
+			throw new UnsupportedOperationException("Not supported in standalone extraction");
+		}
+		
+		@Override
 		public boolean isAdd() {
 			throw new UnsupportedOperationException("Not supported in standalone extraction");
 		}
