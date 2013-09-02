@@ -5,6 +5,7 @@ package se.repos.indexing.item;
 
 import java.util.Set;
 
+import se.repos.indexing.CoreCommit;
 import se.repos.indexing.IndexingDoc;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
@@ -22,6 +23,12 @@ public interface IndexingItemHandler {
 	 * @return other handlers that this one depends on, null for no dependencies
 	 */
 	public Set<Class<? extends IndexingItemHandler>> getDependencies();
+	
+	/**
+	 * Callback at commit, used to commit auxiliary cores along with repositem.
+	 * @return A commit strategy notified of significant indexing events, null if no additional commit is needed
+	 */
+	public CoreCommit getCommit();
 	
 	/**
 	 * Called before this handler, together with others in the same phase, gets any items in a new revision.

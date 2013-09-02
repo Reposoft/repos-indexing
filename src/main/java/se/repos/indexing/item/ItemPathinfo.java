@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Set;
 
+import se.repos.indexing.CoreCommit;
 import se.repos.indexing.IndexingDoc;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
@@ -102,6 +103,11 @@ public class ItemPathinfo implements IndexingItemHandler {
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 		return null;
 	}
+	
+	@Override
+	public CoreCommit getCommit() {
+		return null;
+	}	
 
 	// TODO we need an IdStrategy service, but most likely only one impl
 	String getId(CmsRepository repository, RepoRevision revision, CmsItemPath path) {

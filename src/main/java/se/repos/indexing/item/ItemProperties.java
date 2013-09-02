@@ -5,6 +5,7 @@ package se.repos.indexing.item;
 
 import java.util.Set;
 
+import se.repos.indexing.CoreCommit;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 
@@ -19,6 +20,11 @@ public class ItemProperties implements IndexingItemHandler {
 		// TODO Auto-generated method stub
 	}
 
+	@Override
+	public CoreCommit getCommit() {
+		return null;
+	}
+	
 	@Override
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 		// TODO Auto-generated method stub

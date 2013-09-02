@@ -31,7 +31,13 @@ public interface IndexingState {
 	
 	void initializing(RepoRevision existingVerified, RepoRevision existingOverwriteFrom);
 
+	/**
+	 * 
+	 * @param revision
+	 */
 	void syncRequest(RepoRevision revision);
+
+	void syncComplete(RepoRevision revision);
 	
 	void blockingBegin(RepoRevision revision);
 	
@@ -43,6 +49,10 @@ public interface IndexingState {
 	
 	void backgroundResumed();
 	
+	/**
+	 * 
+	 * @param revision
+	 */
 	void backgroundComplete(RepoRevision revision);
 
 }

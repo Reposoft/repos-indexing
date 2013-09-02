@@ -50,7 +50,23 @@ public class ReposIndexingImplTest {
 	}
 	
 	@Test
+	public void testRevisionNotification() {
+		ReposIndexingImpl impl = new ReposIndexingImpl();
+		
+	}
+	
+	@Test
 	public void testHandlerException() {
+		
+	}
+	
+	@Test
+	public void testHandlerDependencyVerification() {
+		
+	}
+	
+	@Test
+	public void testDeepCopyRelevantFields() {
 		
 	}
 	

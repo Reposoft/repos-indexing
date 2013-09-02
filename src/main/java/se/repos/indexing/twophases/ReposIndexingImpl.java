@@ -27,13 +27,11 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import se.repos.indexing.CmsChangesetItemVisit;
 import se.repos.indexing.IndexConnectException;
 import se.repos.indexing.IndexWriteException;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
-import se.repos.indexing.item.ItemContentsBuffer;
 import se.repos.indexing.item.ItemContentsBufferStrategy;
 import se.repos.indexing.twophases.IndexingItemProgressPhases.Phase;
 import se.simonsoft.cms.item.CmsItemPath;
@@ -221,24 +219,9 @@ public class ReposIndexingImpl implements ReposIndexing {
 		onComplete.run();
 		
 		// guess we need different commit strategies for resync and post-commit indexing, but lets commit every revision for now
-		try {
-			repositem.commit();
-		} catch (SolrServerException e) {
-			throw new IndexWriteException(e);
-		} catch (IOException e) {
-			throw new IndexConnectException(e);
-		}
+		new CoreCommitRevcomplete(repositem).onCompleteRevision();
+		
 		// guess we also need an optimize strategy
-	}
-
-	/**
-	 * Item Visit is the future event handling concept for single items.
-	 * Needs either access to an "inspection" backed CmsItem,
-	 * with the drawback that it provides contents as OutputStream,
-	 * or to {@link CmsChangesetItem}, item properties buffer {@link CmsItemProperties}, {@link ItemContentsBuffer}.
-	 * @deprecated or maybe not future, see {@link se.simonsoft.cms.item.events.ItemEventListener}
-	 */
-	void indexItemVisit(CmsChangesetItemVisit itemVisit) {
 	}
 	
 	/**
