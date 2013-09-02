@@ -49,4 +49,9 @@ public class ReposIndexingImplTest {
 		verify(item).isAdd();
 	}
 	
+	@Test
+	public void testHandlerException() {
+		
+	}
+	
 }
