@@ -41,6 +41,7 @@ import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangeset;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
+import se.simonsoft.cms.item.info.CmsRepositoryLookup;
 import se.simonsoft.cms.item.inspection.CmsChangesetReader;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
@@ -51,6 +52,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	
 	private SolrServer repositem;
 	private CmsChangesetReader changesetReader;
+	private CmsRepositoryLookup revisionLookup;
 	
 	// TODO this service should be per-repository to allow different indexers
 	// but for now it can be both, as the only extra complexity is handling in memory the latest revision indexed
@@ -87,6 +89,11 @@ public class ReposIndexingImpl implements ReposIndexing {
 		this.contentsBufferStrategy = contentsBufferStrategy;
 	}
 	
+	@Inject
+	public void setRevisionLookup(@Named("inspection") CmsRepositoryLookup lookup) {
+		this.revisionLookup = lookup;
+	}
+	
 	protected Executor getExecutorBlocking() {
 		return new BlockingExecutor();
 	}	
@@ -108,6 +115,9 @@ public class ReposIndexingImpl implements ReposIndexing {
 	@Override
 	public void sync(CmsRepository repository, RepoRevision revision) {
 		logger.info("Sync requested {} rev {}", repository, revision);
+		if (revision.getDate() == null) {
+			throw new IllegalArgumentException("Revision must be qualified with timestamp, got " + revision);
+		}
 		
 		/*
 		At large sync operations, do we run all blocking indexing first and then all background, or do we need more sophistication?
@@ -141,10 +151,10 @@ public class ReposIndexingImpl implements ReposIndexing {
 		RepoRevision r = scheduledHighest.get(repository);
 		if (r == null) {
 			logger.debug("No revision status in index. Starting from 0.");
-			r = new RepoRevision(0, null);
+			r = new RepoRevision(0, revisionLookup.getRevisionTimestamp(repository, 0));
 		}
 		for (long i = r.getNumber(); i <= revision.getNumber(); i++) {
-			range.add(new RepoRevision(i, null));
+			range.add(new RepoRevision(i, revisionLookup.getRevisionTimestamp(repository, i)));
 		}
 		logger.debug("Index range: {}", range);
 		
