@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
@@ -72,12 +73,12 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 	
 	@Inject
-	public void setItemBlocking(@Named("blocking") Iterable<IndexingItemHandler> handlersSync) {
+	public void setItemBlocking(@Named("blocking") Set<IndexingItemHandler> handlersSync) {
 		this.itemBlocking = handlersSync;
 	}
 	
 	@Inject
-	public void setItemBackground(@Named("background") Iterable<IndexingItemHandler> handlersAsync) {
+	public void setItemBackground(@Named("background") Set<IndexingItemHandler> handlersAsync) {
 		this.itemBackground = handlersAsync;
 	}
 
