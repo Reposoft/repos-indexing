@@ -7,7 +7,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Set;
 
-import se.repos.indexing.CoreCommit;
 import se.repos.indexing.IndexingDoc;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
@@ -103,11 +102,6 @@ public class ItemPathinfo implements IndexingItemHandler {
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 		return null;
 	}
-	
-	@Override
-	public CoreCommit getCommit() {
-		return null;
-	}	
 
 	// TODO we need an IdStrategy service, but most likely only one impl
 	String getId(CmsRepository repository, RepoRevision revision, CmsItemPath path) {
@@ -132,15 +126,6 @@ public class ItemPathinfo implements IndexingItemHandler {
 		} catch (UnsupportedEncodingException e) {
 			throw new IllegalStateException("Server does not support charset " + URLENCODE_CHARSET, e);
 		}
-	}
-
-	@Override
-	public void onRevisionBegin(CmsRepository repository, RepoRevision revision) {
-	}
-
-	@Override
-	public void onRevisionEnd(CmsRepository repository, RepoRevision revision) {
-		// item core is committed (and optimized? by indexing phases handler)
 	}
 	
 }

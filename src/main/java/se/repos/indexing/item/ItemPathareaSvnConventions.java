@@ -6,10 +6,6 @@ package se.repos.indexing.item;
 import java.util.HashSet;
 import java.util.Set;
 
-import se.repos.indexing.CoreCommit;
-import se.simonsoft.cms.item.CmsRepository;
-import se.simonsoft.cms.item.RepoRevision;
-
 /**
  * Sets value in the "patharea" field,
  * recognizing the conventional svn trunk/branches/tags.
@@ -28,19 +24,6 @@ public class ItemPathareaSvnConventions implements IndexingItemHandler {
 		return new HashSet<Class<? extends IndexingItemHandler>>() {{
 			add(ItemPathinfo.class);
 		}};
-	}
-
-	@Override
-	public CoreCommit getCommit() {
-		return null;
-	}	
-	
-	@Override
-	public void onRevisionBegin(CmsRepository repository, RepoRevision revision) {
-	}
-
-	@Override
-	public void onRevisionEnd(CmsRepository repository, RepoRevision revision) {
 	}
 
 }

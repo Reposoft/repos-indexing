@@ -14,8 +14,11 @@ import se.simonsoft.cms.item.RepoRevision;
  *
  *
  * It is useful to be able to reindex all the easily processed data quickly.
+ * 
  * TODO in a long sync operation background queue becomes extremely long.
  * Should we instead query index for next rev to handle in background, and index phase?
+ * 
+ * TODO many methods here are specific to twophases, some listeners (for commit etc) just need their own phase
  */
 public interface IndexingState {
 
