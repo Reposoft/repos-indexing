@@ -70,4 +70,9 @@ public class ReposIndexingImplTest {
 		
 	}
 	
+	@Test
+	public void testStatusReporting() {
+		
+	}
+	
 }

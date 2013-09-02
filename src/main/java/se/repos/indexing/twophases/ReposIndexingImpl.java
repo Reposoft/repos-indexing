@@ -33,6 +33,7 @@ import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 import se.repos.indexing.item.ItemContentsBufferStrategy;
+import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.twophases.IndexingItemProgressPhases.Phase;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
@@ -61,6 +62,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	private Iterable<IndexingItemHandler> itemBackground = new LinkedList<IndexingItemHandler>();
 
 	private ItemContentsBufferStrategy contentsBufferStrategy;
+	private ItemPropertiesBufferStrategy propertiesBufferStrategy;
 	
 	@Inject
 	public void setSolrRepositem(@Named("repositem") SolrServer repositem) {
@@ -86,6 +88,11 @@ public class ReposIndexingImpl implements ReposIndexing {
 	public void setItemContentsBufferStrategy(ItemContentsBufferStrategy contentsBufferStrategy) {
 		this.contentsBufferStrategy = contentsBufferStrategy;
 	}
+	
+	@Inject
+	public void setItemPropertiesBufferStrategy(ItemPropertiesBufferStrategy propertiesBufferStrategy) {
+		this.propertiesBufferStrategy = propertiesBufferStrategy;
+	} 
 	
 	@Inject
 	public void setRevisionLookup(@Named("inspection") CmsRepositoryLookup lookup) {
@@ -244,12 +251,15 @@ public class ReposIndexingImpl implements ReposIndexing {
 			// TODO with HEAD reference we could index as non-head immediately, see CmsChangesetReader#read(CmsRepositoryInspection, RepoRevision, RepoRevision) and CmsChangesetItem#isOverwritten()
 			doc.addField("head", item.isDelete() ? false : true);
 		}
+
+		CmsRepositoryInspection repositoryInsp = (CmsRepositoryInspection) repository;
+		progress.setProperties(propertiesBufferStrategy.getProperties(repositoryInsp, revision, item.getPath()));
 		
 		// TODO by setting contents here we do NOT limit access to the background phase, meaning that buffers may live for very long during high indexing load for example reindexing
 		// - on the other hand current strategy for tests is to run everything in blocking phase, so could we instead make the background phase synchronous there?
 		if (item.isFile()) {
 			// should we cast further down instead?
-			progress.setContents(contentsBufferStrategy.getBuffer((CmsRepositoryInspection) repository, revision, item.getPath(), doc));
+			progress.setContents(contentsBufferStrategy.getBuffer(repositoryInsp, revision, item.getPath(), doc));
 		} else {
 			progress.setContents(new ItemContentsFolder());
 		}

@@ -3,10 +3,10 @@
  */
 package se.repos.indexing.item;
 
-import se.repos.indexing.IndexingDoc;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
+import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 public interface ItemPropertiesBufferStrategy {
 
@@ -15,9 +15,8 @@ public interface ItemPropertiesBufferStrategy {
 	 * @param repository
 	 * @param revision
 	 * @param path
-	 * @param pathinfo Can be used to get size info etc.
-	 * @return TODO what?
+	 * @return the property data, or proxy for delayed reading of it
 	 */
-	Object getBuffer(CmsRepositoryInspection repository, RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo);
+	CmsItemProperties getProperties(CmsRepositoryInspection repository, RepoRevision revision, CmsItemPath path);
 	
 }
