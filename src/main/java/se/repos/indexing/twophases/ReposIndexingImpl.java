@@ -32,8 +32,10 @@ import se.repos.indexing.IndexWriteException;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
+import se.repos.indexing.item.ItemContentsBufferDeleted;
 import se.repos.indexing.item.ItemContentsBufferStrategy;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
+import se.repos.indexing.item.ItemPropertiesDeleted;
 import se.repos.indexing.twophases.IndexingItemProgressPhases.Phase;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
@@ -252,18 +254,22 @@ public class ReposIndexingImpl implements ReposIndexing {
 			doc.addField("head", item.isDelete() ? false : true);
 		}
 
-		CmsRepositoryInspection repositoryInsp = (CmsRepositoryInspection) repository;
-		progress.setProperties(propertiesBufferStrategy.getProperties(repositoryInsp, revision, item.getPath()));
-		
-		// TODO by setting contents here we do NOT limit access to the background phase, meaning that buffers may live for very long during high indexing load for example reindexing
-		// - on the other hand current strategy for tests is to run everything in blocking phase, so could we instead make the background phase synchronous there?
-		if (item.isFile()) {
-			// should we cast further down instead?
-			progress.setContents(contentsBufferStrategy.getBuffer(repositoryInsp, revision, item.getPath(), doc));
+		if (item.isDelete()) {
+			progress.setProperties(new ItemPropertiesDeleted());
+			progress.setContents(new ItemContentsBufferDeleted());
 		} else {
-			progress.setContents(new ItemContentsFolder());
+			CmsRepositoryInspection repositoryInsp = (CmsRepositoryInspection) repository;
+			progress.setProperties(propertiesBufferStrategy.getProperties(repositoryInsp, revision, item.getPath()));
+			
+			// TODO by setting contents here we do NOT limit access to the background phase, meaning that buffers may live for very long during high indexing load for example reindexing
+			// - on the other hand current strategy for tests is to run everything in blocking phase, so could we instead make the background phase synchronous there?
+			if (item.isFile()) {
+				// should we cast further down instead?
+				progress.setContents(contentsBufferStrategy.getBuffer(repositoryInsp, revision, item.getPath(), doc));
+			} else {
+				progress.setContents(new ItemContentsFolder());
+			}
 		}
-		
 		
 		Executor blocking = getExecutorBlocking();
 		indexItemProcess(blocking, progress, itemBlocking);
