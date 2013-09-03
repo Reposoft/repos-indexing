@@ -20,8 +20,9 @@ public class ItemPropertiesImmediate implements ItemPropertiesBufferStrategy {
 	private CmsContentsReader reader;
 	
 	@Inject
-	public void setCmsContentsReader(CmsContentsReader reader) {
+	public ItemPropertiesImmediate setCmsContentsReader(CmsContentsReader reader) {
 		this.reader = reader;
+		return this;
 	}
 
 	@Override
