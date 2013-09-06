@@ -16,6 +16,8 @@ public interface IndexingDoc {
 	
 	public void setField(String name, Object value);
 	
+	public void removeField(String name);	
+	
 	public Object getFieldValue(String name);
 
 	public Collection<Object> getFieldValues(String name);

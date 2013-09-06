@@ -49,7 +49,7 @@ public class IndexingDocIncrementalSolrj implements
 		throw new UnsupportedOperationException("not implemented");
 	}
 	
-	protected SolrInputDocument getSolrDoc() {
+	public SolrInputDocument getSolrDoc() {
 		if (!update) {
 			return doc;
 		}
@@ -96,6 +96,14 @@ public class IndexingDocIncrementalSolrj implements
 		doc.addField(name, value);
 	}	
 
+	@Override
+	public void removeField(String fieldName) {
+		if (update) {
+			throw new UnsupportedOperationException("Remove not supported in update mode yet");
+		}
+		doc.removeField(fieldName);
+	}
+	
 	@Override
 	public Object getFieldValue(String name) {
 		if (fieldsUpdated.contains(name)) {
@@ -154,5 +162,5 @@ public class IndexingDocIncrementalSolrj implements
 			put("add", fieldValue);
 		}
 	}
-	
+
 }
