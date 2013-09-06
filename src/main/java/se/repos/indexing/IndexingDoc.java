@@ -22,6 +22,8 @@ public interface IndexingDoc {
 	
 	public boolean containsKey(String fieldName);
 	
+	public Collection<String> getFieldNames();
+	
 	/**
 	 * @return the number of fields
 	 */

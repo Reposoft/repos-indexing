@@ -114,6 +114,11 @@ public class IndexingDocIncrementalSolrj implements
 	}
 
 	@Override
+	public Collection<String> getFieldNames() {
+		return doc.getFieldNames();
+	}
+	
+	@Override
 	public boolean containsKey(String fieldName) {
 		return doc.containsKey(fieldName);
 	}
@@ -149,6 +154,5 @@ public class IndexingDocIncrementalSolrj implements
 			put("add", fieldValue);
 		}
 	}
-	 
 	
 }
