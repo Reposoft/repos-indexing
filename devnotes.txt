@@ -1,0 +1,10 @@
+
+ * validate Handler dependencies
+ * deepCopy using dependencies
+ * indexing status notification
+ * present status in webapp
+ * status notification for use with hooks
+ * cms-backend support for isOverwritten
+ * use isOverwritten in indexing-xml to skip add and delete
+ * use isOverwritten in ReposIndexingImpl to skip head update
+ 
