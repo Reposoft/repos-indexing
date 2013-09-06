@@ -10,6 +10,7 @@ import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.ItemContentsBufferStrategy;
 import se.repos.indexing.item.ItemPathinfo;
+import se.repos.indexing.item.ItemProperties;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.twophases.ItemContentsNocache;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
@@ -50,6 +51,7 @@ public class IndexingTestModule extends AbstractModule {
 		Multibinder<IndexingItemHandler> background = Multibinder.newSetBinder(binder(), IndexingItemHandler.class, Names.named("background"));
 		
 		blocking.addBinding().to(ItemPathinfo.class);
+		blocking.addBinding().to(ItemProperties.class);
 		
 		bind(ItemContentsBufferStrategy.class).to(ItemContentsNocache.class);
 		bind(ItemPropertiesBufferStrategy.class).to(ItemPropertiesImmediate.class);

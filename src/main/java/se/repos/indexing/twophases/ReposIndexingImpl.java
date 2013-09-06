@@ -168,7 +168,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 		// run
 		scheduledHighest.put(repository, revision);
 		if (repository instanceof CmsRepositoryInspection) {
-			sync((CmsRepositoryInspection) repository, changesetReader, range);
+			sync((CmsRepositoryInspection) repository, changesetReader, revision, range);
 		} else {
 			throw new AssertionError("Admin repository instance required for indexing. Got " + repository.getClass());
 		}
@@ -190,15 +190,21 @@ public class ReposIndexingImpl implements ReposIndexing {
 	 * @param changesets
 	 * @param toRevision
 	 */
-	void sync(CmsRepositoryInspection repository, CmsChangesetReader changesets, Iterable<RepoRevision> range) {
+	void sync(CmsRepositoryInspection repository, CmsChangesetReader changesets, RepoRevision reference, Iterable<RepoRevision> range) {
 		for (RepoRevision rev : range) {
 			if (rev.getNumber() == 0) {
 				logger.debug("Revprops indexing for rev 0 not implemented"); // changeset reader couldn't handle 0
 				indexRevStart(repository, rev, null).run();
 				continue;
 			}
-			logger.debug("Reading revision {} from repository {}", rev, repository);
-			CmsChangeset changeset = changesets.read(repository, rev);
+			CmsChangeset changeset;
+			if (reference.isNewer(rev)) {
+				logger.debug("Reading revision {} from repository {}, commit revisions based on {}", rev, repository, reference);
+				changeset = changesets.read(repository, rev, reference);
+			} else {
+				logger.debug("Reading revision {} from repository {}", rev, repository);
+				changeset = changesets.read(repository, rev);
+			}
 			index(repository, changeset);
 		}
 	}

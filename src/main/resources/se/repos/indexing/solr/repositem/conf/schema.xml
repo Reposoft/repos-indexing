@@ -96,7 +96,7 @@
 		<field name="copyhas" type="boolean" indexed="true" stored="true" multiValued="false" />
 		
 		<!-- properties, colon (:) in prop name replaced with dot (.) -->
-		<dynamicField name="prop_*" type="string" indexed="true" stored="true" multiValued="true" />
+		<dynamicField name="prop_*" type="string" indexed="true" stored="true" multiValued="false" />
 		
 		<!-- From fulltext extraction -->
 		<field name="text" type="text_general" indexed="true" stored="false" multiValued="false" />
