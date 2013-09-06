@@ -15,6 +15,9 @@ public class ItemProperties implements IndexingItemHandler {
 
 	@Override
 	public void handle(IndexingItemProgress progress) {
+		if (progress.getItem().isDelete()) {
+			return;
+		}
 		IndexingDoc doc = progress.getFields();
 		CmsItemProperties properties = progress.getProperties();
 		for (String n : properties.getKeySet()) {

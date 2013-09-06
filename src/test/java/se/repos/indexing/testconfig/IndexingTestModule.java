@@ -18,6 +18,8 @@ import se.repos.indexing.twophases.ReposIndexingImpl;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsContentsReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsRepositoryLookupSvnkitLook;
+import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCache;
+import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCacheDefault;
 import se.simonsoft.cms.backend.svnkit.svnlook.SvnlookClientProviderStateless;
 import se.simonsoft.cms.item.info.CmsRepositoryLookup;
 import se.simonsoft.cms.item.inspection.CmsChangesetReader;
@@ -59,6 +61,7 @@ public class IndexingTestModule extends AbstractModule {
 		// backend-svnkit
 		bind(SVNLookClient.class).toProvider(SvnlookClientProviderStateless.class);
 		bind(CmsChangesetReader.class).to(CmsChangesetReaderSvnkitLook.class);
+		bind(CommitRevisionCache.class).to(CommitRevisionCacheDefault.class);
 		bind(CmsContentsReader.class).to(CmsContentsReaderSvnkitLook.class);
 		bind(CmsRepositoryLookup.class).annotatedWith(Names.named("inspection")).to(CmsRepositoryLookupSvnkitLook.class);
 		

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import org.junit.Test;
 
 import se.repos.indexing.IndexingDoc;
+import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.properties.CmsItemPropertiesMap;
 
 public class ItemPropertiesTest {
@@ -13,6 +14,8 @@ public class ItemPropertiesTest {
 	@Test
 	public void testHandle() {
 		IndexingItemProgress p = mock(IndexingItemProgress.class);
+		CmsChangesetItem item = mock(CmsChangesetItem.class);
+		when(p.getItem()).thenReturn(item);
 		IndexingDoc doc = mock(IndexingDoc.class);
 		CmsItemPropertiesMap props = new CmsItemPropertiesMap();
 		props.put("a:prop", "val");
