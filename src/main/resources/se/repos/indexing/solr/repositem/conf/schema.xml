@@ -98,6 +98,9 @@
 		<!-- properties, colon (:) in prop name replaced with dot (.) -->
 		<dynamicField name="prop_*" type="string" indexed="true" stored="true" multiValued="false" />
 		
+		<!-- checksum with different algorithms, sha1 should be there -->
+		<dynamicField name="checksum_*" type="string" indexed="true" stored="true" multiValued="false" />
+		
 		<!-- From fulltext extraction -->
 		<field name="text" type="text_general" indexed="true" stored="false" multiValued="false" />
 		<!-- General field for embedded metadata, colon on field name replaced with dot  -->
