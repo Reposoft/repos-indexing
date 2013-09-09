@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2004-2012 Repos Mjukvara AB
+ */
 package se.repos.indexing.item;
 
 import static org.mockito.Mockito.*;
@@ -8,14 +11,18 @@ import java.io.InputStream;
 import org.junit.Test;
 
 import se.repos.indexing.IndexingDoc;
+import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 
 public class ItemChecksumTest {
 
 	@Test
 	public void test() {
+		CmsChangesetItem item = mock(CmsChangesetItem.class);
+		when(item.isFile()).thenReturn(true);
 		IndexingDoc doc = mock(IndexingDoc.class);
 		IndexingItemProgress p = mock(IndexingItemProgress.class);
 		InputStream content = new ByteArrayInputStream("testing\n".getBytes());
+		when(p.getItem()).thenReturn(item);
 		when(p.getContents()).thenReturn(content).thenThrow(new AssertionError("Should only read stream once"));
 		when(p.getFields()).thenReturn(doc);
 		new ItemChecksum().handle(p);
