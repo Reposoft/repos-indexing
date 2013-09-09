@@ -39,6 +39,12 @@ public class ItemPathinfo implements IndexingItemHandler {
 		String id = getId(repository, revision, path);
 		
 		d.setField("id", id);
+		
+		d.setField("repo", repository.getName());
+		d.setField("repoparent", repository.getParentPath());
+		d.setField("repohost", repository.getHost());
+		d.setField("repoid", getId(repository));
+		
 		d.setField("path", path.toString());
 		d.setField("pathname", path.getName());
 		d.setField("pathext", path.getExtension());
@@ -102,10 +108,14 @@ public class ItemPathinfo implements IndexingItemHandler {
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 		return null;
 	}
+	
+	String getId(CmsRepository repository) {
+		return repository.getHost() + repository.getUrlAtHost();
+	}
 
 	// TODO we need an IdStrategy service, but most likely only one impl
 	String getId(CmsRepository repository, RepoRevision revision, CmsItemPath path) {
-		return repository.getHost() + repository.getUrlAtHost() + (path == null ? "" : path) + "@" + getIdRevision(revision); 
+		return getId(repository) + (path == null ? "" : path) + "@" + getIdRevision(revision); 
 	}
 	
 	private String getIdRevision(RepoRevision revision) {

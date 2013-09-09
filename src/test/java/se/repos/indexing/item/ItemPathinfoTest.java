@@ -79,6 +79,11 @@ public class ItemPathinfoTest {
 		
 		assertEquals("https://h.ost:1080/svn/repo1/my/dir/file.txt", f.getFieldValue("url"));
 		assertEquals("/svn/repo1/my/dir/file.txt", f.getFieldValue("urlpath"));
+		
+		assertEquals("repo1", f.getFieldValue("repo"));
+		assertEquals("h.ost:1080", f.getFieldValue("repohost"));
+		assertEquals("/svn", f.getFieldValue("repoparent"));
+		assertEquals("h.ost:1080/svn/repo1", f.getFieldValue("repoid"));
 		// TODO logical ID
 		
 	}
