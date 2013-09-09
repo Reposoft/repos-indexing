@@ -12,7 +12,7 @@ public class ItemChecksum implements IndexingItemHandler {
 
 	@Override
 	public void handle(IndexingItemProgress progress) {
-		ChecksumRead checksum = new ChecksumRead();
+		ChecksumRead checksum = new ChecksumRead(Algorithm.MD5, Algorithm.SHA1, Algorithm.SHA256);
 		try {
 			checksum.add(progress.getContents());
 		} catch (IOException e) {
