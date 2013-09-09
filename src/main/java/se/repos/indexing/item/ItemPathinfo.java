@@ -71,6 +71,7 @@ public class ItemPathinfo implements IndexingItemHandler {
 		
 		if (item.isFile()) {
 			d.setField("type", TYPE_FILE);
+			d.setField("size", item.getFilesize());
 		}
 		if (item.isFolder()) {
 			d.setField("type", TYPE_FOLDER);

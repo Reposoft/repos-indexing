@@ -1,10 +1,12 @@
 
  * validate Handler dependencies
- * deepCopy using dependencies
+ * -postponed,workaround:XmlRestrictFields- deepCopy using dependencies
  * indexing status notification
  * present status in webapp
  * status notification for use with hooks
- * cms-backend support for isOverwritten
- * use isOverwritten in indexing-xml to skip add and delete
+ * -done- cms-backend support for isOverwritten
+ * -done- use isOverwritten in indexing-xml to skip add and delete
  * use isOverwritten in ReposIndexingImpl to skip head update
- 
+ * item size
+ * notification to content buffers would be useful to delete temp files and to update the sum of memory used for caching
+   - we need some way to clean up temp files or big reindex runs will fill the disk

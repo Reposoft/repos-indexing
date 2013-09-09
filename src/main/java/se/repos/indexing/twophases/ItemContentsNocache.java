@@ -13,9 +13,6 @@ import java.io.OutputStream;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.item.ItemContentsBuffer;
 import se.repos.indexing.item.ItemContentsBufferStrategy;
@@ -24,10 +21,11 @@ import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 
+/**
+ * Only suitable for testing, will fill up the disk with temp files in large indexing jobs.
+ */
 public class ItemContentsNocache implements ItemContentsBufferStrategy {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	
 	private CmsContentsReader reader;
 	
 	@Inject
@@ -39,10 +37,6 @@ public class ItemContentsNocache implements ItemContentsBufferStrategy {
 	@Override
 	public ItemContentsBuffer getBuffer(CmsRepositoryInspection repository,
 			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
-		Long size = (Long) pathinfo.getFieldValue("size");
-		if (size == null) {
-			logger.warn("Lacking size information for item");
-		}
 		return new BufferMinimizeMemoryUse(repository, revision, path);
 	}	
 	

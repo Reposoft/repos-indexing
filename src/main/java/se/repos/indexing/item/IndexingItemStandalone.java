@@ -175,6 +175,11 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 		}
 
 		@Override
+		public long getFilesize() {
+			throw new UnsupportedOperationException("Not supported in standalone extraction");
+		}
+		
+		@Override
 		public RepoRevision getRevision() {
 			throw new UnsupportedOperationException("Not supported in standalone extraction");
 		}
