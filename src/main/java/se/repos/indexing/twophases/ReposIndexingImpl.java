@@ -144,7 +144,14 @@ public class ReposIndexingImpl implements ReposIndexing {
 			RepoRevision c = getIndexedRevisionHighestCompleted(repository);
 			RepoRevision pl = getIndexedRevisionLowestStarted(repository);
 			RepoRevision ph = getIndexedRevisionHighestStarted(repository);
-			logger.info("Completed {}, progress from {} to {}", new Object[]{c, pl, ph});
+			if (pl == null) {
+				if (ph != null) {
+					logger.error("Inconsistent revision query results, got highest in progress {}", ph);
+				}
+				logger.info("Indexing has completed revision {}, no indexing in progress", c);
+			} else {
+				logger.info("Indexing has completed revision {}, in progress from {} to {}", c, pl, ph);
+			}
 			// for now the simplest solution is to assume that all in-progress operations have actually completed
 			//if (pl != null) {
 			//	logger.warn("Index contains unfinished revisions between {} and {} at first sync. Reindexing those.", pl, ph);
@@ -375,7 +382,6 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 	
 	protected String escape(String fieldValue) {
-		logger.debug("Escaping {}", fieldValue);
 		return fieldValue.replaceAll("([:^\\(\\)!~/ ])", "\\\\$1");
 	}
 	
@@ -397,18 +403,17 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 	
 	private RepoRevision getIndexedRevision(CmsRepository repository, String valComplete, ORDER order) {
-		logger.debug("Running revision query for {}, {}, {}", repository, valComplete, order);
+		logger.debug("Running revision query for {}, complete={}, order={}", repository, valComplete, order);
 		String idPrefix = getIdRepository(repository);
 		String idPrefixEscaped = escape(idPrefix);
 		logger.debug("Repository's ID prefix is {} ({})", idPrefix, idPrefixEscaped);
 		SolrQuery query = new SolrQuery("type:commit AND complete:" + valComplete + " AND id:" + idPrefixEscaped + "*");
-		logger.debug("Created query {}", query);
 		query.setRows(1);
 		query.setFields("rev", "revt");
 		query.setSort("rev", order); // the timestamp might be in a different order in svn, if revprops or loading has been used irregularly
 		QueryResponse resp;
 		try {
-			logger.debug("Running revision query {}", query);
+			logger.trace("Running revision query {}", query);
 			resp = repositem.query(query);
 		} catch (SolrServerException e) {
 			throw new RuntimeException("Error not handled", e);
