@@ -12,6 +12,9 @@ public class ItemChecksum implements IndexingItemHandler {
 
 	@Override
 	public void handle(IndexingItemProgress progress) {
+		if (!progress.getItem().isFile()) {
+			return;
+		}
 		ChecksumRead checksum = new ChecksumRead(Algorithm.MD5, Algorithm.SHA1, Algorithm.SHA256);
 		try {
 			checksum.add(progress.getContents());
