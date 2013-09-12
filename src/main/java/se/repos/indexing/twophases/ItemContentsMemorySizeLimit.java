@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 
 import se.repos.indexing.IndexingDoc;
+import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.item.ItemContentsBuffer;
 import se.repos.indexing.item.ItemContentsBufferStrategy;
 import se.simonsoft.cms.item.CmsItemPath;
@@ -23,7 +24,7 @@ import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 
 /**
  * 
- * TODO we need a cleanup strategy for temp files
+ * TODO we need a cleanup strategy for temp files, implement {@link IndexingEventAware} to get the notification needed
  */
 public class ItemContentsMemorySizeLimit implements ItemContentsBufferStrategy {
 	
