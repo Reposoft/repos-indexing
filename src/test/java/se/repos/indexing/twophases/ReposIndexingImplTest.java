@@ -11,6 +11,7 @@ import java.util.Date;
 
 import org.junit.Test;
 
+import se.repos.indexing.item.ItemContentsBuffer;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
@@ -67,11 +68,6 @@ public class ReposIndexingImplTest {
 	
 	@Test
 	public void testDeepCopyRelevantFields() {
-		
-	}
-	
-	@Test
-	public void testStatusReporting() {
 		
 	}
 	

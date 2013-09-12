@@ -6,6 +6,7 @@ package se.repos.indexing.testconfig;
 import org.apache.solr.client.solrj.SolrServer;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
 
+import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.ItemContentsBufferStrategy;
@@ -54,6 +55,9 @@ public class IndexingTestModule extends AbstractModule {
 		
 		blocking.addBinding().to(ItemPathinfo.class);
 		blocking.addBinding().to(ItemProperties.class);
+		
+		@SuppressWarnings("unused") // not necessarily needed, because other dependencies are picked up as aware too
+		Multibinder<IndexingEventAware> additionalEventHandlers = Multibinder.newSetBinder(binder(), IndexingEventAware.class);
 		
 		// backend-svnkit
 		bind(SVNLookClient.class).toProvider(SvnlookClientProviderStateless.class);

@@ -4,8 +4,10 @@
 package se.repos.indexing.twophases;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import se.repos.indexing.IndexConnectException;
 import se.repos.indexing.IndexWriteException;
+import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
@@ -66,6 +69,8 @@ public class ReposIndexingImpl implements ReposIndexing {
 	private ItemContentsBufferStrategy contentsBufferStrategy;
 	private ItemPropertiesBufferStrategy propertiesBufferStrategy;
 	
+	private EventHandlers eventHandlers = new EventHandlers();
+	
 	@Inject
 	public void setSolrRepositem(@Named("repositem") SolrServer repositem) {
 		this.repositem = repositem;
@@ -79,28 +84,63 @@ public class ReposIndexingImpl implements ReposIndexing {
 	@Inject
 	public void setItemBlocking(@Named("blocking") Set<IndexingItemHandler> handlersSync) {
 		this.itemBlocking = handlersSync;
+		eventHandlers.addIfAwareAll(handlersSync);
 	}
 	
 	@Inject
 	public void setItemBackground(@Named("background") Set<IndexingItemHandler> handlersAsync) {
 		this.itemBackground = handlersAsync;
+		eventHandlers.addIfAwareAll(handlersAsync);
 	}
 
 	@Inject
 	public void setItemContentsBufferStrategy(ItemContentsBufferStrategy contentsBufferStrategy) {
 		this.contentsBufferStrategy = contentsBufferStrategy;
+		eventHandlers.addIfAware(contentsBufferStrategy);
 	}
 	
 	@Inject
 	public void setItemPropertiesBufferStrategy(ItemPropertiesBufferStrategy propertiesBufferStrategy) {
 		this.propertiesBufferStrategy = propertiesBufferStrategy;
+		eventHandlers.addIfAware(propertiesBufferStrategy);
 	} 
 	
 	@Inject
 	public void setRevisionLookup(@Named("inspection") CmsRepositoryLookup lookup) {
 		this.revisionLookup = lookup;
 	}
+
+	/**
+	 * Optional, adds event listeners that are not added through as other types of dependencies.
+	 * 
+	 * {@link IndexingEventAware} is detected from the following:
+	 * <ul>
+	 * <li>{@link #setItemBlocking(Set)}</li>
+	 * <li>{@link #setItemBackground(Set)}</li>
+	 * <li>{@link #setItemContentsBufferStrategy(ItemContentsBufferStrategy)}</li>
+	 * <li>{@link #setItemPropertiesBufferStrategy(ItemPropertiesBufferStrategy)}</li>
+	 */
+	@Inject
+	public void addEventListeners(Set<IndexingEventAware> other) {
+		if (other != null) {
+			this.eventHandlers.addAll(other);
+		}
+	}
 	
+	protected Collection<IndexingEventAware> getListerners() {
+		return eventHandlers;
+	}
+	
+	/**
+	 * 
+	 * TODO quite possibly we could realize that single-thread scheduling of handlers is better than different executors,
+	 * so we might drop the executors and instead focus on scheduling handlers so that newly added revisions' "blocking"
+	 * handlers get inserted before old revision's waiting handlers.
+	 * We might also do that up to a limit, so that when a revision has waited for very long we run it anyway.
+	 * Conclusion: schedulng should be configurable, not executors.
+	 * 
+	 * @return
+	 */
 	protected Executor getExecutorBlocking() {
 		return new BlockingExecutor();
 	}	
@@ -181,7 +221,9 @@ public class ReposIndexingImpl implements ReposIndexing {
 		}
 		
 		// end of changeset indexing (i.e. after all background work too)
-
+		// TODO really? yes, but only because all executors are blocking. Must be solved so that 
+		
+		// Move this to event handler?
 		try {
 			repositem.commit();
 		} catch (SolrServerException e) {
@@ -213,6 +255,8 @@ public class ReposIndexingImpl implements ReposIndexing {
 				changeset = changesets.read(repository, rev);
 			}
 			index(repository, changeset);
+			// TODO now because all executors are blocking we know that revision is done here, better scheduling insight is needed so we can report event accurately
+			eventHandlers.onRevisionComplete(rev);
 		}
 	}
 	
@@ -476,6 +520,31 @@ public class ReposIndexingImpl implements ReposIndexing {
 			docComplete.addField("id", id);
 			docComplete.setField("complete", partialUpdateToTrue);
 			solrAdd(docComplete);
+		}
+		
+	}
+	
+	class EventHandlers extends LinkedHashSet<IndexingEventAware> implements IndexingEventAware {
+
+		private static final long serialVersionUID = 1L;
+
+		protected void addIfAwareAll(Collection<? extends Object> possibleIndexingEventAware) {
+			for (Object h : possibleIndexingEventAware) {
+				addIfAware(h);
+			}
+		}	
+		
+		protected void addIfAware(Object possibleIndexingEventAware) {
+			if (possibleIndexingEventAware instanceof IndexingEventAware) {
+				this.add((IndexingEventAware) possibleIndexingEventAware);
+			}
+		}
+		
+		@Override
+		public void onRevisionComplete(RepoRevision revision) {
+			for (IndexingEventAware h : this) {
+				h.onRevisionComplete(revision);
+			}
 		}
 		
 	}
