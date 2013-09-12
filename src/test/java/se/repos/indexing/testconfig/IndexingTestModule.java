@@ -12,7 +12,7 @@ import se.repos.indexing.item.ItemContentsBufferStrategy;
 import se.repos.indexing.item.ItemPathinfo;
 import se.repos.indexing.item.ItemProperties;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
-import se.repos.indexing.twophases.ItemContentsNocache;
+import se.repos.indexing.twophases.ItemContentsMemoryChoiceDeferred;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
 import se.repos.indexing.twophases.ReposIndexingImpl;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLook;
@@ -55,9 +55,6 @@ public class IndexingTestModule extends AbstractModule {
 		blocking.addBinding().to(ItemPathinfo.class);
 		blocking.addBinding().to(ItemProperties.class);
 		
-		bind(ItemContentsBufferStrategy.class).to(ItemContentsNocache.class);
-		bind(ItemPropertiesBufferStrategy.class).to(ItemPropertiesImmediate.class);
-		
 		// backend-svnkit
 		bind(SVNLookClient.class).toProvider(SvnlookClientProviderStateless.class);
 		bind(CmsChangesetReader.class).to(CmsChangesetReaderSvnkitLook.class);
@@ -66,7 +63,9 @@ public class IndexingTestModule extends AbstractModule {
 		bind(CmsRepositoryLookup.class).annotatedWith(Names.named("inspection")).to(CmsRepositoryLookupSvnkitLook.class);
 		
 		// tweaks
-		bind(ItemContentsBufferStrategy.class).to(ItemContentsNocache.class);
+		bind(ItemPropertiesBufferStrategy.class).to(ItemPropertiesImmediate.class);
+		bind(ItemContentsBufferStrategy.class).to(ItemContentsMemoryChoiceDeferred.class);
+		bind(Integer.class).annotatedWith(Names.named("indexingFilesizeInMemoryLimitBytes")).toInstance(100000); // optimize for test run performance, but we should test the file cache also
 	}
 
 }

@@ -71,12 +71,14 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 		SvnTestSetup.getInstance().tearDown();
 		super.tearDown();
 		// save solr contents
-		printHits(new SolrQuery("*:*"));
+		//no need now that we use an actual solr server
+		//printHits(new SolrQuery("*:*"));
 		// tests have different repositories so let's see if they can use the same solr instance //solrTestServer = null;
 		// clear data from this test
 		getSolr().deleteByQuery("*:*");
 	}
 	
+	@SuppressWarnings("unused")
 	private void printHits(SolrQuery q) throws SolrServerException {
 		System.out.println("--- solr contents " + q.toString() + " ---");
 		SolrDocumentList results = getSolr().query(q).getResults();
@@ -165,6 +167,8 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 				"se/repos/indexing/testrepo1r3.svndump");
 		assertNotNull(dumpfile);
 		CmsTestRepository repo = SvnTestSetup.getInstance().getRepository().load(dumpfile);
+		
+		repo.keep();
 		
 		ReposIndexing indexing = getIndexing();
 		indexing.sync(repo, new RepoRevision(1, new Date(1)));

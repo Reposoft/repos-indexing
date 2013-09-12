@@ -13,9 +13,6 @@ import java.io.OutputStream;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.item.ItemContentsBuffer;
 import se.repos.indexing.item.ItemContentsBufferStrategy;
@@ -29,8 +26,6 @@ import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
  * TODO we need a cleanup strategy for temp files
  */
 public class ItemContentsMemorySizeLimit implements ItemContentsBufferStrategy {
-	
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	public static final int DEFAULT_SIZE_LIMIT = 100000;
 	
