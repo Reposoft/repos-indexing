@@ -50,6 +50,13 @@ import se.simonsoft.cms.item.inspection.CmsChangesetReader;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
+/**
+ * 
+ *	
+ * TODO this service should be per-repository to allow different indexers
+ * but for now it can be both, as the only extra complexity is handling in memory the latest revision indexed
+ * TODO or should it be global so it can schedule indexing operations for all, with Map<CmsRepository,BackendService> dependencies?
+ */
 public class ReposIndexingImpl implements ReposIndexing {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -57,9 +64,6 @@ public class ReposIndexingImpl implements ReposIndexing {
 	private SolrServer repositem;
 	private CmsChangesetReader changesetReader;
 	private CmsRepositoryLookup revisionLookup;
-	
-	// TODO this service should be per-repository to allow different indexers
-	// but for now it can be both, as the only extra complexity is handling in memory the latest revision indexed
 	
 	private Map<CmsRepository, RepoRevision> scheduledHighest = new HashMap<CmsRepository, RepoRevision>();
 
