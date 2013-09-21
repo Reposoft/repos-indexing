@@ -95,7 +95,7 @@
 		<!-- true for sources of a copy in same revision -->
 		<field name="copyhas" type="boolean" indexed="true" stored="true" multiValued="false" />
 		
-		<field name="size" type="boolean" indexed="true" stored="true" multiValued="false" />
+		<field name="size" type="long" indexed="true" stored="true" multiValued="false" />
 		
 		<!-- properties, colon (:) in prop name replaced with dot (.) -->
 		<dynamicField name="prop_*" type="string" indexed="true" stored="true" multiValued="false" />
