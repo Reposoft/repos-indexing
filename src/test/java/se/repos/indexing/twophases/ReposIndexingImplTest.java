@@ -11,11 +11,10 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import se.repos.indexing.item.ItemContentsBuffer;
+import se.simonsoft.cms.backend.svnkit.CmsRepositorySvn;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
-import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 
 public class ReposIndexingImplTest {
 
@@ -35,7 +34,7 @@ public class ReposIndexingImplTest {
 	
 	@Test
 	public void testDontMarkPreviousAtAdd() {
-		CmsRepositoryInspection repo = new CmsRepositoryInspection("http://host.name/svn/repo", new File("/tmp/repo"));
+		CmsRepositorySvn repo = new CmsRepositorySvn("http://host.name/svn/repo", new File("/tmp/repo"));
 		RepoRevision rev = new RepoRevision(123, new Date(123456));
 		ReposIndexingImpl impl = new ReposIndexingImpl();
 		CmsChangesetItem item = mock(CmsChangesetItem.class);

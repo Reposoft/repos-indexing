@@ -18,6 +18,8 @@
 	<logger name="org.apache.solr" level="warn" />
 	<!-- logs all searches and commits -->
 	<logger name="org.apache.solr.core.SolrCore" level="info" />
+	<!-- this seems to take quite long -->
+	<logger name="org.apache.solr.cor.solrj.impl.HttpClientUtil" level="info" />
 
 	<root level="info">
 		<appender-ref ref="STDOUT" />
