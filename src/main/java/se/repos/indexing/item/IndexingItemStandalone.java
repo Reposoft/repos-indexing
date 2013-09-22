@@ -180,7 +180,7 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 		}
 		
 		@Override
-		public RepoRevision getRevision() {
+		public RepoRevision getRevisionChanged() {
 			throw new UnsupportedOperationException("Not supported in standalone extraction");
 		}
 

@@ -81,8 +81,8 @@ public class ItemPathinfo implements IndexingItemHandler {
 		
 		d.setField("rev", revision.getNumber());
 		d.setField("revt", revision.getDate());
-		d.setField("revc", item.getRevision().getNumber());
-		d.setField("revct", item.getRevision().getDate());
+		d.setField("revc", item.getRevisionChanged().getNumber());
+		d.setField("revct", item.getRevisionChanged().getDate());
 		
 		if (item.isAdd()) {
 			d.setField("pathstat", STAT_ADD);

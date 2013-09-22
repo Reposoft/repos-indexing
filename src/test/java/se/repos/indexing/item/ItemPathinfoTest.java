@@ -32,7 +32,7 @@ public class ItemPathinfoTest {
 		when(item.getPath()).thenReturn(new CmsItemPath("/my/dir/file.txt"));
 		when(item.isFile()).thenReturn(true);
 		when(item.isFolder()).thenReturn(false);
-		when(item.getRevision()).thenReturn(new RepoRevision(rev.getNumber() - 2, new Date(rev.getDate().getTime() - 1000)));
+		when(item.getRevisionChanged()).thenReturn(new RepoRevision(rev.getNumber() - 2, new Date(rev.getDate().getTime() - 1000)));
 		
 		when(item.isAdd()).thenReturn(true);
 		when(item.isContent()).thenReturn(true);
