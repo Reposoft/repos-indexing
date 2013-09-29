@@ -22,6 +22,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import se.repos.indexing.ReposIndexing;
+import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.schema.SchemaRepositemTest;
 import se.repos.indexing.testconfig.IndexingTestModule;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.testing.svn.CmsTestRepository;
@@ -31,9 +33,15 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 
 /**
- * Verify features of the actual index, without using our abstractions.
+ * Verify contents of the actual index after changeset processing, without searching through our abstractions.
+ * 
  * This test should match stuff that we rely on for direct queries to solr from various places.
  * Create new test methods per integration case.
+ * 
+ * For specifc tests on field tokenizing/analysis see {@link SchemaRepositemTest}.
+ * 
+ * Field extraction rules should be unit tested on the respective {@link IndexingItemHandler}s.
+ * 
  * 
  * Using solr test-framework instead of http://wiki.apache.org/solr/Solrj#EmbeddedSolrServer-1
  * to get their temp file management etc.

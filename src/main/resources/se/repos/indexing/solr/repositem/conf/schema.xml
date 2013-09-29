@@ -98,7 +98,7 @@
 		<field name="size" type="long" indexed="true" stored="true" multiValued="false" />
 		
 		<!-- properties, colon (:) in prop name replaced with dot (.) -->
-		<dynamicField name="prop_*" type="string" indexed="true" stored="true" multiValued="false" />
+		<dynamicField name="prop_*" type="metadata" indexed="true" stored="true" multiValued="false" />
 		
 		<!-- checksum with different algorithms, sha1 should be there -->
 		<dynamicField name="checksum_*" type="string" indexed="true" stored="true" multiValued="false" />
@@ -131,6 +131,12 @@
 		<fieldType name="long" class="solr.TrieLongField" precisionStep="0" positionIncrementGap="0" />
 		<fieldType name="date" class="solr.TrieDateField" precisionStep="6" positionIncrementGap="0"/>
 		<fieldType name="boolean" class="solr.BoolField" sortMissingLast="true"/>
+
+		<fieldType name="metadata" class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.PatternTokenizerFactory" pattern="[\s,;]+" />
+			</analyzer>
+		</fieldType>
 	
 		<!-- A general text field that has reasonable, generic cross-language defaults: 
 			it tokenizes with StandardTokenizer, removes stop words from case-insensitive 
