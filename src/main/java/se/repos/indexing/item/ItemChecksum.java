@@ -15,6 +15,9 @@ public class ItemChecksum implements IndexingItemHandler {
 
 	@Override
 	public void handle(IndexingItemProgress progress) {
+		if (progress.getItem().isDelete()) {
+			return;
+		}
 		if (!progress.getItem().isFile()) {
 			return;
 		}
