@@ -6,10 +6,13 @@ package se.repos.indexing.twophases;
 import static org.junit.Assert.*;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Test;
+
+import se.repos.indexing.IndexingDoc;
 
 public class IndexingDocIncrementalSolrjTest {
 
@@ -79,6 +82,26 @@ public class IndexingDocIncrementalSolrjTest {
 		SolrInputDocument nochanges = doc.getSolrDoc();
 		assertEquals("Can not have any fields if there are no updates because solr would overwrite the id", 0, nochanges.size());
 		assertTrue("Solr can't handle empty document so we should specifically identify this case", nochanges == IndexingDocIncrementalSolrj.UPDATE_MODE_NO_CHANGES);
+	}
+	
+	@Test
+	public void testContentSize() {
+		IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
+		assertEquals(0, ((IndexingDoc) doc).getContentSize());
+		doc.setField("string20", "1234567890\n123456789");
+		doc.setField("number1", 10L);
+		doc.setField("object1", new Object());
+		doc.setField("date1", new Date());
+		doc.setField("null1", null);
+		doc.addField("string2", "1");
+		doc.addField("string2", "12");
+		assertEquals("Shuld sum up length of strings as approximate size", 23, doc.getContentSize());
+		
+		IndexingDoc doc2 = doc.deepCopy();
+		doc2.addField("string2", "123");
+		assertEquals("size should follow clone", 26, doc2.getContentSize());
+		
+		
 	}
 	
 }

@@ -36,5 +36,10 @@ public interface IndexingDoc {
 	 * @return
 	 */
 	public IndexingDoc deepCopy();
+
+	/**
+	 * @return rough estimate of the accumulated size of the field values to be sent when adding this doc
+	 */
+	public int getContentSize();
 	
 }

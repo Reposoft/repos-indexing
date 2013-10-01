@@ -29,12 +29,15 @@ public class IndexingDocIncrementalSolrj implements
 
 	private SolrInputDocument doc;
 	
+	private int contentSize = 0;
+	
 	public IndexingDocIncrementalSolrj() {
-		this(new SolrInputDocument());
+		this(new SolrInputDocument(), 0);
 	}
 	
-	protected IndexingDocIncrementalSolrj(SolrInputDocument doc) {
+	protected IndexingDocIncrementalSolrj(SolrInputDocument doc, int contentSize) {
 		this.doc = doc;
+		this.contentSize = contentSize;
 	}
 	
 	/**
@@ -75,15 +78,23 @@ public class IndexingDocIncrementalSolrj implements
 		update = fieldSetIsPartialUpdate;
 	}
 
+	private void countSize(Object value, int multiplier) {
+		if (value instanceof String) {
+			int s = ((String) value).length();
+			this.contentSize += s * multiplier;
+		}
+	}
+	
 	@Override
 	public void setField(String name, Object value) {
 		if (update) {
 			value = new PartialUpdateVal(value);
 			fieldsUpdated.add(name);
 		}
+		countSize(value, 1);
 		doc.setField(name, value);
 	}
-	
+
 	@Override
 	public void addField(String name, Object value) {
 		if (update) {
@@ -93,6 +104,7 @@ public class IndexingDocIncrementalSolrj implements
 			value = new PartialUpdateAdd(value);
 			fieldsUpdated.add(name);
 		}
+		countSize(value, 1);
 		doc.addField(name, value);
 	}	
 
@@ -101,6 +113,7 @@ public class IndexingDocIncrementalSolrj implements
 		if (update) {
 			throw new UnsupportedOperationException("Remove not supported in update mode yet");
 		}
+		countSize(doc.getFieldValue(fieldName), -1);
 		doc.removeField(fieldName);
 	}
 	
@@ -144,7 +157,7 @@ public class IndexingDocIncrementalSolrj implements
 		if (fieldsUpdated.size() > 0) {
 			throw new UnsupportedOperationException("Field clone not supported when there are field updates to " + fieldsUpdated);
 		}
-		return new IndexingDocIncrementalSolrj(doc.deepCopy());
+		return new IndexingDocIncrementalSolrj(doc.deepCopy(), contentSize);
 	}
 
 	private class PartialUpdateVal extends HashMap<String, Object> {
@@ -161,6 +174,11 @@ public class IndexingDocIncrementalSolrj implements
 			super(1);
 			put("add", fieldValue);
 		}
+	}
+
+	@Override
+	public int getContentSize() {
+		return contentSize;
 	}
 
 }
