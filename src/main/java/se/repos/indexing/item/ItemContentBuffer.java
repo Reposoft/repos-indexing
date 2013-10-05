@@ -10,8 +10,13 @@ import java.io.InputStream;
  * 
  * Alternatively the buffering could be built into the {@link IndexingItemProgress} impl.
  */
-public interface ItemContentsBuffer {
+public interface ItemContentBuffer {
 
 	InputStream getContents();
+	
+	/**
+	 * Clean up, disallow subsequent use of {@link #getContents()}.
+	 */
+	void destroy();
 	
 }

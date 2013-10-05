@@ -10,6 +10,8 @@ import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 /**
  * Versioned properties of an item, all verbatim values from svn into the "prop_" dynamic field.
+ * 
+ * @deprecated rename to IndexingItemProperties
  */
 public class ItemProperties implements IndexingItemHandler {
 

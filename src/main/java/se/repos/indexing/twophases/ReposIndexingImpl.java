@@ -35,10 +35,12 @@ import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
-import se.repos.indexing.item.ItemContentsBufferDeleted;
-import se.repos.indexing.item.ItemContentsBufferStrategy;
+import se.repos.indexing.item.ItemContentBufferDeleted;
+import se.repos.indexing.item.ItemContentBufferStrategy;
+import se.repos.indexing.item.ItemContentBufferFolder;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.item.ItemPropertiesDeleted;
+import se.repos.indexing.repository.ReposIndexingPerRepository;
 import se.repos.indexing.twophases.IndexingItemProgressPhases.Phase;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
@@ -56,6 +58,8 @@ import se.simonsoft.cms.item.properties.CmsItemProperties;
  * TODO this service should be per-repository to allow different indexers
  * but for now it can be both, as the only extra complexity is handling in memory the latest revision indexed
  * TODO or should it be global so it can schedule indexing operations for all, with Map<CmsRepository,BackendService> dependencies?
+ * 
+ * @deprecated In favor of {@link ReposIndexingPerRepository}
  */
 public class ReposIndexingImpl implements ReposIndexing {
 
@@ -70,7 +74,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	private Iterable<IndexingItemHandler> itemBlocking = new LinkedList<IndexingItemHandler>();
 	private Iterable<IndexingItemHandler> itemBackground = new LinkedList<IndexingItemHandler>();
 
-	private ItemContentsBufferStrategy contentsBufferStrategy;
+	private ItemContentBufferStrategy contentsBufferStrategy;
 	private ItemPropertiesBufferStrategy propertiesBufferStrategy;
 	
 	private EventHandlers eventHandlers = new EventHandlers();
@@ -98,7 +102,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 
 	@Inject
-	public void setItemContentsBufferStrategy(ItemContentsBufferStrategy contentsBufferStrategy) {
+	public void setItemContentsBufferStrategy(ItemContentBufferStrategy contentsBufferStrategy) {
 		this.contentsBufferStrategy = contentsBufferStrategy;
 		eventHandlers.addIfAware(contentsBufferStrategy);
 	}
@@ -121,7 +125,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	 * <ul>
 	 * <li>{@link #setItemBlocking(Set)}</li>
 	 * <li>{@link #setItemBackground(Set)}</li>
-	 * <li>{@link #setItemContentsBufferStrategy(ItemContentsBufferStrategy)}</li>
+	 * <li>{@link #setItemContentsBufferStrategy(ItemContentBufferStrategy)}</li>
 	 * <li>{@link #setItemPropertiesBufferStrategy(ItemPropertiesBufferStrategy)}</li>
 	 */
 	@Inject
@@ -317,7 +321,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 
 		if (item.isDelete()) {
 			progress.setProperties(new ItemPropertiesDeleted());
-			progress.setContents(new ItemContentsBufferDeleted());
+			progress.setContents(new ItemContentBufferDeleted());
 		} else {
 			CmsRepositoryInspection repositoryInsp = (CmsRepositoryInspection) repository;
 			progress.setProperties(propertiesBufferStrategy.getProperties(repositoryInsp, revision, item.getPath()));
@@ -328,7 +332,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 				// should we cast further down instead?
 				progress.setContents(contentsBufferStrategy.getBuffer(repositoryInsp, revision, item.getPath(), doc));
 			} else {
-				progress.setContents(new ItemContentsFolder());
+				progress.setContents(new ItemContentBufferFolder());
 			}
 		}
 		

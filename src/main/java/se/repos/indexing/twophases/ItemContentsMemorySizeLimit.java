@@ -16,10 +16,13 @@ import java.io.OutputStream;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.IndexingEventAware;
-import se.repos.indexing.item.ItemContentsBuffer;
-import se.repos.indexing.item.ItemContentsBufferStrategy;
+import se.repos.indexing.item.ItemContentBuffer;
+import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
@@ -29,13 +32,15 @@ import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
  * 
  * TODO we need a cleanup strategy for temp files, implement {@link IndexingEventAware} to get the notification needed
  */
-public class ItemContentsMemorySizeLimit implements ItemContentsBufferStrategy {
+public class ItemContentsMemorySizeLimit implements ItemContentBufferStrategy {
+	
+	private static final Logger logger = LoggerFactory.getLogger(ItemContentsMemorySizeLimit.class);
 	
 	public static final int DEFAULT_SIZE_LIMIT = 100000;
 	
-	private CmsContentsReader reader;
-	
 	private int limit = DEFAULT_SIZE_LIMIT;
+	
+	private CmsContentsReader reader;	
 	
 	@Inject
 	public void setFileSizeInMemoryLimit(@Named("indexingFilesizeInMemoryLimitBytes") int bytes) {
@@ -52,7 +57,7 @@ public class ItemContentsMemorySizeLimit implements ItemContentsBufferStrategy {
 	}	
 	
 	@Override
-	public ItemContentsBuffer getBuffer(CmsRepositoryInspection repository,
+	public ItemContentBuffer getBuffer(CmsRepositoryInspection repository,
 			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
 		Long size = (Long) pathinfo.getFieldValue("size");
 		if (size == null) {
@@ -65,7 +70,7 @@ public class ItemContentsMemorySizeLimit implements ItemContentsBufferStrategy {
 		}
 	}
 	
-	public class BufferInMemory implements ItemContentsBuffer {
+	public class BufferInMemory implements ItemContentBuffer {
 		
 		private CmsRepositoryInspection repository;
 		private RepoRevision revision;
@@ -94,6 +99,11 @@ public class ItemContentsMemorySizeLimit implements ItemContentsBufferStrategy {
 				}
 			}
 			return new ByteArrayInputStream(buffer.toByteArray());
+		}
+
+		@Override
+		public void destroy() {
+			buffer = null;
 		}		
 		
 	}
@@ -101,7 +111,7 @@ public class ItemContentsMemorySizeLimit implements ItemContentsBufferStrategy {
 	/**
 	 * Buffer to temp file.
 	 */
-	public class BufferTempFile implements ItemContentsBuffer {
+	public class BufferTempFile implements ItemContentBuffer {
 
 		private CmsRepositoryInspection repository;
 		private RepoRevision revision;
@@ -128,6 +138,7 @@ public class ItemContentsMemorySizeLimit implements ItemContentsBufferStrategy {
 				} catch (IOException e2) {
 					throw new IllegalStateException("Failed to produce temp file destination for contents buffer");
 				}
+				// deleteOnExit can be removed after IndexingItemHandlerContentBufferDisable is added to handler chains
 				tempfile.deleteOnExit(); // TODO does this work? Can we get notified on stream close? Do we reuse the file for subsequent reads? TODO anyway it will fill up the disk for long indexing runs
 				OutputStream out;
 				try {
@@ -141,6 +152,21 @@ public class ItemContentsMemorySizeLimit implements ItemContentsBufferStrategy {
 				return new FileInputStream(tempfile);
 			} catch (FileNotFoundException e) {
 				throw new IllegalStateException("Failed to produce readable input from temp file");
+			}
+		}
+
+		@Override
+		public void destroy() {
+			if (tempfile == null) {
+				logger.warn("Content buffer has never been initialized");
+				return;
+			}
+			if (!tempfile.exists()) {
+				logger.warn("Contents buffer file not found");
+				return;
+			}
+			if (!tempfile.delete()) {
+				throw new AssertionError("Failed to delete indexing item buffer " + tempfile);
 			}
 		}
 		

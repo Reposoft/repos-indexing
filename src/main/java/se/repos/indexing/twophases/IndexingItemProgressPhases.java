@@ -7,7 +7,8 @@ import java.io.InputStream;
 
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.item.IndexingItemProgress;
-import se.repos.indexing.item.ItemContentsBuffer;
+import se.repos.indexing.item.ItemContentBuffer;
+import se.repos.indexing.item.ItemProperties;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
@@ -25,7 +26,7 @@ public class IndexingItemProgressPhases implements IndexingItemProgress {
 	private CmsChangesetItem item;
 	private IndexingDocIncrementalSolrj fields;
 	private CmsItemProperties properties;
-	private ItemContentsBuffer contents;
+	private ItemContentBuffer contents;
 
 	public IndexingItemProgressPhases(CmsRepository repository, RepoRevision revision,
 			CmsChangesetItem item, IndexingDocIncrementalSolrj fields) {
@@ -48,12 +49,16 @@ public class IndexingItemProgressPhases implements IndexingItemProgress {
 		fields.setUpdateMode(true);
 	}
 
+	/**
+	 * @param itemVersionedMetadata possibly the actual properties, possibly a buffer i.e. deferred lookup
+	 * @return for chaining
+	 */
 	public IndexingItemProgressPhases setProperties(CmsItemProperties itemVersionedMetadata) {
 		this.properties = itemVersionedMetadata;
 		return this;
 	}
 	
-	public IndexingItemProgressPhases setContents(ItemContentsBuffer buffer) {
+	public IndexingItemProgressPhases setContents(ItemContentBuffer buffer) {
 		this.contents = buffer;
 		return this;
 	}
@@ -80,20 +85,34 @@ public class IndexingItemProgressPhases implements IndexingItemProgress {
 
 	@Override
 	public CmsItemProperties getProperties() {
-		if (properties == null) {
-			// TODO shouldn't this be up to the ItemPropertiesBufferStrategy, though the interface is unaware of phases?
-			throw new UnsupportedOperationException("indexing of properties is not supported in this phase");
+		if (!hasPropertiesBuffer()) {
+			throw new UnsupportedOperationException("Indexing of properties is not enable at this stage");
 		}
-		return properties;
+		return getPropertiesBuffer();
 	}
 
 	@Override
 	public InputStream getContents() {
-		if (contents == null) {
-			// TODO shouldn't this be up to the ItemContentsBufferStrategy, though the interface is unaware of phases?
-			throw new UnsupportedOperationException("Item contents not available in this indexing phase");
+		if (!hasContentBuffer()) {
+			throw new UnsupportedOperationException("Indexing item contents not available at this stage");
 		}
-		return contents.getContents();
+		return getContents();
 	}
 
+	public boolean hasContentBuffer() {
+		return contents != null;
+	}
+	
+	public ItemContentBuffer getContentBuffer() {
+		return contents;
+	}
+	
+	public boolean hasPropertiesBuffer() {
+		return properties != null;
+	}
+	
+	public CmsItemProperties getPropertiesBuffer() {
+		return properties;
+	}
+	
 }

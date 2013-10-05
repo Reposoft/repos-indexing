@@ -17,8 +17,8 @@ import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
-import se.repos.indexing.item.ItemContentsBuffer;
-import se.repos.indexing.item.ItemContentsBufferStrategy;
+import se.repos.indexing.item.ItemContentBuffer;
+import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
@@ -34,7 +34,7 @@ public class ReposIndexingEventsTest {
 		ReposIndexingImpl impl = new ReposIndexingImpl() {
 		};
 		
-		ItemContentsBufferStrategy bufferAware = new AwareBuffer();
+		ItemContentBufferStrategy bufferAware = new AwareBuffer();
 		impl.setItemContentsBufferStrategy(bufferAware);
 		
 		ItemPropertiesBufferStrategy propertiesAware = new AwareProperties();
@@ -69,10 +69,10 @@ public class ReposIndexingEventsTest {
 		
 	}
 	
-	class AwareBuffer extends Aware implements ItemContentsBufferStrategy {
+	class AwareBuffer extends Aware implements ItemContentBufferStrategy {
 
 		@Override
-		public ItemContentsBuffer getBuffer(CmsRepositoryInspection repository,
+		public ItemContentBuffer getBuffer(CmsRepositoryInspection repository,
 				RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
 			return null;
 		}

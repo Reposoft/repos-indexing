@@ -9,7 +9,7 @@ import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
 import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
-import se.repos.indexing.item.ItemContentsBufferStrategy;
+import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.repos.indexing.item.ItemPathinfo;
 import se.repos.indexing.item.ItemProperties;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
@@ -68,7 +68,7 @@ public class IndexingTestModule extends AbstractModule {
 		
 		// tweaks
 		bind(ItemPropertiesBufferStrategy.class).to(ItemPropertiesImmediate.class);
-		bind(ItemContentsBufferStrategy.class).to(ItemContentsMemoryChoiceDeferred.class);
+		bind(ItemContentBufferStrategy.class).to(ItemContentsMemoryChoiceDeferred.class);
 		bind(Integer.class).annotatedWith(Names.named("indexingFilesizeInMemoryLimitBytes")).toInstance(100000); // optimize for test run performance, but we should test the file cache also
 	}
 

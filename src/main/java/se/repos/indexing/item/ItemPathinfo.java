@@ -16,6 +16,8 @@ import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 /**
  * Metadata but not versioned properties about an item,
  * i.e. anything that can be derived from basic path info.
+ * 
+ * @deprecated rename to IndexingItemPathinfo
  */
 public class ItemPathinfo implements IndexingItemHandler {
 

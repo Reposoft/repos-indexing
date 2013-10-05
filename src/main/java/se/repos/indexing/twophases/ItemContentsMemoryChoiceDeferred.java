@@ -9,7 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import se.repos.indexing.IndexingDoc;
-import se.repos.indexing.item.ItemContentsBuffer;
+import se.repos.indexing.item.ItemContentBuffer;
+import se.repos.indexing.repository.IndexingItemHandlerContentEnable;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
@@ -21,30 +22,32 @@ import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
  * Doesn't create the buffer until contents is actually asked for. Ideally this should happen only in the background phase.
  * 
  * Keeps a reference to the indexing doc for use when contents is actually requested.
+ * 
+ * @deprecated Probably not needed when contents buffer is enabled at a specific {@link IndexingItemHandlerContentEnable} in the chain.
  */
 public class ItemContentsMemoryChoiceDeferred extends ItemContentsMemorySizeLimit {
 
 	public final Logger logger = LoggerFactory.getLogger(ItemContentsMemoryChoiceDeferred.class);
 
 	@Override
-	public ItemContentsBuffer getBuffer(CmsRepositoryInspection repository,
+	public ItemContentBuffer getBuffer(CmsRepositoryInspection repository,
 			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
 		return new BufferChoiceDeferred(repository, revision, path, pathinfo);
 	}
 
-	ItemContentsBuffer getBufferActual(CmsRepositoryInspection repository,
+	ItemContentBuffer getBufferActual(CmsRepositoryInspection repository,
 			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
 		return super.getBuffer(repository, revision, path, pathinfo);
 	}
 	
-	private class BufferChoiceDeferred implements ItemContentsBuffer {
+	private class BufferChoiceDeferred implements ItemContentBuffer {
 
 		private CmsRepositoryInspection repository;
 		private RepoRevision revision;
 		private CmsItemPath path;
 		private IndexingDoc indexingDoc;
 		
-		private ItemContentsBuffer bufferChoice = null;
+		private ItemContentBuffer bufferChoice = null;
 		
 		public BufferChoiceDeferred(CmsRepositoryInspection repository,
 				RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
@@ -66,6 +69,11 @@ public class ItemContentsMemoryChoiceDeferred extends ItemContentsMemorySizeLimi
 				logger.debug("Deferred creation of contents buffer invoked now for {}@{}, got {}", path, revision, bufferChoice.getClass());
 			}
 			return bufferChoice.getContents();
+		}
+
+		@Override
+		public void destroy() {
+			bufferChoice.destroy();
 		}
 		
 	}

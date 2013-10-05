@@ -14,8 +14,8 @@ import java.io.OutputStream;
 import javax.inject.Inject;
 
 import se.repos.indexing.IndexingDoc;
-import se.repos.indexing.item.ItemContentsBuffer;
-import se.repos.indexing.item.ItemContentsBufferStrategy;
+import se.repos.indexing.item.ItemContentBuffer;
+import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
@@ -24,7 +24,7 @@ import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 /**
  * Only suitable for testing, will fill up the disk with temp files in large indexing jobs.
  */
-public class ItemContentsNocache implements ItemContentsBufferStrategy {
+public class ItemContentsNocache implements ItemContentBufferStrategy {
 
 	private CmsContentsReader reader;
 	
@@ -35,7 +35,7 @@ public class ItemContentsNocache implements ItemContentsBufferStrategy {
 	}
 	
 	@Override
-	public ItemContentsBuffer getBuffer(CmsRepositoryInspection repository,
+	public ItemContentBuffer getBuffer(CmsRepositoryInspection repository,
 			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
 		return new BufferMinimizeMemoryUse(repository, revision, path);
 	}	
@@ -43,7 +43,7 @@ public class ItemContentsNocache implements ItemContentsBufferStrategy {
 	/**
 	 * Unless we adapt to different file sizes we need this kind of buffer.
 	 */
-	public class BufferMinimizeMemoryUse implements ItemContentsBuffer {
+	public class BufferMinimizeMemoryUse implements ItemContentBuffer {
 
 		private CmsRepositoryInspection repository;
 		private RepoRevision revision;
@@ -81,6 +81,11 @@ public class ItemContentsNocache implements ItemContentsBufferStrategy {
 			} catch (FileNotFoundException e) {
 				throw new IllegalStateException("Failed to produce readable input from temp file");
 			}
+		}
+
+		@Override
+		public void destroy() {
+			throw new UnsupportedOperationException("Not implemented. This type of buffer is deprecated.");
 		}
 		
 	}
