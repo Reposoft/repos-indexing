@@ -7,6 +7,7 @@ public class IndexingItemHandlerContentDisable extends IndexingItemHandlerIntern
 	@Override
 	public void handleInternal(IndexingItemProgressPhases progress) {
 		progress.getContentBuffer().destroy();
+		progress.setContents(null);
 	}
 
 

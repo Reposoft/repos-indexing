@@ -3,33 +3,51 @@ package se.repos.indexing.repository;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.ByteArrayInputStream;
 import java.util.Set;
 
 import org.junit.Test;
 
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
+import se.repos.indexing.item.ItemContentBuffer;
 import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.repos.indexing.twophases.IndexingItemProgressPhases;
+import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 
 public class IndexingItemHandlerContentBufferHandlingTest {
 
 	@Test
 	public void test() {
+		CmsChangesetItem item = mock(CmsChangesetItem.class);
 		ItemContentBufferStrategy strategy = mock(ItemContentBufferStrategy.class);
+		ItemContentBuffer buffer = mock(ItemContentBuffer.class);
+		when(strategy.getBuffer(null, null, null, null)).thenReturn(buffer);
+		ByteArrayInputStream b = new ByteArrayInputStream("".getBytes());
+		when(buffer.getContents()).thenReturn(b);
 		IndexingItemHandler enable = new IndexingItemHandlerContentEnable(strategy);
 		IndexingItemHandler disable = new IndexingItemHandlerContentDisable();
 		
-		IndexingItemProgress progress = new IndexingItemProgressPhases(null,null,null,null); //repository, revision, item, fields);
+		IndexingItemProgress progress = new IndexingItemProgressPhases(null,null,item,null); //repository, revision, item, fields);
 
+		
 		try {
 			progress.getContents();
+			fail("Should disallow content retrieval before enable");
 		} catch (IllegalStateException e) {
 			// expected
 		}
-		
+		verifyZeroInteractions(buffer);
 		enable.handle(progress);
-		
+		assertSame(b, progress.getContents());
+		disable.handle(progress);
+		verify(buffer).destroy();
+		try {
+			progress.getContents();
+			fail("Should disallow content retrieval after disable");
+		} catch (IllegalStateException e) {
+			// expected
+		}
 	}
 
 	/**

@@ -86,7 +86,7 @@ public class IndexingItemProgressPhases implements IndexingItemProgress {
 	@Override
 	public CmsItemProperties getProperties() {
 		if (!hasPropertiesBuffer()) {
-			throw new UnsupportedOperationException("Indexing of properties is not enable at this stage");
+			throw new IllegalStateException("Indexing of properties is not enable at this stage");
 		}
 		return getPropertiesBuffer();
 	}
@@ -94,9 +94,9 @@ public class IndexingItemProgressPhases implements IndexingItemProgress {
 	@Override
 	public InputStream getContents() {
 		if (!hasContentBuffer()) {
-			throw new UnsupportedOperationException("Indexing item contents not available at this stage");
+			throw new IllegalStateException("Indexing item contents not available at this stage");
 		}
-		return getContents();
+		return getContentBuffer().getContents();
 	}
 
 	public boolean hasContentBuffer() {

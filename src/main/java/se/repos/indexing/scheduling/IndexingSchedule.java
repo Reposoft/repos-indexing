@@ -2,14 +2,14 @@ package se.repos.indexing.scheduling;
 
 import java.util.concurrent.Semaphore;
 
-import se.repos.indexing.Handlers;
+import se.repos.indexing.IndexingHandlers;
 
 /**
  * Receives {@link IndexingUnit}s from different repositories and schedules those based on {@link Marker}s.
  * 
  * Global, i.e. normally called by
  * 
- * Common markers are defined in {@link Handlers}.
+ * Common markers are defined in {@link IndexingHandlers}.
  * 
  * 
  */

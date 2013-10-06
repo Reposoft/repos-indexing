@@ -15,7 +15,7 @@ import se.repos.indexing.scheduling.ScheduleSendIncremental;
 import se.repos.indexing.scheduling.ScheduleBackground;
 import se.repos.indexing.scheduling.ScheduleSendComplete;
 
-public abstract class Handlers {
+public abstract class IndexingHandlers {
 
 	public static final Iterable<Class<? extends IndexingItemHandler>> STANDARD_FIRST = new LinkedList<Class<? extends IndexingItemHandler>>() {
 		private static final long serialVersionUID = 1L;
