@@ -19,8 +19,6 @@ import se.repos.indexing.scheduling.ScheduleSendComplete;
 
 public abstract class IndexingHandlers {
 
-	private static final String REFLECTION_ERROR = "Error using multibinder at runtime";
-
 	public static final Iterable<Class<? extends IndexingItemHandler>> STANDARD_FIRST = new LinkedList<Class<? extends IndexingItemHandler>>() {
 		private static final long serialVersionUID = 1L;
 		{
@@ -60,25 +58,7 @@ public abstract class IndexingHandlers {
 	}
 	
 	public static void to(Object guiceMultibinder, Iterable<Class<? extends IndexingItemHandler>> handlers) {
-		try {
-			Method addBinding = guiceMultibinder.getClass().getDeclaredMethod("addBinding");
-			addBinding.setAccessible(true);
-			for (Class<? extends IndexingItemHandler> handler : handlers) {
-				Object binder = addBinding.invoke(guiceMultibinder);
-				Method to = binder.getClass().getMethod("to", Class.class);				
-				to.invoke(binder, handler);
-			}
-		} catch (SecurityException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		}
+		avoidCompileTimeDependency(guiceMultibinder, "to", Class.class, handlers);
 	}
 	
 	public static void to(Object guiceMultibinder, Class<? extends IndexingItemHandler>... handlers) {
@@ -86,29 +66,33 @@ public abstract class IndexingHandlers {
 	}
 	
 	public static void toInstance(Object guiceMultibinder, Iterable<? extends IndexingItemHandler> handlers) {
-		try {
-			Method addBinding = guiceMultibinder.getClass().getDeclaredMethod("addBinding");
-			addBinding.setAccessible(true);
-			for (IndexingItemHandler handler : handlers) {
-				Object binder = addBinding.invoke(guiceMultibinder);
-				Method to = binder.getClass().getMethod("toInstance", Object.class);				
-				to.invoke(binder, handler);
-			}
-		} catch (SecurityException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		} catch (NoSuchMethodException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		} catch (IllegalArgumentException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		} catch (IllegalAccessException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		} catch (InvocationTargetException e) {
-			throw new RuntimeException(REFLECTION_ERROR, e);
-		}
+		avoidCompileTimeDependency(guiceMultibinder, "toInstance", Object.class, handlers);
 	}
 	
 	public static void toInstance(Object guiceMultibinder, IndexingItemHandler... handlers) {
 		toInstance(guiceMultibinder, Arrays.asList(handlers));
+	}
+	
+	private static void avoidCompileTimeDependency(Object guiceMultibinder, String bindToMethodName, Class<?> bindToType, @SuppressWarnings("rawtypes") Iterable bindings) {
+		try {
+			Method addBinding = guiceMultibinder.getClass().getDeclaredMethod("addBinding");
+			addBinding.setAccessible(true);
+			for (Object handler : bindings) {
+				Object binder = addBinding.invoke(guiceMultibinder);
+				Method to = binder.getClass().getMethod(bindToMethodName,bindToType);				
+				to.invoke(binder, handler);
+			}
+		} catch (SecurityException e) {
+			throw new RuntimeException("Error using multibinder at runtime", e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException("Error using multibinder at runtime", e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException("Error using multibinder at runtime", e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException("Error using multibinder at runtime", e);
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException("Error using multibinder at runtime", e);
+		}		
 	}
 	
 }
