@@ -75,6 +75,12 @@ public class ItemContentsMemorySizeLimitTest {
 		assertEquals("Should allow re-read", "1".getBytes()[0], buf.getContents().read());
 		buf.destroy();
 		assertEquals("Temp file should have been deleted", numbefore, expectedtempfolder.list().length);
+		try {
+			buf.getContents();
+			fail("Should not allow buffer read after destroy");
+		} catch (IllegalStateException e) {
+			// expected
+		}
 	}
 
 }
