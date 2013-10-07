@@ -9,11 +9,13 @@ import javax.inject.Named;
 
 import org.apache.solr.client.solrj.SolrServer;
 
+import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
+import se.repos.indexing.scheduling.IndexingSchedule;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.info.CmsRepositoryLookup;
@@ -22,9 +24,19 @@ import se.simonsoft.cms.item.inspection.CmsChangesetReader;
 public class ReposIndexingPerRepository implements ReposIndexing {
 
 	private CmsRepository repository;
+	private IndexingSchedule schedule;
+	private CmsChangesetReader changesetReader;
+	private CmsRepositoryLookup revisionLookup;
+	private Set<IndexingItemHandler> handlers;
 
+	@Inject
 	public ReposIndexingPerRepository(CmsRepository repository) {
 		this.repository = repository;
+	}
+	
+	@Inject
+	public void setIndexingSchedule(IndexingSchedule schedule) {
+		this.schedule = schedule;
 	}
 	
 //	@Inject
@@ -32,21 +44,22 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 //		this.repositem = repositem;
 //	}
 //	
-//	@Inject
-//	public void setCmsChangesetReader(CmsChangesetReader changesetReader) {
-//		this.changesetReader = changesetReader;
-//	}
-//	
-//	@Inject
-//	public void setHandlers(Set<IndexingItemHandler> handlers) {
-//		this.handlers = handlers;
-//		eventHandlers.addIfAwareAll(handlersSync);
-//	}
-//
-//	@Inject
-//	public void setRevisionLookup(@Named("inspection") CmsRepositoryLookup lookup) {
-//		this.revisionLookup = lookup;
-//	}
+	@Inject
+	public void setCmsChangesetReader(CmsChangesetReader changesetReader) {
+		this.changesetReader = changesetReader;
+	}
+	
+	@Inject
+	public void setHandlers(Set<IndexingItemHandler> handlers) {
+		this.handlers = handlers;
+		//eventHandlers.addIfAwareAll(handlersSync);
+	}
+
+	@Inject
+	public void setRevisionLookup(@Named("inspection") CmsRepositoryLookup lookup) {
+		this.revisionLookup = lookup;
+	}
+	
 //
 //	/**
 //	 * Optional, adds event listeners that are not added through as other types of dependencies.

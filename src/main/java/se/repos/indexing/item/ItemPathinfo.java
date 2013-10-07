@@ -114,11 +114,12 @@ public class ItemPathinfo implements IndexingItemHandler {
 		return null;
 	}
 	
+	@Deprecated // use IdStrategy
 	String getId(CmsRepository repository) {
 		return repository.getHost() + repository.getUrlAtHost();
 	}
 
-	// TODO we need an IdStrategy service, but most likely only one impl
+	@Deprecated // use IdStrategy
 	String getId(CmsRepository repository, RepoRevision revision, CmsItemPath path) {
 		return getId(repository) + (path == null ? "" : path) + "@" + getIdRevision(revision); 
 	}

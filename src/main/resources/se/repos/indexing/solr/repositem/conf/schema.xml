@@ -11,6 +11,10 @@
 		Unique id per resource including revision
 		-->
 		<field name="id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+		<!--
+		Unique id per resource, identical for different revisions at same path, like URL field but possibly easier for joins etc
+		-->
+		<field name="idhead" type="string" indexed="true" stored="true" multiValued="false" />
 		
 		<!--
 		Solr field 
@@ -41,10 +45,14 @@
 		<!-- commit revision - when the item was last modified (maybe at a different path), can be earlier than rev -->
 		<field name="revc"  type="long" indexed="true" stored="true" multiValued="false" />
 		<field name="revct" type="date" indexed="true" stored="true" multiValued="false" />
+		<!-- reference to the "id" field of the commit doc -->
+		<field name="revid" type="string" indexed="true" stored="true" multiValued="false" />
 		
-		<!-- URL, URI (= logical id?), with rev for historical?, including commits? -->
+		<!-- URL of the resource -->
 		<field name="url"       type="string" indexed="true" stored="true" multiValued="false"/>
-		<!-- URL at host, encoded (unlike pathfull if we keep that one) -->
+		<!-- URL, with ?p=[revision] -->
+		<!-- any practical use? <field name="urlrev"    type="string" indexed="true" stored="true" multiValued="false"/>  -->
+		<!-- URL at host, encoded (unlike pathfull if we keep that one), without revision -->
 		<field name="urlpath"       type="string" indexed="true" stored="true" multiValued="false"/>
 		<!-- Logical ID -->
 		<field name="urlid"       type="string" indexed="true" stored="true" multiValued="false"/>
@@ -112,9 +120,10 @@
 		
 		<!-- References, unresolved, including external -->
 		<field name="ref" type="string" indexed="true" stored="true" multiValued="true"/>
-		<!-- References, resolved to "url" field values, excluding query string and fragments, excluding revisions? -->
+		<!-- References, resolved to "url" field values, excluding query string and fragments (such as revisions) -->
 		<field name="refurl" type="string" indexed="true" stored="true" multiValued="true"/>
-		<!-- References, resolved to "id" field values, internal only, with revisions? -->
+		<!-- Given a link between resources it is impossible to resolve that to an id with a specific revision unless it has a "peg revision" in the URL -->
+		<!-- References, resolved to "idhead" field values unless revision is explicit and it resolves to "id" -->
 		<field name="refid" type="string" indexed="true" stored="true" multiValued="true"/>
 		
 	</fields>
