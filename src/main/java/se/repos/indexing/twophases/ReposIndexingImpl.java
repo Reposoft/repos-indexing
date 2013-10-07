@@ -5,7 +5,6 @@ package se.repos.indexing.twophases;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -18,19 +17,13 @@ import java.util.concurrent.ExecutorService;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.solr.client.solrj.SolrQuery;
+
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import se.repos.indexing.IndexConnectException;
-import se.repos.indexing.IndexWriteException;
 import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
@@ -63,9 +56,10 @@ import se.simonsoft.cms.item.properties.CmsItemProperties;
  */
 public class ReposIndexingImpl implements ReposIndexing {
 
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private SolrServer repositem;
+	SolrServer repositem;
+	
 	private CmsChangesetReader changesetReader;
 	private CmsRepositoryLookup revisionLookup;
 	
@@ -78,6 +72,13 @@ public class ReposIndexingImpl implements ReposIndexing {
 	private ItemPropertiesBufferStrategy propertiesBufferStrategy;
 	
 	private EventHandlers eventHandlers = new EventHandlers();
+	
+	private RepositoryStatus repositoryStatus;
+	
+	@Inject
+	public void setSolrRepositem(RepositoryStatus repositoryStatus) {
+		this.repositoryStatus = repositoryStatus;
+	}
 	
 	@Inject
 	public void setSolrRepositem(@Named("repositem") SolrServer repositem) {
@@ -181,17 +182,11 @@ public class ReposIndexingImpl implements ReposIndexing {
 		
 		 */
 		
-		/*
-		To facilitate fast indexing of HEAD-only content it would be useful to get repo "tree" with revisions from HEAD
-		as reference when reading changeset, and setting a flag if we know that an item is not current HEAD.
-		When sync is complete, that information should be removed and upcoming revisions should be handled as HEAD.
-		 */
-		
 		if (!scheduledHighest.containsKey(repository)) {
 			logger.info("Unknown index completion status for repository {}. Polling.", repository);
-			RepoRevision c = getIndexedRevisionHighestCompleted(repository);
-			RepoRevision pl = getIndexedRevisionLowestStarted(repository);
-			RepoRevision ph = getIndexedRevisionHighestStarted(repository);
+			RepoRevision c = repositoryStatus.getIndexedRevisionHighestCompleted(repository);
+			RepoRevision pl = repositoryStatus.getIndexedRevisionLowestStarted(repository);
+			RepoRevision ph = repositoryStatus.getIndexedRevisionHighestStarted(repository);
 			if (pl == null) {
 				if (ph != null) {
 					logger.error("Inconsistent revision query results, got highest in progress {}", ph);
@@ -338,7 +333,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 		
 		Executor blocking = getExecutorBlocking();
 		indexItemProcess(blocking, progress, itemBlocking);
-		solrAdd(doc.getSolrDoc());
+		repositoryStatus.solrAdd(doc.getSolrDoc());
 		
 		progress.setPhase(Phase.update);
 		// for simplicity, continue using the same executor service
@@ -347,7 +342,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 		// This method should probably move back to index
 		indexItemProcess(blocking, progress, itemBackground);
 		if (doc.size() > 0) {
-			solrAdd(doc.getSolrDoc());
+			repositoryStatus.solrAdd(doc.getSolrDoc());
 		}
 		// TODO run the end handler after all items
 	}
@@ -367,7 +362,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 		mark.addField("id", query);		
 		mark.setUpdateMode(true);
 		mark.setField("head", false);
-		solrAdd(mark.getSolrDoc());
+		repositoryStatus.solrAdd(mark.getSolrDoc());
 	}
 	
 	/**
@@ -412,73 +407,11 @@ public class ReposIndexingImpl implements ReposIndexing {
 		docStart.addField("type", "commit");
 		docStart.addField("rev", getIdRevision(revision));
 		docStart.addField("complete", false);
-		solrAdd(docStart);
+		repositoryStatus.solrAdd(docStart);
 		return new RunRevComplete(id);
 	}
 
-	protected void solrAdd(SolrInputDocument doc) {
-		if (doc.size() == 0) {
-			throw new IllegalArgumentException("Detected attempt to index empty document");
-		}
-		if (doc == IndexingDocIncrementalSolrj.UPDATE_MODE_NO_CHANGES) {
-			logger.warn("Index add was attempted in update mode but no changes have been made, got fields {}", doc.getFieldNames());
-			return;
-		}
-		try {
-			repositem.add(doc);
-		} catch (SolrServerException e) {
-			throw new IndexWriteException(e);
-		} catch (IOException e) {
-			throw new IndexConnectException(e);
-		}
-	}
 	
-	protected String escape(String fieldValue) {
-		return fieldValue.replaceAll("([:^\\(\\)!~/ ])", "\\\\$1");
-	}
-	
-	protected String quote(String fieldValue) {
-		return '"' + fieldValue.replace("\"", "\\\"") + '"';
-	}
-	
-	protected RepoRevision getIndexedRevisionHighestCompleted(CmsRepository repository) {
-		logger.debug("Checking higest clompleted revision for {}", repository);
-		return getIndexedRevision(repository, "true", ORDER.desc);
-	}
-	
-	protected RepoRevision getIndexedRevisionHighestStarted(CmsRepository repository) {
-		return getIndexedRevision(repository, "false", ORDER.desc);
-	}
-	
-	protected RepoRevision getIndexedRevisionLowestStarted(CmsRepository repository) {
-		return getIndexedRevision(repository, "false", ORDER.asc);
-	}
-	
-	private RepoRevision getIndexedRevision(CmsRepository repository, String valComplete, ORDER order) {
-		logger.debug("Running revision query for {}, complete={}, order={}", repository, valComplete, order);
-		String idPrefix = getIdRepository(repository);
-		String idPrefixEscaped = escape(idPrefix);
-		logger.debug("Repository's ID prefix is {} ({})", idPrefix, idPrefixEscaped);
-		SolrQuery query = new SolrQuery("type:commit AND complete:" + valComplete + " AND id:" + idPrefixEscaped + "*");
-		query.setRows(1);
-		query.setFields("rev", "revt");
-		query.setSort("rev", order); // the timestamp might be in a different order in svn, if revprops or loading has been used irregularly
-		QueryResponse resp;
-		try {
-			logger.trace("Running revision query {}", query);
-			resp = repositem.query(query);
-		} catch (SolrServerException e) {
-			throw new RuntimeException("Error not handled", e);
-		}
-		SolrDocumentList results = resp.getResults();
-		if (results.getNumFound() == 0) {
-			return null;
-		}
-		SolrDocument r = results.get(0);
-		Long rev = (Long) r.getFieldValue("rev");
-		Date revt = (Date) r.getFieldValue("revt");
-		return new RepoRevision(rev, revt);
-	}
 	
 	/* moved to ItemPathinfo
 	String getId(CmsRepository repository, RepoRevision revision, CmsItemPath path) {
@@ -527,7 +460,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 			SolrInputDocument docComplete = new SolrInputDocument();
 			docComplete.addField("id", id);
 			docComplete.setField("complete", partialUpdateToTrue);
-			solrAdd(docComplete);
+			repositoryStatus.solrAdd(docComplete);
 		}
 		
 	}

@@ -1,6 +1,7 @@
 package se.repos.indexing.scheduling;
 
 import se.repos.indexing.IndexingEventAware;
+import se.repos.indexing.solrj.CommitSolrj;
 
 /**
  * Maps {@link Marker} events to scheduling-agnostic {@link IndexingEventAware}s.
@@ -17,7 +18,7 @@ public abstract class SchedulingAwareIndexingEventAware implements SchedulingAwa
 
 	@Override
 	public void onCompleted(Marker marker) {
-		if (marker instanceof ScheduleSendComplete) {
+		if (marker instanceof CommitSolrj) {
 			for (IndexingEventAware a : eventAware) {
 				a.onRevisionComplete(null); // TODO get Repository and Revision
 			}

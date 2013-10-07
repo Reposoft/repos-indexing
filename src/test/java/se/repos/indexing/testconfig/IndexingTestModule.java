@@ -6,8 +6,10 @@ package se.repos.indexing.testconfig;
 import org.apache.solr.client.solrj.SolrServer;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
 
+import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.ReposIndexing;
+import se.repos.indexing.item.IdStrategyDefault;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.repos.indexing.item.ItemPathinfo;
@@ -16,6 +18,7 @@ import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.twophases.ItemContentsMemoryChoiceDeferred;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
 import se.repos.indexing.twophases.ReposIndexingImpl;
+import se.repos.indexing.twophases.RepositoryStatus;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsContentsReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsRepositoryLookupSvnkitLook;
@@ -66,7 +69,9 @@ public class IndexingTestModule extends AbstractModule {
 		bind(CmsContentsReader.class).to(CmsContentsReaderSvnkitLook.class);
 		bind(CmsRepositoryLookup.class).annotatedWith(Names.named("inspection")).to(CmsRepositoryLookupSvnkitLook.class);
 		
-		// tweaks
+		// configure indexing
+		bind(IdStrategy.class).to(IdStrategyDefault.class);
+		bind(RepositoryStatus.class);
 		bind(ItemPropertiesBufferStrategy.class).to(ItemPropertiesImmediate.class);
 		bind(ItemContentBufferStrategy.class).to(ItemContentsMemoryChoiceDeferred.class);
 		bind(Integer.class).annotatedWith(Names.named("indexingFilesizeInMemoryLimitBytes")).toInstance(100000); // optimize for test run performance, but we should test the file cache also

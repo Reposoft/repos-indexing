@@ -13,9 +13,9 @@ import se.repos.indexing.repository.IndexingItemHandlerContentEnable;
 import se.repos.indexing.repository.IndexingItemHandlerPropertiesDisable;
 import se.repos.indexing.repository.IndexingItemHandlerPropertiesEnable;
 import se.repos.indexing.scheduling.ScheduleAwaitNewer;
-import se.repos.indexing.scheduling.ScheduleSendIncremental;
 import se.repos.indexing.scheduling.ScheduleBackground;
-import se.repos.indexing.scheduling.ScheduleSendComplete;
+import se.repos.indexing.solrj.CommitSolrj;
+import se.repos.indexing.solrj.ScheduleSendIncrementalSolrj;
 
 public abstract class IndexingHandlers {
 
@@ -27,7 +27,7 @@ public abstract class IndexingHandlers {
 			add(IndexingItemHandlerPropertiesEnable.class);
 			add(ItemProperties.class);
 			add(IndexingItemHandlerPropertiesDisable.class); // the others can read from indexing doc instead
-			add(ScheduleSendIncremental.class);
+			add(ScheduleSendIncrementalSolrj.class);
 			add(ScheduleAwaitNewer.class);
 			add(IndexingItemHandlerContentEnable.class);
 		}
@@ -37,7 +37,7 @@ public abstract class IndexingHandlers {
 		private static final long serialVersionUID = 1L;
 		{
 			add(IndexingItemHandlerContentDisable.class);
-			add(ScheduleSendComplete.class);
+			add(CommitSolrj.class);
 		}
 	};
 	

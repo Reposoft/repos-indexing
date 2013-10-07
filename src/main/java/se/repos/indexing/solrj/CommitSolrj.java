@@ -2,27 +2,32 @@ package se.repos.indexing.solrj;
 
 import java.util.Set;
 
-import org.apache.solr.client.solrj.SolrServer;
-
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
+import se.repos.indexing.scheduling.Marker;
 
-public class ScheduleSendIncrementalSolrj implements IndexingItemHandler {
+public class CommitSolrj implements Marker {
 
-	private SolrServer solr;
-
-	public ScheduleSendIncrementalSolrj(SolrServer solrCore) {
-		this.solr = solrCore;
+	public CommitSolrj() {
+		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void handle(IndexingItemProgress progress) {
-		throw new UnsupportedOperationException("not implemented");
+		// TODO Auto-generated method stub
+
 	}
 
 	@Override
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
+		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void onItemsMark() {
+		// TODO Auto-generated method stub
+
 	}
 
 }

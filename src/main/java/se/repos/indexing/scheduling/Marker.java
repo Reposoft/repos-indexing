@@ -3,14 +3,17 @@ package se.repos.indexing.scheduling;
 import se.repos.indexing.item.IndexingItemHandler;
 
 /**
- * Marks scheduling points in handler chain.
+ * Marks scheduling points in handler chain, where all items should have reached the same stage.
  * 
- * Not public because scheduling can only handle pre-defined markers.
+ * Other {@link IndexingItemHandler}s should allow indexing to happen item-by-item for a chain of handlers.
  * 
- * TODO needs support for executing an operation once after all items (maybe before all items too)
+ * Some of these markers have scheduling significance, such as {@link ScheduleBackground} etc.
  */
-interface Marker extends IndexingItemHandler {
+public interface Marker extends IndexingItemHandler {
 
-	
+	/**
+	 * Called after {@link #handle(se.repos.indexing.item.IndexingItemProgress)} of all items, when each one in an indexing unit is at this stage.
+	 */
+	void onItemsMark();
 	
 }
