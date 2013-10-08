@@ -5,7 +5,5 @@ package se.repos.indexing.scheduling;
  * 
  * Normally preceded in handler iteration by {@link ScheduleSendIncremental}.
  */
-public interface ScheduleAwaitNewer extends Marker {
-	
-
+public final class ScheduleAwaitNewer extends MarkerOnly {
 }

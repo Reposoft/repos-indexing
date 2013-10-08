@@ -34,8 +34,12 @@ import se.simonsoft.cms.item.properties.CmsItemProperties;
 /**
  * Stuff from the original {@link ReposIndexingImpl} that was needed in {@link ReposIndexingPerRepository}
  * but couldn't be extracted to {@link IndexingItemHandler}s within the current architecture.
+ * 
+ * Could be made a first class service but then it should also handle caching of results
+ * (and get updated based on indexing progress)
+ * so that any service could use it to ask for status.
  */
-public class RepositoryStatus {
+public class RepositoryIndexStatus {
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -43,7 +47,7 @@ public class RepositoryStatus {
 	private IdStrategy idStrategy;
 	
 	@Inject
-	public RepositoryStatus(@Named("repositem") SolrServer repositem, IdStrategy idStrategy) {
+	public RepositoryIndexStatus(@Named("repositem") SolrServer repositem, IdStrategy idStrategy) {
 		this.repositem = repositem;
 		this.idStrategy = idStrategy;
 	}
@@ -154,6 +158,7 @@ public class RepositoryStatus {
 		return id;
 	}
 
+	// has been moved to MarkerRevisionComplete
 	public void indexRevComplete(String id) {
 		SolrInputDocument docComplete = new SolrInputDocument();
 		docComplete.addField("id", id);

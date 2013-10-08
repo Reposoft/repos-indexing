@@ -29,9 +29,6 @@ import se.repos.indexing.item.IndexingItemProgress;
  */
 class IndexingUnit {
 
-	// iteration order must be same as original
-	Map<Marker, List<IndexingItemHandler>> phases = new LinkedHashMap<Marker, List<IndexingItemHandler>>();
-	
 	/**
 	 * @param items Passed through to handlers in an order decided by {@link IndexingSchedule}
 	 * @param handler Ordered list for indexing execution. Handlers are not necessarily unique.
@@ -44,7 +41,6 @@ class IndexingUnit {
 	 * The actual iteration of a changeset, for example, might be deferred for memory reasons.
 	 * @return
 	 */
-	//NavigableSet<IndexingItemProgress> getItem() {
 	Iterable<IndexingItemProgress> getItems() {
 		return null;
 	}
@@ -59,27 +55,5 @@ class IndexingUnit {
 	boolean hasHandler(IndexingItemHandler handler) {
 		return false;
 	}
-	
-	/**
-	 * Keeps all items but splits on a cross-item handler and returns all preceding handlers.
-	 * @param handler To be removed, along with all handlers after
-	 * @return with current as
-	IndexingUnit getBefore(Marker handler) {
-		return null;
-	}
-	
-	IndexingUnit getAfter(Marker handler) {
-		return null;
-	}
-	
-	IndexingUnit getParent() {
-		return null;
-	}
-	 */	
-
-//	
-//	static class Handlers implements NavigableMap<Marker, List<IndexingItemHandler>> {
-//		
-//	}
 	
 }

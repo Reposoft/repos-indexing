@@ -7,12 +7,16 @@ import se.repos.indexing.item.IndexingItemHandler;
  * 
  * Other {@link IndexingItemHandler}s should allow indexing to happen item-by-item for a chain of handlers.
  * 
- * Some of these markers have scheduling significance, such as {@link ScheduleBackground} etc.
+ * Some of these markers have scheduling significance, such as {@link MarkerOnly} impls.
  */
 public interface Marker extends IndexingItemHandler {
 
 	/**
 	 * Called after {@link #handle(se.repos.indexing.item.IndexingItemProgress)} of all items, when each one in an indexing unit is at this stage.
+	 * 
+	 * Note that statefulness from {@link #handle(se.repos.indexing.item.IndexingItemProgress)} is normally safe in a per-repository handler configuration,
+	 * because revisions only overlap between handlers and not within them,
+	 * but this depends on how {@link IndexingUnit#getHandlers(se.repos.indexing.item.IndexingItemProgress)} is configured.
 	 */
 	void onItemsMark();
 	

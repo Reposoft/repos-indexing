@@ -72,10 +72,10 @@ public class ReposIndexingImpl implements ReposIndexing {
 	
 	private EventHandlers eventHandlers = new EventHandlers();
 	
-	private RepositoryStatus repositoryStatus;
+	private RepositoryIndexStatus repositoryStatus;
 	
 	@Inject
-	public void setSolrRepositem(RepositoryStatus repositoryStatus) {
+	public void setSolrRepositem(RepositoryIndexStatus repositoryStatus) {
 		this.repositoryStatus = repositoryStatus;
 	}
 	

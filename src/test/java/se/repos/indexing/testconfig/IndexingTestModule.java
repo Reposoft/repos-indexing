@@ -18,7 +18,7 @@ import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.twophases.ItemContentsMemoryChoiceDeferred;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
 import se.repos.indexing.twophases.ReposIndexingImpl;
-import se.repos.indexing.twophases.RepositoryStatus;
+import se.repos.indexing.twophases.RepositoryIndexStatus;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsContentsReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsRepositoryLookupSvnkitLook;
@@ -71,7 +71,7 @@ public class IndexingTestModule extends AbstractModule {
 		
 		// configure indexing
 		bind(IdStrategy.class).to(IdStrategyDefault.class);
-		bind(RepositoryStatus.class);
+		bind(RepositoryIndexStatus.class);
 		bind(ItemPropertiesBufferStrategy.class).to(ItemPropertiesImmediate.class);
 		bind(ItemContentBufferStrategy.class).to(ItemContentsMemoryChoiceDeferred.class);
 		bind(Integer.class).annotatedWith(Names.named("indexingFilesizeInMemoryLimitBytes")).toInstance(100000); // optimize for test run performance, but we should test the file cache also

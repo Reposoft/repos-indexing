@@ -1,6 +1,8 @@
 package se.repos.indexing.repository;
 
 import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,9 +27,11 @@ import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.item.ItemPropertiesDeleted;
 import se.repos.indexing.scheduling.IndexingSchedule;
 import se.repos.indexing.scheduling.IndexingUnitRevision;
+import se.repos.indexing.scheduling.Marker;
+import se.repos.indexing.solrj.MarkerCommitSolrjRepositem;
 import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
 import se.repos.indexing.twophases.IndexingItemProgressPhases;
-import se.repos.indexing.twophases.RepositoryStatus;
+import se.repos.indexing.twophases.RepositoryIndexStatus;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangeset;
@@ -35,6 +39,7 @@ import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.info.CmsRepositoryLookup;
 import se.simonsoft.cms.item.inspection.CmsChangesetReader;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
+import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 public class ReposIndexingPerRepository implements ReposIndexing {
 
@@ -50,7 +55,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	private RepoRevision scheduledLowest = null;
 	private RepoRevision completedHighest = null;
 
-	private RepositoryStatus repositoryStatus = null;
+	private RepositoryIndexStatus repositoryStatus = null;
 	
 	@Inject
 	public ReposIndexingPerRepository(CmsRepository repository) {
@@ -58,7 +63,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	}
 	
 	@Inject
-	public void setRepositoryStatus(RepositoryStatus repositoryStatus) {
+	public void setRepositoryStatus(RepositoryIndexStatus repositoryStatus) {
 		this.repositoryStatus  = repositoryStatus;
 	}
 	
@@ -80,7 +85,11 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	@Inject
 	public void setHandlers(Set<IndexingItemHandler> handlers) {
 		this.handlers = handlers;
-		//eventHandlers.addIfAwareAll(handlersSync);
+		for (IndexingItemHandler h : handlers) {
+			if (h instanceof IndexingEventAware) {
+				throw new IllegalArgumentException("Handler " + h + " not accepted because this indexing impl does not support " + IndexingEventAware.class.getSimpleName());
+			}
+		}
 	}
 
 	@Inject
@@ -112,8 +121,8 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 //	
 
 	@Override
-	public void sync(CmsRepository repository, RepoRevision revision) {
-		if (repository != null) {
+	public void sync(CmsRepository repositoryParamDeprecated, RepoRevision revision) {
+		if (repositoryParamDeprecated != null) {
 			throw new IllegalArgumentException("Repository parameter is deprecated");
 		}
 		
@@ -150,10 +159,12 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			scheduledHighest = new RepoRevision(0, revisionLookup.getRevisionTimestamp(repository, 0));
 		}
 		
-		for (long i = scheduledHighest.getNumber(); i <= revision.getNumber(); i++) {
-			RepoRevision next = new RepoRevision(i, revisionLookup.getRevisionTimestamp(repository, i));
+		for (long i = scheduledHighest.getNumber() + 1; i <= revision.getNumber(); i++) {
+			Date revt = revisionLookup.getRevisionTimestamp(repository, i);
+			logger.debug("Creating indexing unit {} {}", i, revt);
+			RepoRevision next = new RepoRevision(i, revt);
 			IndexingUnitRevision read = getIndexingUnit(next, revision);
-			
+			schedule.add(read);
 		}
 
 	}
@@ -164,28 +175,30 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	 */
 	protected IndexingUnitRevision getIndexingUnit(RepoRevision revision, RepoRevision referenceRevision) {
 		CmsChangeset changeset = changesetReader.read(revision, referenceRevision);
+
+		CmsItemProperties revprops = null;
+		String commitId = repositoryStatus.indexRevStart(repository, revision, revprops);
 		
 		List<IndexingItemProgress> items = new LinkedList<IndexingItemProgress>();
 		for (CmsChangesetItem item : changeset.getItems()) {
 			
 			IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
+			doc.addField("revid", commitId);
 			
 			IndexingItemProgressPhases progress = new IndexingItemProgressPhases(repository, revision, item, doc);
 			
 			// Only use head flag on files for now because we don't have the revision to make the update safely on folders
 			if (item.isFile()) {
 				if (!item.isAdd()) {
+					// TODO we could track the items that are already marked head=false thanks to isOverwritten, and avoid this extra solr doc
 					repositoryStatus.indexItemMarkPrevious(repository, revision, item);
 				}
-				// TODO with HEAD reference we could index as non-head immediately, see CmsChangesetReader#read(CmsRepositoryInspection, RepoRevision, RepoRevision) and CmsChangesetItem#isOverwritten()
-				doc.addField("head", item.isDelete() ? false : true);
 			}
 
-			
+			items.add(progress);
 		}
-		
-		return null;
-		
+
+		return new IndexingUnitRevision(items, handlers);		
 	}
 
 	@Override
@@ -197,43 +210,11 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	}
 
 	@Override
-	public RepoRevision getRevProgress(CmsRepository repo) {
+	public RepoRevision getRevProgress(CmsRepository repository) {
 		if (repository != null) {
 			throw new IllegalArgumentException("Repository parameter is deprecated");
 		}
 		return scheduledLowest;
 	}
-
-	
-	
-	
-	
-	
-	
-	
-	class EventHandlers extends LinkedHashSet<IndexingEventAware> implements IndexingEventAware {
-
-		private static final long serialVersionUID = 1L;
-
-		protected void addIfAwareAll(Collection<? extends Object> possibleIndexingEventAware) {
-			for (Object h : possibleIndexingEventAware) {
-				addIfAware(h);
-			}
-		}	
-		
-		protected void addIfAware(Object possibleIndexingEventAware) {
-			if (possibleIndexingEventAware instanceof IndexingEventAware) {
-				this.add((IndexingEventAware) possibleIndexingEventAware);
-			}
-		}
-		
-		@Override
-		public void onRevisionComplete(RepoRevision revision) {
-			for (IndexingEventAware h : this) {
-				h.onRevisionComplete(revision);
-			}
-		}
-		
-	}	
 	
 }

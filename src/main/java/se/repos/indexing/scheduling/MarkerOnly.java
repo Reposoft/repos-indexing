@@ -19,4 +19,8 @@ abstract class MarkerOnly implements Marker {
 		return null;
 	}
 
+	@Override
+	public void onItemsMark() {
+	}
+
 }

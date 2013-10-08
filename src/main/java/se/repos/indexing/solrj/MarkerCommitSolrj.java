@@ -2,32 +2,32 @@ package se.repos.indexing.solrj;
 
 import java.util.Set;
 
+import org.apache.solr.client.solrj.SolrServer;
+
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 import se.repos.indexing.scheduling.Marker;
 
-public class RevisionCompleteSolrj implements Marker {
+public class MarkerCommitSolrj implements Marker {
 
-	public RevisionCompleteSolrj() {
-		// TODO Auto-generated constructor stub
+	private SolrServer core;
+
+	public MarkerCommitSolrj(SolrServer core) {
+		this.core = core;
 	}
 
 	@Override
 	public void handle(IndexingItemProgress progress) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void onItemsMark() {
-		// TODO Auto-generated method stub
-
+		new SolrCommit(core).run();
 	}
 
 }

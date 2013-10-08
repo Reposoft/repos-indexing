@@ -7,11 +7,11 @@ import org.apache.solr.client.solrj.SolrServer;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 
-public class ScheduleSendIncrementalSolrj implements IndexingItemHandler {
+public class HandlerSendIncrementalSolrj implements IndexingItemHandler {
 
 	private SolrServer solr;
 
-	public ScheduleSendIncrementalSolrj(SolrServer solrCore) {
+	public HandlerSendIncrementalSolrj(SolrServer solrCore) {
 		this.solr = solrCore;
 	}
 
