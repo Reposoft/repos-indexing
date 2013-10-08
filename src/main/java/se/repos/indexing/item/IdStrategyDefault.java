@@ -24,14 +24,6 @@ public class IdStrategyDefault implements IdStrategy {
 	}
 	
 	/**
-	 * @param revision
-	 * @return how to represent a revision in id
-	 */
-	protected String getIdRevision(RepoRevision revision) {
-		return Long.toString(revision.getNumber());
-	}
-	
-	/**
 	 * @return what's inbetween the idhead and the revision identifier
 	 */
 	protected String getPegSeparator() {
@@ -47,6 +39,15 @@ public class IdStrategyDefault implements IdStrategy {
 			throw new IllegalArgumentException("Item must have revision to be valid as ID");
 		}
 		return new RepoRevision(itemId.getPegRev(), null);
+	}
+	
+	/**
+	 * @param revision
+	 * @return how to represent a revision in id
+	 */
+	@Override
+	public String getIdRevision(RepoRevision revision) {
+		return Long.toString(revision.getNumber());
 	}
 	
 	@Override

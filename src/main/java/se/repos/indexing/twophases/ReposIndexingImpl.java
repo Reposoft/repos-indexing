@@ -17,7 +17,6 @@ import java.util.concurrent.ExecutorService;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
@@ -246,7 +245,8 @@ public class ReposIndexingImpl implements ReposIndexing {
 		for (RepoRevision rev : range) {
 			if (rev.getNumber() == 0) {
 				logger.debug("Revprops indexing for rev 0 not implemented"); // changeset reader couldn't handle 0
-				indexRevStart(repository, rev, null).run();
+				String commitId = repositoryStatus.indexRevStart(repository, rev, null);
+				repositoryStatus.indexRevComplete(commitId);
 				continue;
 			}
 			CmsChangeset changeset;
@@ -348,21 +348,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 	
 	protected void indexItemMarkPrevious(CmsRepository repository, RepoRevision revision, CmsChangesetItem item) {
-		if (item.isFolder()) {
-			logger.warn("Flagging !head on folder is unreliable, see issue in SvnlookItem");
-		}
-		CmsItemPath path = item.getPath();
-		RepoRevision revisionObsoleted = item.getRevisionObsoleted();
-		if (revisionObsoleted == null) {
-			logger.warn("Unknown obsoleted revision for {}, no existing item will be marked as non-HEAD", item);
-			return;
-		}
-		String query = repository.getHost() + repository.getUrlAtHost() + (path == null ? "" : path) + "@" + revisionObsoleted.getNumber(); // From ItemPathInfo
-		IndexingDocIncrementalSolrj mark = new IndexingDocIncrementalSolrj();
-		mark.addField("id", query);		
-		mark.setUpdateMode(true);
-		mark.setField("head", false);
-		repositoryStatus.solrAdd(mark.getSolrDoc());
+		repositoryStatus.indexItemMarkPrevious(repository, revision, item);
 	}
 	
 	/**
@@ -397,21 +383,9 @@ public class ReposIndexingImpl implements ReposIndexing {
 	 */
 	Runnable indexRevStart(CmsRepository repository, CmsChangeset changeset) {
 		RepoRevision revision = changeset.getRevision();
-		return indexRevStart(repository, revision, null);
+		String commitId = repositoryStatus.indexRevStart(repository, revision, null);
+		return new RunRevComplete(commitId);
 	}
-	
-	Runnable indexRevStart(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops) {
-		String id = getIdCommit(repository, revision);
-		SolrInputDocument docStart = new SolrInputDocument();
-		docStart.addField("id", id);
-		docStart.addField("type", "commit");
-		docStart.addField("rev", getIdRevision(revision));
-		docStart.addField("complete", false);
-		repositoryStatus.solrAdd(docStart);
-		return new RunRevComplete(id);
-	}
-
-	
 	
 	/* moved to ItemPathinfo
 	String getId(CmsRepository repository, RepoRevision revision, CmsItemPath path) {
@@ -442,12 +416,6 @@ public class ReposIndexingImpl implements ReposIndexing {
 	}
 
 	class RunRevComplete implements Runnable {
-
-		// http://mail-archives.apache.org/mod_mbox/lucene-solr-user/201209.mbox/%3C7E0464726BD046488B66D661770F9C2F01B02EFF0C@TLVMBX01.nice.com%3E
-		@SuppressWarnings("serial")
-		final Map<String, Boolean> partialUpdateToTrue = new HashMap<String, Boolean>() {{
-			put("set", true);
-		}};
 		
 		private String id;
 		
@@ -457,10 +425,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 		
 		@Override
 		public void run() {
-			SolrInputDocument docComplete = new SolrInputDocument();
-			docComplete.addField("id", id);
-			docComplete.setField("complete", partialUpdateToTrue);
-			repositoryStatus.solrAdd(docComplete);
+			repositoryStatus.indexRevComplete(id);
 		}
 		
 	}

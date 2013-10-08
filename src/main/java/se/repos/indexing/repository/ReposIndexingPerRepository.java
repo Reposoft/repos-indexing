@@ -17,12 +17,21 @@ import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.item.IndexingItemProgress;
+import se.repos.indexing.item.ItemContentBufferDeleted;
+import se.repos.indexing.item.ItemContentBufferFolder;
 import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
+import se.repos.indexing.item.ItemPropertiesDeleted;
 import se.repos.indexing.scheduling.IndexingSchedule;
+import se.repos.indexing.scheduling.IndexingUnitRevision;
+import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
+import se.repos.indexing.twophases.IndexingItemProgressPhases;
 import se.repos.indexing.twophases.RepositoryStatus;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
+import se.simonsoft.cms.item.events.change.CmsChangeset;
+import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.info.CmsRepositoryLookup;
 import se.simonsoft.cms.item.inspection.CmsChangesetReader;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
@@ -38,6 +47,8 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	private Set<IndexingItemHandler> handlers;
 
 	private RepoRevision scheduledHighest = null;
+	private RepoRevision scheduledLowest = null;
+	private RepoRevision completedHighest = null;
 
 	private RepositoryStatus repositoryStatus = null;
 	
@@ -102,6 +113,10 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 
 	@Override
 	public void sync(CmsRepository repository, RepoRevision revision) {
+		if (repository != null) {
+			throw new IllegalArgumentException("Repository parameter is deprecated");
+		}
+		
 		logger.info("Sync requested {} rev {}", repository, revision);
 		if (revision.getDate() == null) {
 			throw new IllegalArgumentException("Revision must be qualified with timestamp, got " + revision);
@@ -116,59 +131,86 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		
 		if (scheduledHighest == null) {
 			logger.info("Unknown index completion status for repository {}. Polling.", repository);
-			RepoRevision c = repositoryStatus.getIndexedRevisionHighestCompleted(repository);
-			RepoRevision pl = repositoryStatus.getIndexedRevisionLowestStarted(repository);
-			RepoRevision ph = repositoryStatus.getIndexedRevisionHighestStarted(repository);
-			if (pl == null) {
-				if (ph != null) {
-					logger.error("Inconsistent revision query results, got highest in progress {}", ph);
+			completedHighest = repositoryStatus.getIndexedRevisionHighestCompleted(repository);
+			scheduledLowest = repositoryStatus.getIndexedRevisionLowestStarted(repository);
+			scheduledHighest = repositoryStatus.getIndexedRevisionHighestStarted(repository);
+			if (scheduledLowest == null) {
+				if (scheduledHighest != null) {
+					logger.error("Inconsistent revision query results, got highest in progress {}", scheduledHighest);
 				}
-				logger.info("Indexing has completed revision {}, no indexing in progress", c);
+				logger.info("Indexing has completed revision {}, no indexing in progress", completedHighest);
 			} else {
-				logger.info("Indexing has completed revision {}, in progress from {} to {}", c, pl, ph);
+				logger.info("Indexing has completed revision {}, in progress from {} to {}", completedHighest, scheduledLowest, scheduledHighest);
 			}
-			// for now the simplest solution is to assume that all in-progress operations have actually completed
-			//if (pl != null) {
-			//	logger.warn("Index contains unfinished revisions between {} and {} at first sync. Reindexing those.", pl, ph);
-			//}
-			scheduledHighest = ph;
 		}
 		
 		// running may be null if everything is completed
-		// TODO find the proper revision dates because those are indexed, needed in SvnTestIndexing too
-		List<RepoRevision> range = new LinkedList<RepoRevision>();
-		RepoRevision r = scheduledHighest;
-		if (r == null) {
+		if (scheduledHighest == null) {
 			logger.debug("No revision status in index. Starting from 0.");
-			r = new RepoRevision(0, revisionLookup.getRevisionTimestamp(repository, 0));
+			scheduledHighest = new RepoRevision(0, revisionLookup.getRevisionTimestamp(repository, 0));
 		}
-		for (long i = r.getNumber(); i <= revision.getNumber(); i++) {
-			range.add(new RepoRevision(i, revisionLookup.getRevisionTimestamp(repository, i)));
-		}
-		logger.debug("Index range: {}", range);
 		
-		// run
-		scheduledHighest = revision;
-		if (repository instanceof CmsRepositoryInspection) {
-			//sync((CmsRepositoryInspection) repository, changesetReader, revision, range);
-		} else {
-			throw new AssertionError("Admin repository instance required for indexing. Got " + repository.getClass());
+		for (long i = scheduledHighest.getNumber(); i <= revision.getNumber(); i++) {
+			RepoRevision next = new RepoRevision(i, revisionLookup.getRevisionTimestamp(repository, i));
+			IndexingUnitRevision read = getIndexingUnit(next, revision);
+			
 		}
 
+	}
+
+	/**
+	 * @param revision The revision to index
+	 * @param referenceRevision Reference revision, for checking head status
+	 */
+	protected IndexingUnitRevision getIndexingUnit(RepoRevision revision, RepoRevision referenceRevision) {
+		CmsChangeset changeset = changesetReader.read(revision, referenceRevision);
+		
+		List<IndexingItemProgress> items = new LinkedList<IndexingItemProgress>();
+		for (CmsChangesetItem item : changeset.getItems()) {
+			
+			IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
+			
+			IndexingItemProgressPhases progress = new IndexingItemProgressPhases(repository, revision, item, doc);
+			
+			// Only use head flag on files for now because we don't have the revision to make the update safely on folders
+			if (item.isFile()) {
+				if (!item.isAdd()) {
+					repositoryStatus.indexItemMarkPrevious(repository, revision, item);
+				}
+				// TODO with HEAD reference we could index as non-head immediately, see CmsChangesetReader#read(CmsRepositoryInspection, RepoRevision, RepoRevision) and CmsChangesetItem#isOverwritten()
+				doc.addField("head", item.isDelete() ? false : true);
+			}
+
+			
+		}
+		
+		return null;
+		
 	}
 
 	@Override
 	public RepoRevision getRevComplete(CmsRepository repository) {
-		// TODO Auto-generated method stub
-		return null;
+		if (repository != null) {
+			throw new IllegalArgumentException("Repository parameter is deprecated");
+		}
+		return completedHighest;
 	}
 
 	@Override
 	public RepoRevision getRevProgress(CmsRepository repo) {
-		// TODO Auto-generated method stub
-		return null;
+		if (repository != null) {
+			throw new IllegalArgumentException("Repository parameter is deprecated");
+		}
+		return scheduledLowest;
 	}
 
+	
+	
+	
+	
+	
+	
+	
 	class EventHandlers extends LinkedHashSet<IndexingEventAware> implements IndexingEventAware {
 
 		private static final long serialVersionUID = 1L;
