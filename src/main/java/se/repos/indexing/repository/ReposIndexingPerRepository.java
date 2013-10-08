@@ -198,7 +198,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			items.add(progress);
 		}
 
-		return new IndexingUnitRevision(items, handlers);		
+		return new IndexingUnitRevision(items, handlers);	
 	}
 
 	@Override

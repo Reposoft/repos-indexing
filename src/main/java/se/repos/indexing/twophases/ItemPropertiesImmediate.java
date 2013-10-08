@@ -28,7 +28,11 @@ public class ItemPropertiesImmediate implements ItemPropertiesBufferStrategy {
 	@Override
 	public CmsItemProperties getProperties(CmsRepositoryInspection repository,
 			RepoRevision revision, CmsItemPath path) {
-		return reader.getProperties(revision, path);
+		if (repository == null) {
+			return reader.getProperties(revision, path);
+		}
+		// the deprecated way
+		return reader.getProperties(repository, revision, path);
 	}
 	
 }
