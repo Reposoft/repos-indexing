@@ -2,10 +2,12 @@ package se.repos.indexing.scheduling;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
 import java.util.NavigableSet;
+import java.util.Set;
 
 import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.item.IndexingItemHandler;
@@ -29,12 +31,17 @@ import se.repos.indexing.item.IndexingItemProgress;
  */
 class IndexingUnit {
 
+	private Map<IndexingItemProgress, Iterator<IndexingItemHandler>> handlers = new LinkedHashMap<IndexingItemProgress, Iterator<IndexingItemHandler>>();
+	private Set<Class<? extends IndexingItemHandler>> handlertypes = new LinkedHashSet<Class<? extends IndexingItemHandler>>();
+	
 	/**
 	 * @param items Passed through to handlers in an order decided by {@link IndexingSchedule}
 	 * @param handler Ordered list for indexing execution. Handlers are not necessarily unique.
 	 */
 	public IndexingUnit(Iterable<IndexingItemProgress> items, Iterable<IndexingItemHandler> handler) {
-		
+		for (IndexingItemProgress i : items) {
+			handlers.put(i, handler.iterator());
+		}
 	}
 	
 	/**
@@ -42,18 +49,18 @@ class IndexingUnit {
 	 * @return
 	 */
 	Iterable<IndexingItemProgress> getItems() {
-		return null;
+		return handlers.keySet();
 	}
 	
 	/**
 	 * @return TODO stateful iterator per item?
 	 */
 	Iterator<IndexingItemHandler> getHandlers(IndexingItemProgress item) {
-		return null;
+		return handlers.get(item);
 	}
 	
-	boolean hasHandler(IndexingItemHandler handler) {
-		return false;
+	boolean hasHandler(Class<? extends IndexingItemHandler> handler) {
+		return handlertypes.contains(handler);
 	}
 	
 }

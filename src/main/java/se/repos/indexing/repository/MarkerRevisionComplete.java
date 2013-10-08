@@ -19,6 +19,9 @@ import se.repos.indexing.item.IndexingItemProgress;
 import se.repos.indexing.scheduling.Marker;
 import se.repos.indexing.solrj.SolrAdd;
 
+/**
+ * Sends an update to the indexed revision doc that the revision is completely indexed.
+ */
 public class MarkerRevisionComplete implements Marker {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());

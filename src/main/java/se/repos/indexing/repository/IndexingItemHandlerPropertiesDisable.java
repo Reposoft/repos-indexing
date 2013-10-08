@@ -7,7 +7,7 @@ public class IndexingItemHandlerPropertiesDisable extends
 
 	@Override
 	public void handleInternal(IndexingItemProgressPhases progress) {
-		throw new UnsupportedOperationException("not implemented");
+		// anything to do here?
 	}
 
 }

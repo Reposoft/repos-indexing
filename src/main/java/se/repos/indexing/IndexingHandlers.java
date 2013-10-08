@@ -16,6 +16,7 @@ import se.repos.indexing.repository.MarkerRevisionComplete;
 import se.repos.indexing.scheduling.ScheduleAwaitNewer;
 import se.repos.indexing.scheduling.ScheduleBackground;
 import se.repos.indexing.solrj.HandlerSendIncrementalSolrjRepositem;
+import se.repos.indexing.solrj.HandlerSendSolrjRepositem;
 import se.repos.indexing.solrj.MarkerCommitSolrjRepositem;
 
 public abstract class IndexingHandlers {
@@ -38,6 +39,7 @@ public abstract class IndexingHandlers {
 		private static final long serialVersionUID = 1L;
 		{
 			add(IndexingItemHandlerContentDisable.class);
+			add(HandlerSendSolrjRepositem.class);
 			add(MarkerRevisionComplete.class);
 			add(MarkerCommitSolrjRepositem.class);
 		}

@@ -54,7 +54,7 @@ public class ItemContentsMemorySizeLimit implements ItemContentBufferStrategy {
 	public ItemContentsMemorySizeLimit setCmsContentsReader(CmsContentsReader reader) {
 		this.reader = reader;
 		return this;
-	}	
+	}
 	
 	@Override
 	public ItemContentBuffer getBuffer(CmsRepositoryInspection repository,
@@ -70,6 +70,9 @@ public class ItemContentsMemorySizeLimit implements ItemContentBufferStrategy {
 		}
 	}
 	
+	/**
+	 * @deprecated Share with {@link ItemContentsMemory} after transition to per-repository is complete
+	 */
 	public class BufferInMemory implements ItemContentBuffer {
 		
 		private CmsRepositoryInspection repository;

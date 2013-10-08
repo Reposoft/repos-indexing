@@ -31,6 +31,7 @@ import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.scheduling.IndexingSchedule;
 import se.repos.indexing.scheduling.IndexingScheduleBlockingOnly;
+import se.repos.indexing.twophases.ItemContentsMemory;
 import se.repos.indexing.twophases.ItemContentsMemorySizeLimit;
 import se.repos.indexing.twophases.ItemContentsNocache;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
@@ -39,6 +40,7 @@ import se.simonsoft.cms.backend.svnkit.CmsRepositorySvn;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLookRepo;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsContentsReaderSvnkitLook;
+import se.simonsoft.cms.backend.svnkit.svnlook.CmsContentsReaderSvnkitLookRepo;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsRepositoryLookupSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCache;
 import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCacheDefault;
@@ -82,7 +84,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 			bind(CmsTestRepository.class).toInstance(repository); // backend specific type, should be called CmsSvnTestRepository
 			
 			bind(CmsChangesetReader.class).to(CmsChangesetReaderSvnkitLookRepo.class);
-			bind(CmsContentsReader.class).to(CmsContentsReaderSvnkitLook.class);
+			bind(CmsContentsReader.class).to(CmsContentsReaderSvnkitLookRepo.class);
 			bind(CommitRevisionCache.class).to(CommitRevisionCacheDefault.class);
 			bind(CmsRepositoryLookup.class).annotatedWith(Names.named("inspection")).to(CmsRepositoryLookupSvnkitLook.class);
 			bind(SVNLookClient.class).toProvider(SvnlookClientProviderStateless.class);
@@ -99,7 +101,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 			IndexingHandlers.configureLast(handlers);
 			
 			bind(IdStrategy.class).to(IdStrategyDefault.class);
-			bind(ItemContentBufferStrategy.class).to(ItemContentsNocache.class); // we shuld have a memory-only impl
+			bind(ItemContentBufferStrategy.class).to(ItemContentsMemory.class); // we shuld have a memory-only impl
 			bind(ItemPropertiesBufferStrategy.class).to(ItemPropertiesImmediate.class);
 		}};
 		
