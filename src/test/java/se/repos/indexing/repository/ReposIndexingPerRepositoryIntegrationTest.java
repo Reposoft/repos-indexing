@@ -3,10 +3,12 @@ package se.repos.indexing.repository;
 import static org.junit.Assert.*;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
@@ -15,12 +17,17 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
+import org.apache.solr.core.CoreDescriptor;
+import org.apache.solr.core.SolrConfig;
+import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
+import org.apache.solr.schema.IndexSchema;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.tmatesoft.svn.core.internal.wc17.db.StructureFields.RepositoryInfo;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
+import org.xml.sax.InputSource;
 
 import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingHandlers;
@@ -67,14 +74,33 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		// Dependent modules can use repos-testing, but that's dependent on this module so here we start solr from source path.
-		File solrhome = new File("src/main/resources/" + "se/repos/indexing/solr");
-		assertTrue(solrhome.exists());
-		assertTrue(new File(solrhome, "solr.xml").exists());
-		SolrResourceLoader resourceLoader = new SolrResourceLoader(solrhome.getAbsolutePath());
+		File dataDir = new File(System.getProperty("java.io.tmpdir") + "/solrdata-" + this.getClass().getName());
+		if (dataDir.exists()) {
+			FileUtils.deleteDirectory(dataDir);
+		}
+		
+		SolrResourceLoader resourceLoader = new SolrResourceLoader(dataDir.getAbsolutePath());
 		CoreContainer coreContainer = new CoreContainer(resourceLoader);
+		//CoreDescriptor coreDescriptor = coreContainer.getCoreDescriptor("repositem");
+		CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, "repositem", dataDir.getAbsolutePath());
+		
+		//InputStream solrconfxml = getClass().getClassLoader().getResourceAsStream("se/repos/indexing/solr/repositem/conf/solrconfig.xml");
+		//InputStream schemaxml = getClass().getClassLoader().getResourceAsStream("se/repos/indexing/solr/repositem/conf/schema.xml");
+		// need actual files so it can be loaded in standalone solr
+		File solrconfxml = new File("src/main/resources/se/repos/indexing/solr/repositem/conf/solrconfig.xml");
+		assertTrue(solrconfxml.exists());
+		File schemaxml = new File("src/main/resources/se/repos/indexing/solr/repositem/conf/schema.xml");
+		assertTrue(schemaxml.exists());
+		SolrConfig solrconfig = new SolrConfig("solrconfig.xml",  new InputSource(new FileInputStream(solrconfxml)));
+		IndexSchema schema = new IndexSchema(solrconfig, "schema.xml", new InputSource(new FileInputStream(schemaxml)));
+		
+		SolrCore repositemCore = new SolrCore("repositem", dataDir.getAbsolutePath(), solrconfig, schema, coreDescriptor);
 		coreContainer.load();
+		
 		final SolrServer repositem = new EmbeddedSolrServer(coreContainer, "repositem");
+
+		System.out.println("Load core using:");
+		System.out.println("http://localhost:8983/solr/admin/cores?action=CREATE&name=repositem&config=" + solrconfxml.getAbsolutePath() + "&schema=" + schemaxml.getAbsolutePath() + "&dataDir=" + dataDir.getAbsolutePath());
 		
 		final CmsTestRepository repository = SvnTestSetup.getInstance().getRepository();
 		
