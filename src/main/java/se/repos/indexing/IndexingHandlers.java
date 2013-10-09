@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2004-2012 Repos Mjukvara AB
+ */
 package se.repos.indexing;
 
 import java.lang.reflect.InvocationTargetException;
@@ -79,6 +82,13 @@ public abstract class IndexingHandlers {
 	
 	public static void toInstance(Object guiceMultibinder, IndexingItemHandler... handlers) {
 		toInstance(guiceMultibinder, Arrays.asList(handlers));
+	}
+	
+	/**
+	 * Because we have such a useful utility here we're exposing it for wider use, no guarantees made.
+	 */
+	public static void toArbitrary(Object guiceBinder, @SuppressWarnings("rawtypes") Iterable to) {
+		avoidCompileTimeDependency(guiceBinder, "to", Class.class, to);
 	}
 	
 	private static void avoidCompileTimeDependency(Object guiceMultibinder, String bindToMethodName, Class<?> bindToType, @SuppressWarnings("rawtypes") Iterable bindings) {
