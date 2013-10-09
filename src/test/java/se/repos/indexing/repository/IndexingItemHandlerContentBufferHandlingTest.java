@@ -25,8 +25,8 @@ public class IndexingItemHandlerContentBufferHandlingTest {
 		when(strategy.getBuffer(null, null, null, null)).thenReturn(buffer);
 		ByteArrayInputStream b = new ByteArrayInputStream("".getBytes());
 		when(buffer.getContents()).thenReturn(b);
-		IndexingItemHandler enable = new IndexingItemHandlerContentEnable(strategy);
-		IndexingItemHandler disable = new IndexingItemHandlerContentDisable();
+		IndexingItemHandler enable = new HandlerContentEnable(strategy);
+		IndexingItemHandler disable = new HandlerContentDisable();
 		
 		IndexingItemProgress progress = new IndexingItemProgressPhases(null,null,item,null); //repository, revision, item, fields);
 
@@ -56,8 +56,8 @@ public class IndexingItemHandlerContentBufferHandlingTest {
 	@Test
 	public void testUnsupportedProgress() {
 		ItemContentBufferStrategy strategy = mock(ItemContentBufferStrategy.class);
-		IndexingItemHandler enable = new IndexingItemHandlerContentEnable(strategy);
-		IndexingItemHandler disable = new IndexingItemHandlerContentDisable();
+		IndexingItemHandler enable = new HandlerContentEnable(strategy);
+		IndexingItemHandler disable = new HandlerContentDisable();
 		
 		IndexingItemProgress progressUnsupported = mock(IndexingItemProgress.class);
 		try {

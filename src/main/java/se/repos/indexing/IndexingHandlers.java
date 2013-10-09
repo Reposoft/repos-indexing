@@ -5,12 +5,13 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import se.repos.indexing.item.HandlerChecksum;
 import se.repos.indexing.item.HandlerHeadinfo;
 import se.repos.indexing.item.IndexingItemHandler;
-import se.repos.indexing.item.ItemPathinfo;
-import se.repos.indexing.item.ItemProperties;
-import se.repos.indexing.repository.IndexingItemHandlerContentDisable;
-import se.repos.indexing.repository.IndexingItemHandlerContentEnable;
+import se.repos.indexing.item.HandlerPathinfo;
+import se.repos.indexing.item.HandlerProperties;
+import se.repos.indexing.repository.HandlerContentDisable;
+import se.repos.indexing.repository.HandlerContentEnable;
 import se.repos.indexing.repository.IndexingItemHandlerPropertiesDisable;
 import se.repos.indexing.repository.IndexingItemHandlerPropertiesEnable;
 import se.repos.indexing.repository.MarkerRevisionComplete;
@@ -27,20 +28,21 @@ public abstract class IndexingHandlers {
 		{
 			add(ScheduleBackground.class);
 			add(HandlerHeadinfo.class);
-			add(ItemPathinfo.class);
+			add(HandlerPathinfo.class);
 			add(IndexingItemHandlerPropertiesEnable.class);
-			add(ItemProperties.class);
+			add(HandlerProperties.class);
 			add(IndexingItemHandlerPropertiesDisable.class); // the others can read from indexing doc instead
 			add(HandlerSendIncrementalSolrjRepositem.class);
 			add(ScheduleAwaitNewer.class);
-			add(IndexingItemHandlerContentEnable.class);
+			add(HandlerContentEnable.class);
+			add(HandlerChecksum.class);
 		}
 	};
 
 	public static final Iterable<Class<? extends IndexingItemHandler>> STANDARD_LAST = new LinkedList<Class<? extends IndexingItemHandler>>() {
 		private static final long serialVersionUID = 1L;
 		{
-			add(IndexingItemHandlerContentDisable.class);
+			add(HandlerContentDisable.class);
 			add(HandlerSendSolrjRepositem.class);
 			add(MarkerRevisionComplete.class);
 			add(MarkerCommitSolrjRepositem.class);

@@ -19,10 +19,8 @@ import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 /**
  * Metadata but not versioned properties about an item,
  * i.e. anything that can be derived from basic path info.
- * 
- * @deprecated rename to IndexingItemPathinfo
  */
-public class ItemPathinfo implements IndexingItemHandler {
+public class HandlerPathinfo implements IndexingItemHandler {
 
 	private static final String URLENCODE_CHARSET = "UTF-8";
 	public static final String TYPE_FILE = "file";

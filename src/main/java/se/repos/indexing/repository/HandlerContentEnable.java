@@ -12,7 +12,7 @@ import se.repos.indexing.twophases.IndexingItemProgressPhases;
 /**
  * Inserted into handler chain to enable contents access for later handlers.
  */
-public class IndexingItemHandlerContentEnable extends IndexingItemHandlerInternal<IndexingItemProgressPhases> {
+public class HandlerContentEnable extends IndexingItemHandlerInternal<IndexingItemProgressPhases> {
 
 	private static final ItemContentBuffer ITEM_IS_FOLDER = new ItemContentBufferFolder();
 	
@@ -21,7 +21,7 @@ public class IndexingItemHandlerContentEnable extends IndexingItemHandlerInterna
 	private ItemContentBufferStrategy strategy;
 
 	@Inject
-	public IndexingItemHandlerContentEnable(ItemContentBufferStrategy strategy) {
+	public HandlerContentEnable(ItemContentBufferStrategy strategy) {
 		this.strategy = strategy;
 	}
 

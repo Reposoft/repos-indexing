@@ -18,11 +18,11 @@ import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 
-public class ItemPathinfoTest {
+public class HandlerPathinfoTest {
 
 	@Test
 	public void testHandle() {
-		ItemPathinfo pathinfo = new ItemPathinfo();
+		HandlerPathinfo pathinfo = new HandlerPathinfo();
 		CmsRepository repo = new CmsRepository("https://h.ost:1080/svn/repo1");
 		RepoRevision rev = new RepoRevision(10L, new Date());
 		

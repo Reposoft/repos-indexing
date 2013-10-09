@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.item.ItemContentBuffer;
-import se.repos.indexing.repository.IndexingItemHandlerContentEnable;
+import se.repos.indexing.repository.HandlerContentEnable;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
@@ -23,7 +23,7 @@ import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
  * 
  * Keeps a reference to the indexing doc for use when contents is actually requested.
  * 
- * @deprecated Probably not needed when contents buffer is enabled at a specific {@link IndexingItemHandlerContentEnable} in the chain.
+ * @deprecated Probably not needed when contents buffer is enabled at a specific {@link HandlerContentEnable} in the chain.
  */
 public class ItemContentsMemoryChoiceDeferred extends ItemContentsMemorySizeLimit {
 

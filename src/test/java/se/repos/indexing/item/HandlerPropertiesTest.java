@@ -12,7 +12,7 @@ import se.repos.indexing.IndexingDoc;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.properties.CmsItemPropertiesMap;
 
-public class ItemPropertiesTest {
+public class HandlerPropertiesTest {
 
 	@Test
 	public void testHandle() {
@@ -26,7 +26,7 @@ public class ItemPropertiesTest {
 		when(p.getFields()).thenReturn(doc);
 		when(p.getProperties()).thenReturn(props);
 		
-		IndexingItemHandler handler = new ItemProperties();
+		IndexingItemHandler handler = new HandlerProperties();
 		handler.handle(p);
 		verify(doc).setField("prop_a.prop", "val");
 		verify(doc).setField("prop_another.prop", "multi\nline");

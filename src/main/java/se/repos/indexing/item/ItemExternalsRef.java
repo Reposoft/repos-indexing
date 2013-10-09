@@ -19,7 +19,7 @@ public class ItemExternalsRef implements IndexingItemHandler {
 	@Override
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 		return new HashSet<Class<? extends IndexingItemHandler>>() {private static final long serialVersionUID = 1L;{
-			add(ItemProperties.class);
+			add(HandlerProperties.class);
 		}};
 	}
 

@@ -9,8 +9,8 @@ import org.junit.Test;
 
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
-import se.repos.indexing.item.ItemPathinfo;
-import se.repos.indexing.item.ItemProperties;
+import se.repos.indexing.item.HandlerPathinfo;
+import se.repos.indexing.item.HandlerProperties;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Binding;
@@ -31,15 +31,15 @@ public class IndexingHandlersTest {
 			@Override
 			protected void configure() {
 				Multibinder<IndexingItemHandler> multibinder = Multibinder.newSetBinder(binder(), IndexingItemHandler.class);
-				IndexingHandlers.to(multibinder, ItemPathinfo.class, ItemProperties.class);
+				IndexingHandlers.to(multibinder, HandlerPathinfo.class, HandlerProperties.class);
 				IndexingHandlers.toInstance(multibinder, handler1, handler2);
 			}
 		};
 		Injector injector = Guice.createInjector(module);
 		Map<Key<?>, Binding<?>> allBindings = injector.getAllBindings();
 		assertTrue(allBindings.keySet().contains(Key.get(new TypeLiteral<Set<IndexingItemHandler>>(){})));
-		assertTrue(allBindings.keySet().contains(Key.get(ItemPathinfo.class)));
-		assertTrue(allBindings.keySet().contains(Key.get(ItemProperties.class)));
+		assertTrue(allBindings.keySet().contains(Key.get(HandlerPathinfo.class)));
+		assertTrue(allBindings.keySet().contains(Key.get(HandlerProperties.class)));
 		Set<IndexingItemHandler> handlers = injector.getInstance(Key.get(new TypeLiteral<Set<IndexingItemHandler>>(){}));
 		assertTrue(handlers.contains(handler1));
 		assertTrue(handlers.contains(handler2));

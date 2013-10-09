@@ -11,7 +11,7 @@ import se.simonsoft.cms.item.Checksum;
 import se.simonsoft.cms.item.Checksum.Algorithm;
 import se.simonsoft.cms.item.impl.ChecksumRead;
 
-public class ItemChecksum implements IndexingItemHandler {
+public class HandlerChecksum implements IndexingItemHandler {
 
 	@Override
 	public void handle(IndexingItemProgress progress) {

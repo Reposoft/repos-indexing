@@ -22,7 +22,7 @@ public class ItemPathareaSvnConventions implements IndexingItemHandler {
 	@Override
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 		return new HashSet<Class<? extends IndexingItemHandler>>() {{
-			add(ItemPathinfo.class);
+			add(HandlerPathinfo.class);
 		}};
 	}
 

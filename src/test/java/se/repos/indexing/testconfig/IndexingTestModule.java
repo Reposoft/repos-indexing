@@ -12,8 +12,8 @@ import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IdStrategyDefault;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.ItemContentBufferStrategy;
-import se.repos.indexing.item.ItemPathinfo;
-import se.repos.indexing.item.ItemProperties;
+import se.repos.indexing.item.HandlerPathinfo;
+import se.repos.indexing.item.HandlerProperties;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.twophases.ItemContentsMemoryChoiceDeferred;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
@@ -56,8 +56,8 @@ public class IndexingTestModule extends AbstractModule {
 		@SuppressWarnings("unused") // background is of little use in tests
 		Multibinder<IndexingItemHandler> background = Multibinder.newSetBinder(binder(), IndexingItemHandler.class, Names.named("background"));
 		
-		blocking.addBinding().to(ItemPathinfo.class);
-		blocking.addBinding().to(ItemProperties.class);
+		blocking.addBinding().to(HandlerPathinfo.class);
+		blocking.addBinding().to(HandlerProperties.class);
 		
 		@SuppressWarnings("unused") // not necessarily needed, because other dependencies are picked up as aware too
 		Multibinder<IndexingEventAware> additionalEventHandlers = Multibinder.newSetBinder(binder(), IndexingEventAware.class);
