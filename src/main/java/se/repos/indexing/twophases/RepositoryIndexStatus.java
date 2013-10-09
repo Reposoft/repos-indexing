@@ -23,6 +23,7 @@ import com.google.inject.name.Named;
 import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexConnectException;
 import se.repos.indexing.IndexWriteException;
+import se.repos.indexing.item.HandlerHeadinfo;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.repository.ReposIndexingPerRepository;
 import se.simonsoft.cms.item.CmsItemPath;
@@ -121,6 +122,7 @@ public class RepositoryIndexStatus {
 	 * @param repository
 	 * @param revision
 	 * @param item
+	 * @deprecated Use {@link HandlerHeadinfo}
 	 */
 	public void indexItemMarkPrevious(CmsRepository repository, RepoRevision revision, CmsChangesetItem item) {
 		if (item.isFolder()) {

@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.LinkedList;
 
+import se.repos.indexing.item.HandlerHeadinfo;
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.ItemPathinfo;
 import se.repos.indexing.item.ItemProperties;
@@ -25,6 +26,7 @@ public abstract class IndexingHandlers {
 		private static final long serialVersionUID = 1L;
 		{
 			add(ScheduleBackground.class);
+			add(HandlerHeadinfo.class);
 			add(ItemPathinfo.class);
 			add(IndexingItemHandlerPropertiesEnable.class);
 			add(ItemProperties.class);

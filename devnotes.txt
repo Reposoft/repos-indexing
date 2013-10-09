@@ -11,3 +11,7 @@
  * notification to content buffers would be useful to delete temp files and to update the sum of memory used for caching
    - we need some way to clean up temp files or big reindex runs will fill the disk
  * we could replace blocking/background with configurable scheduling rules, where the list of handlers could include entries like "wait for later revision's handlers up to X milliseconds" and "enable content buffer", "destroy content buffer"
+ 
+ == Second generation
+ * We could probably handle solr operations more efficiently if the indexing progress allowed add for different cores, and flagging when it is time to commit
+   - Batch add could be a big boost

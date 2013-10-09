@@ -187,14 +187,6 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			
 			IndexingItemProgressPhases progress = new IndexingItemProgressPhases(repository, revision, item, doc);
 			
-			// Only use head flag on files for now because we don't have the revision to make the update safely on folders
-			if (item.isFile()) {
-				if (!item.isAdd()) {
-					// TODO we could track the items that are already marked head=false thanks to isOverwritten, and avoid this extra solr doc
-					repositoryStatus.indexItemMarkPrevious(repository, revision, item);
-				}
-			}
-
 			items.add(progress);
 		}
 
