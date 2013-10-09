@@ -10,7 +10,7 @@ import java.util.LinkedList;
 
 import se.repos.indexing.item.HandlerChecksum;
 import se.repos.indexing.item.HandlerHeadinfo;
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.item.HandlerIndexTime;
 import se.repos.indexing.item.HandlerPathinfo;
 import se.repos.indexing.item.HandlerProperties;
 import se.repos.indexing.repository.HandlerContentDisable;
@@ -30,6 +30,7 @@ public abstract class IndexingHandlers {
 		private static final long serialVersionUID = 1L;
 		{
 			add(ScheduleBackground.class);
+			add(HandlerIndexTime.class);
 			add(HandlerHeadinfo.class);
 			add(HandlerPathinfo.class);
 			add(IndexingItemHandlerPropertiesEnable.class);

@@ -3,7 +3,7 @@
  */
 package se.repos.indexing.scheduling;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;

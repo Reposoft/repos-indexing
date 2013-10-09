@@ -6,6 +6,7 @@ package se.repos.indexing.scheduling;
 import java.util.concurrent.Semaphore;
 
 import se.repos.indexing.IndexingHandlers;
+import se.repos.indexing.Marker;
 
 /**
  * Receives {@link IndexingUnit}s from different repositories and schedules those based on {@link Marker}s.

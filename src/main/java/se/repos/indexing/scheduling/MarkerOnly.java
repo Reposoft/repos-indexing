@@ -5,7 +5,8 @@ package se.repos.indexing.scheduling;
 
 import java.util.Set;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
+import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
 
 /**
@@ -23,7 +24,11 @@ abstract class MarkerOnly implements Marker {
 	}
 
 	@Override
-	public void onItemsMark() {
+	public void trigger() {
 	}
 
+	@Override
+	public void ignore() {
+	}
+	
 }

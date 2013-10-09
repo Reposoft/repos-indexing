@@ -11,7 +11,8 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
+import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
 
 /**
@@ -79,7 +80,7 @@ public class IndexingScheduleBlockingOnly implements IndexingSchedule {
 			if (marker == null) {
 				break;
 			} else {
-				marker.onItemsMark();
+				marker.trigger();
 				marker = null;
 			}
 		}

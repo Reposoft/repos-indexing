@@ -9,9 +9,10 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-import se.repos.indexing.IndexingEventAware;
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
+import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
+import se.repos.indexing.twophases.IndexingEventAware;
 
 /**
  * Responsible for iterating through items and handlers and pause at specific {@link Marker}s.

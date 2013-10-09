@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingDoc;
+import se.repos.indexing.IndexingItemHandler;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;

@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 import se.repos.indexing.item.HandlerPathinfo;
 import se.repos.indexing.item.HandlerProperties;

@@ -6,6 +6,8 @@ package se.repos.indexing.item;
 import java.util.HashSet;
 import java.util.Set;
 
+import se.repos.indexing.IndexingItemHandler;
+
 /**
  * Sets value in the "patharea" field,
  * recognizing the conventional svn trunk/branches/tags.

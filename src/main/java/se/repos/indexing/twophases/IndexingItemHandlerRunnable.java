@@ -3,7 +3,7 @@
  */
 package se.repos.indexing.twophases;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 
 public class IndexingItemHandlerRunnable implements Runnable {

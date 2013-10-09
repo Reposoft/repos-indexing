@@ -9,6 +9,7 @@ import static org.mockito.Mockito.*;
 import org.junit.Test;
 
 import se.repos.indexing.IndexingDoc;
+import se.repos.indexing.IndexingItemHandler;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.properties.CmsItemPropertiesMap;
 

@@ -6,6 +6,7 @@ package se.repos.indexing.item;
 import java.util.Set;
 
 import se.repos.indexing.IndexingDoc;
+import se.repos.indexing.IndexingItemHandler;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 /**

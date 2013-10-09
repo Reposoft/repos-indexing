@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import se.repos.indexing.IndexingDoc;
+import se.repos.indexing.IndexingItemHandler;
 import se.simonsoft.cms.item.Checksum;
 import se.simonsoft.cms.item.Checksum.Algorithm;
 import se.simonsoft.cms.item.impl.ChecksumRead;

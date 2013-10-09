@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
+import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
-import se.repos.indexing.scheduling.Marker;
 import se.repos.indexing.solrj.SolrAdd;
 
 /**
@@ -62,7 +62,7 @@ public class MarkerRevisionComplete implements Marker {
 	}
 
 	@Override
-	public void onItemsMark() {
+	public void trigger() {
 		if (commitIdCurrent == null) {
 			logger.info("Revision was empty");
 			return;
@@ -73,5 +73,9 @@ public class MarkerRevisionComplete implements Marker {
 		new SolrAdd(repositem, doc).run();
 		commitIdCurrent = null;
 	}
+	
+	@Override
+	public void ignore() {
+	}	
 
 }

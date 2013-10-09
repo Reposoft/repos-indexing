@@ -7,7 +7,7 @@ import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrServer;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 
 public class HandlerSendSolrj implements IndexingItemHandler {

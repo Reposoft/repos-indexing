@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import se.repos.indexing.IndexingDoc;
-import se.repos.indexing.IndexingEventAware;
 import se.repos.indexing.item.ItemContentBuffer;
 import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.simonsoft.cms.item.CmsItemPath;

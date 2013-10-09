@@ -22,6 +22,11 @@
 		<field name="_version_" type="long" indexed="true" stored="true" multiValued="false" />
 
 		<!--
+		Index time, when the item was indexed
+		-->
+		<field name="t" type="date" indexed="true" stored="true" multiValued="false" />
+
+		<!--
 		Type of item: "commit", "file", "folder". Type affects which fields are expected to exist.
 		-->
 		<field name="type" type="string" indexed="true" stored="true" multiValued="false" />

@@ -6,6 +6,8 @@ package se.repos.indexing.item;
 import java.util.HashSet;
 import java.util.Set;
 
+import se.repos.indexing.IndexingItemHandler;
+
 /**
  * Adds entries from svn:externals to "ref" fields.
  */

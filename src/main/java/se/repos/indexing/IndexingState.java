@@ -3,6 +3,8 @@
  */
 package se.repos.indexing;
 
+import se.repos.indexing.repository.MarkerRevisionComplete;
+import se.repos.indexing.twophases.RepositoryIndexStatus;
 import se.simonsoft.cms.item.RepoRevision;
 
 /**
@@ -19,6 +21,8 @@ import se.simonsoft.cms.item.RepoRevision;
  * Should we instead query index for next rev to handle in background, and index phase?
  * 
  * TODO many methods here are specific to twophases, some listeners (for commit etc) just need their own phase
+ * 
+ * TODO combine with {@link RepositoryIndexStatus} and {@link MarkerRevisionComplete}
  */
 public interface IndexingState {
 

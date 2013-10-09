@@ -1,11 +1,11 @@
 /**
  * Copyright (C) 2004-2012 Repos Mjukvara AB
  */
-package se.repos.indexing.item;
+package se.repos.indexing;
 
 import java.util.Set;
 
-import se.repos.indexing.IndexingDoc;
+import se.repos.indexing.item.IndexingItemProgress;
 
 /**
  * Handles one item at a time

@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 
 public class IndexingUnitTest {

@@ -5,9 +5,9 @@ package se.repos.indexing.solrj;
 
 import java.util.Set;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
+import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
-import se.repos.indexing.scheduling.Marker;
 
 /**
  * Idea: do batch add to solr to improve performance.
@@ -33,8 +33,12 @@ public class HandlerSendSolrBatch implements Marker {
 	}
 
 	@Override
-	public void onItemsMark() {
+	public void trigger() {
 		throw new UnsupportedOperationException("not implemented");
 	}
+	
+	@Override
+	public void ignore() {
+	}	
 
 }

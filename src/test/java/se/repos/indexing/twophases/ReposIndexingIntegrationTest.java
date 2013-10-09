@@ -21,8 +21,8 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.ReposIndexing;
-import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.schema.SchemaRepositemTest;
 import se.repos.indexing.testconfig.IndexingTestModule;
 import se.simonsoft.cms.item.RepoRevision;

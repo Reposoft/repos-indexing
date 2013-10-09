@@ -7,9 +7,9 @@ import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrServer;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
+import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
-import se.repos.indexing.scheduling.Marker;
 
 public class MarkerCommitSolrj implements Marker {
 
@@ -29,8 +29,12 @@ public class MarkerCommitSolrj implements Marker {
 	}
 
 	@Override
-	public void onItemsMark() {
+	public void trigger() {
 		new SolrCommit(core).run();
 	}
+	
+	@Override
+	public void ignore() {
+	}	
 
 }

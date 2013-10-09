@@ -5,7 +5,7 @@ package se.repos.indexing.repository;
 
 import java.util.Set;
 
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 
 /**

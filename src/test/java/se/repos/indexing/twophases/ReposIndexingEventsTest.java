@@ -14,8 +14,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import se.repos.indexing.IndexingDoc;
-import se.repos.indexing.IndexingEventAware;
-import se.repos.indexing.item.IndexingItemHandler;
+import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 import se.repos.indexing.item.ItemContentBuffer;
 import se.repos.indexing.item.ItemContentBufferStrategy;
