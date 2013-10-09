@@ -7,7 +7,7 @@ import javax.inject.Inject;
 
 import org.apache.solr.client.solrj.SolrServer;
 
-import com.google.inject.name.Named;
+import javax.inject.Named;
 
 public class HandlerSendSolrjRepositem extends HandlerSendSolrj {
 

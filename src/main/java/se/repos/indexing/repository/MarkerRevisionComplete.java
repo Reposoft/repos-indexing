@@ -14,8 +14,8 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
+import javax.inject.Inject;
+import javax.inject.Named;
 
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
