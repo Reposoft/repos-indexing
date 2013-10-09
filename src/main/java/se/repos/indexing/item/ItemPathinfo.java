@@ -7,6 +7,9 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.Set;
 
+import javax.inject.Inject;
+
+import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingDoc;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
@@ -30,6 +33,13 @@ public class ItemPathinfo implements IndexingItemHandler {
 	public static final char STAT_MODIFY = 'M';
 	public static final char STAT_DELETE = 'D';
 	
+	private IdStrategy idStrategy;
+	
+	@Inject
+	public void setIdStrategy(IdStrategy idStrategy) {
+		this.idStrategy = idStrategy;
+	}
+	
 	@Override
 	public void handle(IndexingItemProgress progress) {
 		CmsChangesetItem item = progress.getItem();
@@ -38,14 +48,13 @@ public class ItemPathinfo implements IndexingItemHandler {
 		CmsRepository repository = progress.getRepository();
 		RepoRevision revision = progress.getRevision();
 		CmsItemPath path = item.getPath();
-		String id = getId(repository, revision, path);
 		
-		d.setField("id", id);
+		d.setField("id", idStrategy.getId(repository, revision, path));
 		
 		d.setField("repo", repository.getName());
 		d.setField("repoparent", repository.getParentPath());
 		d.setField("repohost", repository.getHost());
-		d.setField("repoid", getId(repository));
+		d.setField("repoid", idStrategy.getIdRepository(repository));
 		
 		d.setField("path", path.toString());
 		d.setField("pathname", path.getName());
@@ -113,20 +122,6 @@ public class ItemPathinfo implements IndexingItemHandler {
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 		return null;
 	}
-	
-	@Deprecated // use IdStrategy
-	String getId(CmsRepository repository) {
-		return repository.getHost() + repository.getUrlAtHost();
-	}
-
-	@Deprecated // use IdStrategy
-	String getId(CmsRepository repository, RepoRevision revision, CmsItemPath path) {
-		return getId(repository) + (path == null ? "" : path) + "@" + getIdRevision(revision); 
-	}
-	
-	private String getIdRevision(RepoRevision revision) {
-		return Long.toString(revision.getNumber());
-	}	
 	
 	private String urlencode(CmsItemPath path) {
 		StringBuffer b = new StringBuffer();

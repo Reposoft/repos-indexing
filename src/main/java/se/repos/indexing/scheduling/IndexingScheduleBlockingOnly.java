@@ -54,17 +54,33 @@ public class IndexingScheduleBlockingOnly implements IndexingSchedule {
 	}
 
 	public void run(IndexingUnit unit) {
-		for (IndexingItemProgress i : unit.getItems()) {
-			Iterator<IndexingItemHandler> handlers = unit.getHandlers(i);
-			while (handlers.hasNext()) {
-				IndexingItemHandler handler = handlers.next();
-//				if (handler == ScheduleBackground.Impl) {
-//					logger.debug("Blocking indexing ignoring schedule marker {}", handler);
-//				}
-				handler.handle(i);
+		Marker marker = null;
+		while (true) {
+			for (IndexingItemProgress i : unit.getItems()) {
+				Iterator<IndexingItemHandler> handlers = unit.getHandlers(i);
+				while (handlers.hasNext()) {
+					IndexingItemHandler handler = handlers.next();
+					handler.handle(i);
+					if (handler instanceof Marker) {
+						if (marker == null) {
+							marker = (Marker) handler;
+						} else {
+							if (!handler.equals(marker)) {
+								throw new IllegalArgumentException("Item has a different marker ordering than previous, got " + handler + " for " + i);
+							}
+						}
+						logger.trace("Stopped at marker {} for item {}", marker, i);
+						break;
+					}
+				}
+			}
+			if (marker == null) {
+				break;
+			} else {
+				marker.onItemsMark();
+				marker = null;
 			}
 		}
-		// TODO produce any events? Could also be handlers that do this?
 	} 
 	
 	@Override

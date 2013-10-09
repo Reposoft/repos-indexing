@@ -64,7 +64,6 @@ public class MarkerRevisionComplete implements Marker {
 			logger.info("Revision was empty");
 			return;
 		}
-		commitIdCurrent = null;
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.setField("id", commitIdCurrent);
 		doc.setField("complete", partialUpdateToTrue);

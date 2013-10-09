@@ -176,8 +176,6 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 		assertNotNull(dumpfile);
 		CmsTestRepository repo = SvnTestSetup.getInstance().getRepository().load(dumpfile);
 		
-		repo.keep();
-		
 		ReposIndexing indexing = getIndexing();
 		indexing.sync(repo, new RepoRevision(1, new Date(1)));
 		
