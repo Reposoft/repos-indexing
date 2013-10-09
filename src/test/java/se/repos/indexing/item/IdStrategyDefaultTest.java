@@ -30,7 +30,7 @@ public class IdStrategyDefaultTest {
 		IdStrategy strategy = new IdStrategyDefault() {
 
 			@Override
-			protected String getPrefix(CmsRepository repository) {
+			public String getIdRepository(CmsRepository repository) {
 				return "x-svn://" + repository.getHost() + repository.getParentPath() + "/" + repository.getName() + "^";
 			}
 

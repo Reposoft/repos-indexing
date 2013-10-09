@@ -31,7 +31,7 @@ public interface IdStrategy {
 	public String getIdHead(CmsItemId itemId);
 
 	/**
-	 * @return the prefix to commit items, i.e. repository with a separator that is different from {@link #getId(CmsRepository, RepoRevision, CmsItemPath)} with root path
+	 * @return prefix to both {@link #getIdCommit(CmsRepository, RepoRevision)} and {@link #getId(CmsItemId)}
 	 */
 	public String getIdRepository(CmsRepository repository);
 	

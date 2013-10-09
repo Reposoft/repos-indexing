@@ -32,7 +32,7 @@ public class ItemContentsMemory implements ItemContentBufferStrategy {
 		if (size == null) {
 			throw new IllegalStateException("No size information in indexing doc " + path + ". Use a different buffer strategy.");
 		}		
-		return new BufferInMemory(null, revision, path, size.intValue());
+		return new BufferInMemory(reader, revision, path, size.intValue());
 	}
 	
 	public static class BufferInMemory implements ItemContentBuffer {
