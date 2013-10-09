@@ -3,7 +3,6 @@ package se.repos.indexing.repository;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
@@ -17,17 +16,11 @@ import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-import org.apache.solr.core.CoreDescriptor;
-import org.apache.solr.core.SolrConfig;
-import org.apache.solr.core.SolrCore;
 import org.apache.solr.core.SolrResourceLoader;
-import org.apache.solr.schema.IndexSchema;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.tmatesoft.svn.core.internal.wc17.db.StructureFields.RepositoryInfo;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
-import org.xml.sax.InputSource;
 
 import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingHandlers;
@@ -39,10 +32,7 @@ import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.scheduling.IndexingSchedule;
 import se.repos.indexing.scheduling.IndexingScheduleBlockingOnly;
 import se.repos.indexing.twophases.ItemContentsMemory;
-import se.repos.indexing.twophases.ItemContentsMemorySizeLimit;
-import se.repos.indexing.twophases.ItemContentsNocache;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
-import se.repos.indexing.twophases.RepositoryIndexStatus;
 import se.simonsoft.cms.backend.svnkit.CmsRepositorySvn;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLookRepo;
@@ -70,37 +60,16 @@ import com.google.inject.name.Names;
 
 public class ReposIndexingPerRepositoryIntegrationTest {
 
+	// reuse solr instance dir
+	private final File instanceDir = new File(System.getProperty("java.io.tmpdir") + "/solr-" + this.getClass().getSimpleName());
+	
 	private Injector context = null;
+	
+	private EmbeddedSolrServer forTearDown = null;
 	
 	@Before
 	public void setUp() throws Exception {
-		File dataDir = new File(System.getProperty("java.io.tmpdir") + "/solrdata-" + this.getClass().getName());
-		if (dataDir.exists()) {
-			FileUtils.deleteDirectory(dataDir);
-		}
-		
-		SolrResourceLoader resourceLoader = new SolrResourceLoader(dataDir.getAbsolutePath());
-		CoreContainer coreContainer = new CoreContainer(resourceLoader);
-		//CoreDescriptor coreDescriptor = coreContainer.getCoreDescriptor("repositem");
-		CoreDescriptor coreDescriptor = new CoreDescriptor(coreContainer, "repositem", dataDir.getAbsolutePath());
-		
-		//InputStream solrconfxml = getClass().getClassLoader().getResourceAsStream("se/repos/indexing/solr/repositem/conf/solrconfig.xml");
-		//InputStream schemaxml = getClass().getClassLoader().getResourceAsStream("se/repos/indexing/solr/repositem/conf/schema.xml");
-		// need actual files so it can be loaded in standalone solr
-		File solrconfxml = new File("src/main/resources/se/repos/indexing/solr/repositem/conf/solrconfig.xml");
-		assertTrue(solrconfxml.exists());
-		File schemaxml = new File("src/main/resources/se/repos/indexing/solr/repositem/conf/schema.xml");
-		assertTrue(schemaxml.exists());
-		SolrConfig solrconfig = new SolrConfig("solrconfig.xml",  new InputSource(new FileInputStream(solrconfxml)));
-		IndexSchema schema = new IndexSchema(solrconfig, "schema.xml", new InputSource(new FileInputStream(schemaxml)));
-		
-		SolrCore repositemCore = new SolrCore("repositem", dataDir.getAbsolutePath(), solrconfig, schema, coreDescriptor);
-		coreContainer.load();
-		
-		final SolrServer repositem = new EmbeddedSolrServer(coreContainer, "repositem");
-
-		System.out.println("Load core using:");
-		System.out.println("http://localhost:8983/solr/admin/cores?action=CREATE&name=repositem&config=" + solrconfxml.getAbsolutePath() + "&schema=" + schemaxml.getAbsolutePath() + "&dataDir=" + dataDir.getAbsolutePath());
+		final SolrServer repositem = setUpSolrRepositem();
 		
 		final CmsTestRepository repository = SvnTestSetup.getInstance().getRepository();
 		
@@ -133,10 +102,42 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		context = Guice.createInjector(backend, indexing);
 	}
+
+	private SolrServer setUpSolrRepositem() throws IOException {
+		File coreSource = new File("src/main/resources/se/repos/indexing/solr/repositem/");
+		
+		if (instanceDir.exists()) { // instance dir is kept for inspection after each test but recreated before each new test
+			FileUtils.deleteDirectory(instanceDir);
+		}
+
+		String coreName = "repositem";
+		FileUtils.copyDirectory(coreSource, new File(instanceDir, coreName));
+		FileUtils.copyFile(new File(coreSource.getParentFile(),  "testing-home/solr.xml"), new File(instanceDir, "solr.xml"));
+		
+		SolrResourceLoader solrResourceLoader = new SolrResourceLoader(instanceDir.getAbsolutePath());
+		CoreContainer solrCoreContainer = new CoreContainer(solrResourceLoader);
+		solrCoreContainer.load();
+		final SolrServer repositem = new EmbeddedSolrServer(solrCoreContainer, "repositem");
+		forTearDown = (EmbeddedSolrServer) repositem;
+		return repositem;
+	};
+	
+	private void tearDownSolrRepositem() {
+		forTearDown.shutdown();
+		
+		new File(instanceDir, "/repositem/core.properties").delete(); // Solr 4.5.0 won't load the core if core.properties is present
+		System.out.println("Load test core using:");
+		String loadName = "repositem-" + instanceDir.getName();
+		String corePath = instanceDir.getAbsolutePath() + "/repositem";
+		System.out.println("http://localhost:8983/solr/admin/cores?action=RELOAD&name=" + loadName);
+		System.out.println("http://localhost:8983/solr/admin/cores?action=CREATE&name=" + loadName + "&instanceDir=" + corePath);// + "&dataDir=" + corePath + "/data");		
+	}
 	
 	@After
 	public void tearDown() throws Exception {
 		SvnTestSetup.getInstance().tearDown();
+		
+		tearDownSolrRepositem();
 	}
 	
 	@Test
