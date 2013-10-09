@@ -6,10 +6,7 @@ package se.repos.indexing.scheduling;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
 import java.util.Set;
 
 import se.repos.indexing.IndexingEventAware;

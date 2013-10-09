@@ -5,12 +5,11 @@ package se.repos.indexing.scheduling;
 
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
+
+import javax.inject.Singleton;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.inject.Singleton;
 
 import se.repos.indexing.item.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
