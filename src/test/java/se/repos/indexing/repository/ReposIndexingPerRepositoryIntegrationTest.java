@@ -143,14 +143,14 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	@Test
 	public void testMarkItemHead() throws SolrServerException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
-				"se/repos/indexing/testrepo1.svndump");
+				"se/repos/indexing/testrepo1r3.svndump");
 		assertNotNull(dumpfile);
-		context.getInstance(CmsTestRepository.class).load(dumpfile);
+		context.getInstance(CmsTestRepository.class).load(dumpfile);//.keep();
 		
 		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
 		context.getInstance(IndexingSchedule.class).start();
 		
-		indexing.sync(null, new RepoRevision(1, new Date(1)));
+		indexing.sync(new RepoRevision(1, new Date(1)));
 		
 		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
 		
@@ -164,7 +164,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 			assertEquals("at " + r1.get(i).get("path"), true, r1.get(i).get("head"));
 		}
 		
-		indexing.sync(null, new RepoRevision(2, new Date(2)));
+		indexing.sync(new RepoRevision(2, new Date(2)));
 		SolrDocumentList r2r1 = repositem.query(new SolrQuery("id:*@1").setSort("path", ORDER.asc)).getResults();
 		// TODO support folders assertEquals("/dir " + r2r1.get(0), true, r2r1.get(0).get("head"));
 		assertEquals("/dir/t2.txt " + r2r1.get(1), true, r2r1.get(1).get("head"));
@@ -172,7 +172,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		SolrDocumentList r2 = repositem.query(new SolrQuery("id:*@2").setSort("path", ORDER.asc)).getResults();
 		assertEquals("next revision should be head, " + r2.get(0), true, r2.get(0).get("head"));
 		
-		indexing.sync(null, new RepoRevision(3, new Date(3)));
+		indexing.sync(new RepoRevision(3, new Date(3)));
 		// everything from r1 should now have been replaced with later versions
 		SolrDocumentList r3r1 = repositem.query(new SolrQuery("id:*@1").setSort("path", ORDER.asc)).getResults();
 		
@@ -223,7 +223,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals(null, indexing.getRevComplete(null));
 		assertEquals(null, indexing.getRevProgress(null));
 		
-		indexing.sync(null, new RepoRevision(1, new Date(1))); // 2012-09-27T12:05:34.040515Z
+		indexing.sync(new RepoRevision(1, new Date(1))); // 2012-09-27T12:05:34.040515Z
 		assertNotNull("Should track indexing", indexing.getRevComplete(null));
 		assertEquals("should have indexed up to the given revision", 1, indexing.getRevComplete(null).getNumber());
 		
@@ -235,7 +235,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		// new indexing service, recover sync status
 		ReposIndexing indexing2 = context.getInstance(ReposIndexing.class);
-		indexing2.sync(null, new RepoRevision(1, new Date(1))); // polling now done at sync
+		indexing2.sync(new RepoRevision(1, new Date(1))); // polling now done at sync
 		assertNotNull("New indexing should poll for indexed revision",
 				indexing2.getRevComplete(null));
 		assertTrue("New indexing should poll for highest indexed revision", 
@@ -251,12 +251,12 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals("Service is not expected to handle cuncurrent indexing", 1, indexing2.getRevComplete(null).getNumber());
 		
 		ReposIndexing indexing3 = context.getInstance(ReposIndexing.class);
-		indexing3.sync(null, new RepoRevision(1, new Date(1))); // polling now done at sync
+		indexing3.sync(new RepoRevision(1, new Date(1))); // polling now done at sync
 		assertEquals("New indexing service should not mistake aborted indexing as completed", 1, indexing3.getRevComplete(null).getNumber());
 		//not implemented//assertEquals("New indexing service should see that a revision has started but not completed", 2, indexing3.getRevProgress(repo).getNumber());
 		
 		try {
-			indexing3.sync(null, new RepoRevision(2, new Date(2)));
+			indexing3.sync(new RepoRevision(2, new Date(2)));
 			fail("Should attempt to index rev 2 because it is marked as in progress and the new indexing instance does not know the state of that operation so it has to assume that it was aborted");
 		} catch (Exception e) {
 			// expected, there is no revision 2

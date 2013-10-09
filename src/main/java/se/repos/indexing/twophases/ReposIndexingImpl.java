@@ -162,6 +162,12 @@ public class ReposIndexingImpl implements ReposIndexing {
 		return new BlockingExecutor();
 	}
 	
+
+	@Override
+	public void sync(RepoRevision repoRevision) {
+		throw new UnsupportedOperationException("This is the old multirepo service impl");
+	}
+	
 	/**
 	 * Polls indexing status, forwards indexing task to {@link #sync(CmsRepositoryInspection, CmsChangesetReader, Iterable)}
 	 * 
@@ -454,5 +460,5 @@ public class ReposIndexingImpl implements ReposIndexing {
 		}
 		
 	}
-	
+
 }

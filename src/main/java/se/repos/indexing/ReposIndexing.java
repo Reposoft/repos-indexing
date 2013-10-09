@@ -8,8 +8,11 @@ import se.simonsoft.cms.item.RepoRevision;
 
 public interface ReposIndexing {
 
+	@Deprecated // service should be per repository
 	public void sync(CmsRepository repository, RepoRevision revision);
 
+	public void sync(RepoRevision revision);
+	
 	/**
 	 * @return Highest revision that indexing has completed for.
 	 */

@@ -122,9 +122,11 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 
 	@Override
 	public void sync(CmsRepository repositoryParamDeprecated, RepoRevision revision) {
-		if (repositoryParamDeprecated != null) {
-			throw new IllegalArgumentException("Repository parameter is deprecated");
-		}
+		throw new IllegalArgumentException("Repository parameter is deprecated");
+	}
+	
+	@Override
+	public void sync(RepoRevision revision) {
 		
 		logger.info("Sync requested {} rev {}", repository, revision);
 		if (revision.getDate() == null) {
@@ -174,6 +176,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	 * @param referenceRevision Reference revision, for checking head status
 	 */
 	protected IndexingUnitRevision getIndexingUnit(RepoRevision revision, RepoRevision referenceRevision) {
+		logger.debug("Reading changeset {}{}", revision, referenceRevision == null ? "" : " with reference revision " + referenceRevision);
 		CmsChangeset changeset = changesetReader.read(revision, referenceRevision);
 
 		CmsItemProperties revprops = null;

@@ -1,7 +1,6 @@
 package se.repos.indexing.item;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -16,7 +15,6 @@ import org.slf4j.LoggerFactory;
 
 import se.repos.indexing.IdStrategy;
 import se.repos.indexing.solrj.SolrAdd;
-import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
@@ -56,6 +54,11 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 		CmsChangesetItem item = progress.getItem();
 		if (item.isFolder()) {
 			logger.debug("Skipping head flag on folder because revisionObsoleted is unreliable (see issue in SvnlookItem) and update requires exact id");
+			return;
+		}
+		
+		if (item.isDelete()) {
+			progress.getFields().setField("head", false);
 			return;
 		}
 		

@@ -48,7 +48,7 @@ public class MarkerRevisionComplete implements Marker {
 			commitIdCurrent = commitId;
 		} else {
 			if (!commitIdCurrent.equals(commitId)) {
-				throw new IllegalStateException("Revision overlap at " + commitIdCurrent + " and " + commitId + ". Not supported until pre-revision handler support is added.");
+				throw new IllegalStateException("Revision overlap at " + commitIdCurrent + " and " + commitId + ". Not supported until per-revision handler support is added.");
 			}
 		}
 	}
@@ -68,6 +68,7 @@ public class MarkerRevisionComplete implements Marker {
 		doc.setField("id", commitIdCurrent);
 		doc.setField("complete", partialUpdateToTrue);
 		new SolrAdd(repositem, doc).run();
+		commitIdCurrent = null;
 	}
 
 }
