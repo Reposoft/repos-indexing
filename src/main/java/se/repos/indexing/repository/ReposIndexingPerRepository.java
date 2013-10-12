@@ -93,6 +93,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 				throw new IllegalArgumentException("Handler " + h + " not accepted because this indexing impl does not support " + IndexingEventAware.class.getSimpleName());
 			}
 		}
+		logger.debug("Handler chain for {} is: {}", repository, handlers);
 	}
 
 	@Inject

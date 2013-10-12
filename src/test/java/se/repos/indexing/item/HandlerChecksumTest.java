@@ -26,9 +26,9 @@ public class HandlerChecksumTest {
 		when(p.getContents()).thenReturn(content).thenThrow(new AssertionError("Should only read stream once"));
 		when(p.getFields()).thenReturn(doc);
 		new HandlerChecksum().handle(p);
-		verify(doc).addField("checksum_md5", "eb1a3227cdc3fedbaec2fe38bf6c044a");
-		verify(doc).addField("checksum_sha1", "9801739daae44ec5293d4e1f53d3f4d2d426d91c");
-		verify(doc).addField("checksum_sha256", "12a61f4e173fb3a11c05d6471f74728f76231b4a5fcd9667cef3af87a3ae4dc2");
+		verify(doc, times(1)).addField("checksum_md5", "eb1a3227cdc3fedbaec2fe38bf6c044a");
+		verify(doc, times(1)).addField("checksum_sha1", "9801739daae44ec5293d4e1f53d3f4d2d426d91c");
+		verify(doc, times(1)).addField("checksum_sha256", "12a61f4e173fb3a11c05d6471f74728f76231b4a5fcd9667cef3af87a3ae4dc2");
 	}
 
 }
