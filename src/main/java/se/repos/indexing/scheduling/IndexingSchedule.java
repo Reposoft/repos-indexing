@@ -41,5 +41,12 @@ public interface IndexingSchedule {
 	Iterable<IndexingUnit> getQueue();
 	
 	int getQueueSize();
+
+	/**
+	 * Used to detect aborted indexing jobs, i.e. application restarts in the middle of indexing.
+	 * Same as getQueueSize == 0.
+	 * @return true if all hitherto added indexing tasks have been completed
+	 */
+	boolean isComplete();
 	
 }

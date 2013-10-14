@@ -3,13 +3,11 @@
  */
 package se.repos.indexing.repository;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +22,8 @@ import se.repos.indexing.solrj.SolrAdd;
 
 /**
  * Sends an update to the indexed revision doc that the revision is completely indexed.
+ * 
+ * Note that the marking of revision as started is not a handler, because it can be don prior to scheduling.
  */
 public class MarkerRevisionComplete implements Marker {
 
@@ -64,13 +64,14 @@ public class MarkerRevisionComplete implements Marker {
 	@Override
 	public void trigger() {
 		if (commitIdCurrent == null) {
-			logger.info("Revision was empty");
+			logger.info("Revision was empty. Should have been set complete when started.");
 			return;
 		}
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.setField("id", commitIdCurrent);
 		doc.setField("complete", partialUpdateToTrue);
 		new SolrAdd(repositem, doc).run();
+		logger.info("Marked revision {} as complete in index", commitIdCurrent);
 		commitIdCurrent = null;
 	}
 	

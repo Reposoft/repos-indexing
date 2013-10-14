@@ -58,6 +58,10 @@ public class ItemContentsMemorySizeLimitTest {
 					throw new RuntimeException(e);
 				}
 			}
+			@Override
+			public CmsItemProperties getRevisionProperties(RepoRevision revision) {
+				throw new UnsupportedOperationException();
+			}
 		};
 		ItemContentsMemorySizeLimit buffer = new ItemContentsMemorySizeLimit();
 		buffer.setCmsContentsReader(reader);

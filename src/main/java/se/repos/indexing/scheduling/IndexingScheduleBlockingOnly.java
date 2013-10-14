@@ -95,6 +95,11 @@ public class IndexingScheduleBlockingOnly implements IndexingSchedule {
 	public int getQueueSize() {
 		return 0;
 	}
+
+	@Override
+	public boolean isComplete() {
+		return getQueueSize() == 0;
+	}
 	
 	
 }

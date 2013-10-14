@@ -3,10 +3,7 @@
  */
 package se.repos.indexing.repository;
 
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -14,23 +11,14 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.solr.client.solrj.SolrServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingItemHandler;
-import se.repos.indexing.Marker;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemProgress;
-import se.repos.indexing.item.ItemContentBufferDeleted;
-import se.repos.indexing.item.ItemContentBufferFolder;
-import se.repos.indexing.item.ItemContentBufferStrategy;
-import se.repos.indexing.item.ItemPropertiesBufferStrategy;
-import se.repos.indexing.item.ItemPropertiesDeleted;
 import se.repos.indexing.scheduling.IndexingSchedule;
 import se.repos.indexing.scheduling.IndexingUnitRevision;
-import se.repos.indexing.solrj.MarkerCommitSolrjRepositem;
 import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
 import se.repos.indexing.twophases.IndexingEventAware;
 import se.repos.indexing.twophases.IndexingItemProgressPhases;
@@ -41,7 +29,6 @@ import se.simonsoft.cms.item.events.change.CmsChangeset;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.info.CmsRepositoryLookup;
 import se.simonsoft.cms.item.inspection.CmsChangesetReader;
-import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 public class ReposIndexingPerRepository implements ReposIndexing {
@@ -54,9 +41,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	private CmsRepositoryLookup revisionLookup;
 	private Set<IndexingItemHandler> handlers;
 
-	private RepoRevision scheduledHighest = null;
-	private RepoRevision scheduledLowest = null;
-	private RepoRevision completedHighest = null;
+	private RepoRevision lock = null;
 
 	private RepositoryIndexStatus repositoryStatus = null;
 	
@@ -144,35 +129,91 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		
 		 */
 		
-		if (scheduledHighest == null) {
+		if (lock == null) {
 			logger.info("Unknown index completion status for repository {}. Polling.", repository);
-			completedHighest = repositoryStatus.getIndexedRevisionHighestCompleted(repository);
-			scheduledLowest = repositoryStatus.getIndexedRevisionLowestStarted(repository);
-			scheduledHighest = repositoryStatus.getIndexedRevisionHighestStarted(repository);
+			RepoRevision completedHighest = repositoryStatus.getIndexedRevisionHighestCompleted(repository);
+			RepoRevision scheduledLowest = repositoryStatus.getIndexedRevisionLowestStarted(repository);
+			RepoRevision scheduledHighest = repositoryStatus.getIndexedRevisionHighestStarted(repository);
 			if (scheduledLowest == null) {
 				if (scheduledHighest != null) {
-					logger.error("Inconsistent revision query results, got highest in progress {}", scheduledHighest);
+					throw new IllegalStateException("Failed to query for index status. Inconsistent result " + scheduledHighest + ".");
 				}
-				logger.info("Indexing has completed revision {}, no indexing in progress", completedHighest);
+				if (completedHighest != null) {
+					logger.info("Indexing has completed revision {}, no indexing in progress", completedHighest);
+					lock = completedHighest;
+				} else {
+					lock = indexFirst();
+				}
 			} else {
-				logger.info("Indexing has completed revision {}, in progress from {} to {}", completedHighest, scheduledLowest, scheduledHighest);
+				if (scheduledHighest == null) {
+					throw new IllegalStateException("Failed to query for index status. Inconsistent result " + scheduledLowest + ".");
+				}
+				if (completedHighest != null && completedHighest.isNewerOrEqual(scheduledLowest)) {
+					throw new IllegalStateException("Inconsistent index contents. Highest completed revision is "
+							+ completedHighest + " but in progress at " + scheduledLowest + " to " + scheduledHighest);
+				}
+				if (schedule.isComplete()) {
+					logger.warn("Index has incomplete revisions " + scheduledLowest + " to " + scheduledHighest + " but schedule is empty."
+							+ " Assuming aborted indexing. Restarting " + (completedHighest == null ? "from scratch." : "at " + completedHighest + "."));
+					if (completedHighest == null) {
+						lock = indexFirst();
+					} else {
+						lock = completedHighest;
+					}
+				} else {
+					logger.info("Indexing has completed revision {}, in progress from {} to {}", completedHighest, scheduledLowest, scheduledHighest);
+					lock = scheduledHighest;
+				}
 			}
 		}
 		
-		// running may be null if everything is completed
-		if (scheduledHighest == null) {
-			logger.debug("No revision status in index. Starting from 0.");
-			scheduledHighest = new RepoRevision(0, revisionLookup.getRevisionTimestamp(repository, 0));
+		if (lock == null) {
+			throw new AssertionError("Failed to calculate index status.");
 		}
 		
-		for (long i = scheduledHighest.getNumber() + 1; i <= revision.getNumber(); i++) {
+		// flag that this sync run is responsible for revisions up to the given one
+		onSync(lock, revision);
+		long start = lock.getNumber() + 1;
+		lock = revision;
+		// here we could release a blocking semaphore for other sync calls
+		
+		
+		// Trusting onSync to take care of blocking we can run one revision at a time without storing traces of them first.
+		// Scheduling will returng quickly to next revision if implemented with background worker. 
+		for (long i = start; i <= lock.getNumber(); i++) {
 			Date revt = revisionLookup.getRevisionTimestamp(repository, i);
 			logger.debug("Creating indexing unit {} {}", i, revt);
 			RepoRevision next = new RepoRevision(i, revt);
-			IndexingUnitRevision read = getIndexingUnit(next, revision);
+			IndexingUnitRevision read = getIndexingUnit(next, lock);
 			schedule.add(read);
 		}
 
+	}
+
+	/**
+	 * Start indexing of a repository
+	 * @return the initial revision
+	 */
+	protected RepoRevision indexFirst() {
+		logger.debug("No revision status in index. Starting from 0.");
+		RepoRevision first = new RepoRevision(0, revisionLookup.getRevisionTimestamp(repository, 0));
+		CmsItemProperties revprops0 = null;
+		repositoryStatus.indexRevEmpty(repository, first, revprops0);
+		return first;
+	}
+
+	/**
+	 * Ensure that
+	 *  - No other sync operation is invoked on this repository for same or lower revision
+	 *  - Sync operations on this repository to higher revision is allowed to schedule but runs after
+	 * @param lock the revision we had covered before the sync call
+	 * @param revision the revision we've been asked to run to
+	 */
+	protected void onSync(RepoRevision lock, RepoRevision revision) {
+		// quick fix for subsequent sync, i.e. hook call if current indexing has not completed
+		logger.info("Immediately marking {} as started, current sync HEAD for {}, previous was", revision, repository, lock);
+		// maybe index some kind of lock using IdStrategy#getIdEntry(CmsRepository, String) and https://wiki.apache.org/solr/RealTimeGet		
+		repositoryStatus.indexRevStartAndCommit(repository, revision, null);
 	}
 
 	/**
@@ -181,10 +222,20 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	 */
 	protected IndexingUnitRevision getIndexingUnit(RepoRevision revision, RepoRevision referenceRevision) {
 		logger.debug("Reading changeset {}{}", revision, referenceRevision == null ? "" : " with reference revision " + referenceRevision);
-		CmsChangeset changeset = changesetReader.read(revision, referenceRevision);
+		CmsChangeset changeset;
+		if (revision.equals(referenceRevision)) {
+			changeset = changesetReader.read(revision);
+		} else {
+			changeset = changesetReader.read(revision, referenceRevision);
+		}
 
-		CmsItemProperties revprops = null;
-		String commitId = repositoryStatus.indexRevStart(repository, revision, revprops);
+		CmsItemProperties revprops = null; // TODO with cms-item 2.1.1 get revprops, and change to isEmpty below
+		String commitId;
+		if (changeset.getItems().size() == 0) {
+			commitId = repositoryStatus.indexRevEmpty(repository, revision, revprops);
+		} else {
+			commitId = repositoryStatus.indexRevStart(repository, revision, revprops);
+		}
 		
 		List<IndexingItemProgress> items = new LinkedList<IndexingItemProgress>();
 		for (CmsChangesetItem item : changeset.getItems()) {
@@ -205,7 +256,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		if (repository != null) {
 			throw new IllegalArgumentException("Repository parameter is deprecated");
 		}
-		return completedHighest;
+		throw new UnsupportedOperationException("Scheduler status has superceded indexing status for completed revision");
 	}
 
 	@Override
@@ -213,7 +264,20 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		if (repository != null) {
 			throw new IllegalArgumentException("Repository parameter is deprecated");
 		}
-		return scheduledLowest;
+		throw new UnsupportedOperationException("Use getRevision because this service can not see the difference between completed and in progress revisions");
+	}
+	
+	/**
+	 * This is pretty internal.
+	 * You need the schedule or the index to see the actual progress.
+	 * Used for some unit testing, thus kept.
+	 */
+	@Override
+	public RepoRevision getRevision() {
+		if (lock == null) {
+			throw new IllegalStateException("No indexing operation has been executed yet");
+		}
+		return lock;
 	}
 	
 }

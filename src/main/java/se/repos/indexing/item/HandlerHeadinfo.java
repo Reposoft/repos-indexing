@@ -66,11 +66,6 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 			return;
 		}
 		
-		if (item.isDelete()) {
-			progress.getFields().setField("head", false);
-			return;
-		}
-		
 		if (item.isAdd()) {
 			// do nothing because no earlier revision exists
 		} else if (earlierMarkedOverwritten.containsKey(item.getPath())) {
@@ -88,7 +83,7 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 			progress.getFields().setField("head", false);
 			earlierMarkedOverwritten.put(item.getPath(), progress.getRevision());
 		} else {
-			progress.getFields().setField("head", true);
+			progress.getFields().setField("head", !item.isDelete());
 		}
 	}
 

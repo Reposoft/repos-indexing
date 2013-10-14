@@ -19,7 +19,6 @@ import javax.inject.Named;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +32,6 @@ import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.item.ItemPropertiesDeleted;
 import se.repos.indexing.repository.ReposIndexingPerRepository;
 import se.repos.indexing.twophases.IndexingItemProgressPhases.Phase;
-import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangeset;
@@ -41,7 +39,6 @@ import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.info.CmsRepositoryLookup;
 import se.simonsoft.cms.item.inspection.CmsChangesetReader;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
-import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 /**
  * 
@@ -415,6 +412,11 @@ public class ReposIndexingImpl implements ReposIndexing {
 		return scheduledHighest.get(repository); // not handling progress for now
 	}
 
+	@Override
+	public RepoRevision getRevision() {
+		throw new UnsupportedOperationException("Not implemented");
+	}
+	
 	@Override
 	public RepoRevision getRevProgress(CmsRepository repo) {
 		return null;

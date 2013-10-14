@@ -29,6 +29,8 @@ import se.repos.indexing.IndexWriteException;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.HandlerHeadinfo;
 import se.repos.indexing.repository.ReposIndexingPerRepository;
+import se.repos.indexing.solrj.SolrAdd;
+import se.repos.indexing.solrj.SolrCommit;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
@@ -64,42 +66,39 @@ public class RepositoryIndexStatus {
 			logger.warn("Index add was attempted in update mode but no changes have been made, got fields {}", doc.getFieldNames());
 			return;
 		}
-		try {
-			repositem.add(doc);
-		} catch (SolrServerException e) {
-			throw new IndexWriteException(e);
-		} catch (IOException e) {
-			throw new IndexConnectException(e);
-		}
-	}
-
-	protected String escape(String fieldValue) {
-		return fieldValue.replaceAll("([:^\\(\\)!~/ ])", "\\\\$1");
+		new SolrAdd(repositem, doc).run();
 	}
 
 	protected String quote(String fieldValue) {
 		return '"' + fieldValue.replace("\"", "\\\"") + '"';
 	}
 
+	/**
+	 * @return started and completed revision, highest number
+	 */
 	public RepoRevision getIndexedRevisionHighestCompleted(CmsRepository repository) {
 		logger.debug("Checking higest clompleted revision for {}", repository);
 		return getIndexedRevision(repository, "true", ORDER.desc);
 	}
 
+	/**
+	 * @return started but not completed revision, highest number
+	 */
 	public RepoRevision getIndexedRevisionHighestStarted(CmsRepository repository) {
 		return getIndexedRevision(repository, "false", ORDER.desc);
 	}
 
+	/**
+	 * @return started but not completed revision, lowedst number
+	 */
 	public RepoRevision getIndexedRevisionLowestStarted(CmsRepository repository) {
 		return getIndexedRevision(repository, "false", ORDER.asc);
 	}
 
 	private RepoRevision getIndexedRevision(CmsRepository repository, String valComplete, ORDER order) {
+		String repoid = idStrategy.getIdRepository(repository);
 		logger.debug("Running revision query for {}, complete={}, order={}", repository, valComplete, order);
-		String idPrefix = idStrategy.getIdRepository(repository);
-		String idPrefixEscaped = escape(idPrefix);
-		logger.debug("Repository's ID prefix is {} ({})", idPrefix, idPrefixEscaped);
-		SolrQuery query = new SolrQuery("type:commit AND complete:" + valComplete + " AND id:" + idPrefixEscaped + "*");
+		SolrQuery query = new SolrQuery("type:commit AND complete:" + valComplete + " AND repoid:" + quote(repoid));
 		query.setRows(1);
 		query.setFields("rev", "revt");
 		query.setSort("rev", order); // the timestamp might be in a different order in svn, if revprops or loading has been used irregularly
@@ -146,24 +145,40 @@ public class RepositoryIndexStatus {
 	}
 
 	/**
-	 * 
-	 * @param repository
-	 * @param revision
-	 * @param revprops
 	 * @return Commit ID field value
 	 */
-	public String indexRevStart(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops) {
+	protected String indexRevFlag(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops, boolean complete) {
+		if (revprops != null) {
+			throw new UnsupportedOperationException("Revprops indexing not supported");
+		}
 		String id = idStrategy.getIdCommit(repository, revision);
+		String repoid = idStrategy.getIdRepository(repository);
 		SolrInputDocument docStart = new SolrInputDocument();
 		docStart.addField("id", id);
+		docStart.addField("repoid", repoid);
 		docStart.addField("type", "commit");
 		docStart.addField("rev", idStrategy.getIdRevision(revision));
-		docStart.addField("complete", false);
+		docStart.addField("complete", complete);
 		this.solrAdd(docStart);
 		return id;
 	}
 
-	// has been moved to MarkerRevisionComplete
+	public String indexRevStart(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops) {
+		return indexRevFlag(repository, revision, revprops, false);
+	}
+	
+	public String indexRevEmpty(CmsRepository repository,
+			RepoRevision revision, CmsItemProperties revprops) {
+		return indexRevFlag(repository, revision, revprops, true);
+	}
+	
+	public void indexRevStartAndCommit(CmsRepository repository,
+			RepoRevision revision, CmsItemProperties revprops) {
+		indexRevStart(repository, revision, revprops);
+		new SolrCommit(repositem).run();
+	}
+	
+	@Deprecated // has been moved to MarkerRevisionComplete
 	public void indexRevComplete(String id) {
 		SolrInputDocument docComplete = new SolrInputDocument();
 		docComplete.addField("id", id);

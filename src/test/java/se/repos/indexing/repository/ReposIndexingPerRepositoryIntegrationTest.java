@@ -4,6 +4,7 @@
 package se.repos.indexing.repository;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,9 +39,7 @@ import se.repos.indexing.scheduling.IndexingScheduleBlockingOnly;
 import se.repos.indexing.twophases.ItemContentsMemory;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
 import se.simonsoft.cms.backend.svnkit.CmsRepositorySvn;
-import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLookRepo;
-import se.simonsoft.cms.backend.svnkit.svnlook.CmsContentsReaderSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsContentsReaderSvnkitLookRepo;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsRepositoryLookupSvnkitLook;
 import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCache;
@@ -148,7 +147,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
 				"se/repos/indexing/testrepo1r3.svndump");
 		assertNotNull(dumpfile);
-		context.getInstance(CmsTestRepository.class).load(dumpfile);//.keep();
+		context.getInstance(CmsTestRepository.class).load(dumpfile);
 		
 		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
 		context.getInstance(IndexingSchedule.class).start();
@@ -222,13 +221,20 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
 		context.getInstance(IndexingSchedule.class).start();
 		
-		// these two should possibly be moved to RepositoryIndexStatus
-		assertEquals(null, indexing.getRevComplete(null));
-		assertEquals(null, indexing.getRevProgress(null));
+		CmsChangesetReader changesetReader = spy(context.getInstance(CmsChangesetReader.class));
+		((ReposIndexingPerRepository) indexing).setCmsChangesetReader(changesetReader);
 		
-		indexing.sync(new RepoRevision(1, new Date(1))); // 2012-09-27T12:05:34.040515Z
-		assertNotNull("Should track indexing", indexing.getRevComplete(null));
-		assertEquals("should have indexed up to the given revision", 1, indexing.getRevComplete(null).getNumber());
+		// these two should possibly be moved to RepositoryIndexStatus
+		try {
+			assertEquals(null, indexing.getRevision());
+		} catch (IllegalStateException e) {
+			// Ok to not support this before indexing
+		}
+		
+		RepoRevision revision1 = RepoRevision.parse("1/2012-09-27T12:05:34.040515Z"); 
+		indexing.sync(revision1);
+		assertEquals("should have indexed up to the given revision", 1, indexing.getRevision().getNumber());
+		verify(changesetReader, times(1)).read(revision1); // should read only once
 		
 		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
 		
@@ -238,12 +244,13 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		// new indexing service, recover sync status
 		ReposIndexing indexing2 = context.getInstance(ReposIndexing.class);
-		indexing2.sync(new RepoRevision(1, new Date(1))); // polling now done at sync
+		indexing2.sync(revision1); // same revision as before, because polling is done at sync
 		assertNotNull("New indexing should poll for indexed revision",
-				indexing2.getRevComplete(null));
-		assertTrue("New indexing should poll for highest indexed revision", 
-				indexing2.getRevComplete(null).getNumber() == 1);
-	
+				indexing2.getRevision());
+		assertEquals("New indexing should poll for highest indexed (started) revision", 
+				1, indexing2.getRevision().getNumber());
+		verify(changesetReader, times(1)).read(revision1); // should read only once
+		
 		// mess with the index to see how sync status is handled
 		SolrInputDocument fake2 = new SolrInputDocument();
 		String id2 = r1.getResults().get(1).getFieldValue("id").toString().replace("#1", "#2");
@@ -251,19 +258,27 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		fake2.setField("complete", true);
 		repositem.add(fake2);
 		repositem.commit();
-		assertEquals("Service is not expected to handle cuncurrent indexing", 1, indexing2.getRevComplete(null).getNumber());
+		System.out.println("Added fake rev index entry " + id2);
+		assertEquals("Service isn't required (nor expected) to handle cuncurrent indexing", 1, indexing.getRevision().getNumber());
 		
 		ReposIndexing indexing3 = context.getInstance(ReposIndexing.class);
-		indexing3.sync(new RepoRevision(1, new Date(1))); // polling now done at sync
-		assertEquals("New indexing service should not mistake aborted indexing as completed", 1, indexing3.getRevComplete(null).getNumber());
-		//not implemented//assertEquals("New indexing service should see that a revision has started but not completed", 2, indexing3.getRevProgress(repo).getNumber());
+		indexing3.sync(revision1); // polling now done at sync
+		assertEquals("New indexing service should not mistake aborted indexing as completed", 1, indexing3.getRevision().getNumber());
+		verify(changesetReader, times(1)).read(revision1); // should read only once
 		
+		RepoRevision revision2 = new RepoRevision(2, new Date(revision1.getDate().getTime() + 1));
 		try {
-			indexing3.sync(new RepoRevision(2, new Date(2)));
+			indexing3.sync(revision2);
 			fail("Should attempt to index rev 2 because it is marked as in progress and the new indexing instance does not know the state of that operation so it has to assume that it was aborted");
-		} catch (Exception e) {
-			// expected, there is no revision 2
+		} catch (RuntimeException e) {
+			if (e.getCause() instanceof org.tmatesoft.svn.core.SVNException) {
+				// expected, there is no revision 2
+			} else {
+				throw e;
+			}
 		}
+		verify(changesetReader, times(1)).read(revision1); // should read only once
+		verify(changesetReader, times(1)).read(revision2);
 	}
 
 }
