@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -44,6 +45,8 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	private RepoRevision lock = null;
 
 	private RepositoryIndexStatus repositoryStatus = null;
+	
+	private static final Semaphore statuscheck = new Semaphore(1);
 	
 	@Inject
 	public ReposIndexingPerRepository(CmsRepository repository) {
@@ -116,6 +119,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	
 	@Override
 	public void sync(RepoRevision revision) {
+		statuscheck.acquireUninterruptibly();
 		
 		logger.info("Sync requested {} rev {}", repository, revision);
 		if (revision.getDate() == null) {
@@ -175,8 +179,8 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		onSync(lock, revision);
 		long start = lock.getNumber() + 1;
 		lock = revision;
-		// here we could release a blocking semaphore for other sync calls
 		
+		statuscheck.release();
 		
 		// Trusting onSync to take care of blocking we can run one revision at a time without storing traces of them first.
 		// Scheduling will returng quickly to next revision if implemented with background worker. 
