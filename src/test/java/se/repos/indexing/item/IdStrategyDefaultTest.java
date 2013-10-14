@@ -24,8 +24,14 @@ public class IdStrategyDefaultTest {
 		CmsRepository repo = new CmsRepository("http://some.host:123/svn/repo1");
 		RepoRevision rev = new RepoRevision(1, new Date());
 		assertEquals("some.host:123/svn/repo1/a/b.txt@1", strategy.getId(repo, rev, new CmsItemPath("/a/b.txt")));
-		assertNotEquals("repository id must be distinguished from root item id",
-				strategy.getIdRepository(repo), strategy.getIdHead(repo, null));
+		// Do we ever use the repository ID directly? //assertNotEquals("repository id must be distinguished from root item id",
+		//		strategy.getIdRepository(repo), strategy.getIdHead(repo, null));
+		assertTrue("repoid should be prefix to item ids", strategy.getId(repo, rev, new CmsItemPath("/a/b.txt"))
+				.startsWith(strategy.getIdRepository(repo)));
+		assertTrue("repoid should be prefix to commit ids", strategy.getIdCommit(repo, rev)
+				.startsWith(strategy.getIdRepository(repo)));
+		assertTrue("repoid should be prefix to info ids", strategy.getIdEntry(repo, "someRepositoryField")
+				.startsWith(strategy.getIdRepository(repo)));
 	}
 	
 	@Test

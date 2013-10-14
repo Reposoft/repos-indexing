@@ -23,6 +23,7 @@ public class HandlerPathinfoTest {
 	@Test
 	public void testHandle() {
 		HandlerPathinfo pathinfo = new HandlerPathinfo();
+		pathinfo.setIdStrategy(new IdStrategyDefault());
 		CmsRepository repo = new CmsRepository("https://h.ost:1080/svn/repo1");
 		RepoRevision rev = new RepoRevision(10L, new Date());
 		

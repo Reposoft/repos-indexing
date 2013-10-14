@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import se.repos.indexing.item.IdStrategyDefault;
 import se.repos.indexing.item.IndexingItemProgress;
 import se.repos.indexing.item.HandlerPathinfo;
 import se.repos.indexing.item.HandlerProperties;
@@ -32,6 +33,7 @@ public class IndexingHandlersTest {
 		Module module = new AbstractModule() {
 			@Override
 			protected void configure() {
+				bind(IdStrategy.class).to(IdStrategyDefault.class);
 				Multibinder<IndexingItemHandler> multibinder = Multibinder.newSetBinder(binder(), IndexingItemHandler.class);
 				IndexingHandlers.to(multibinder, HandlerPathinfo.class, HandlerProperties.class);
 				IndexingHandlers.toInstance(multibinder, handler1, handler2);

@@ -24,7 +24,12 @@ import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 
-@Singleton // saves some updates at multi-revision sync by remembering items that were set to non-head due to isOverwritten
+/**
+ * Flags current item as head and previous as non-head.
+ * 
+ * Stateful singleton because it remembers items that were set to non-head due to isOverwritten, thus saves some updates at multi-revision sync.
+ */
+@Singleton // 
 public class HandlerHeadinfo implements IndexingItemHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());

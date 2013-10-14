@@ -42,6 +42,11 @@ public interface IdStrategy {
 	 * @return id for item that represents commit, i.e. indexing status and revprops
 	 */
 	public String getIdCommit(CmsRepository repository, RepoRevision revision);
+	
+	/**
+	 * @return id for storing a piece of repository-related information
+	 */
+	public String getIdEntry(CmsRepository repository, String repositoryField);
 
 	/**
 	 * @return the format of a revision
