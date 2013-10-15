@@ -161,7 +161,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 				}
 				if (schedule.isComplete()) {
 					logger.warn("Index has incomplete revisions " + scheduledLowest + " to " + scheduledHighest + " but schedule is empty."
-							+ " Assuming aborted indexing. Restarting " + (completedHighest == null ? "from scratch." : "at " + completedHighest + "."));
+							+ " Assuming aborted indexing. Restarting " + (completedHighest == null ? "from scratch." : "after " + completedHighest + "."));
 					if (completedHighest == null) {
 						lock = indexFirst();
 					} else {

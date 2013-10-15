@@ -159,6 +159,7 @@ public class RepositoryIndexStatus {
 		docStart.addField("type", "commit");
 		docStart.addField("rev", idStrategy.getIdRevision(revision));
 		docStart.addField("complete", complete);
+		docStart.addField("t", new Date());
 		this.solrAdd(docStart);
 		return id;
 	}

@@ -74,7 +74,7 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 				throw new IllegalStateException("Obsoleted revision " + item.getRevisionObsoleted() + " for " + item + " does not match " + obsoleted + "when it was last indexed");
 			}
 			earlierMarkedOverwritten.remove(item.getPath());
-			logger.debug("Skipping !head flag because {} was known to be later overwritten when indexed at {}", item.getPath(), obsoleted);
+			logger.trace("Skipping !head flag because {} was known to be later overwritten when indexed at {}", item.getPath(), obsoleted);
 		} else {
 			indexItemMarkPrevious(progress.getRepository(), progress.getRevision(), item);
 		}

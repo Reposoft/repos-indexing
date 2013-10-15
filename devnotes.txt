@@ -15,3 +15,5 @@
  == Second generation
  * We could probably handle solr operations more efficiently if the indexing progress allowed add for different cores, and flagging when it is time to commit
    - Batch add could be a big boost
+   
+ * Can we index handler errors on the commit entries? error on the latest.
