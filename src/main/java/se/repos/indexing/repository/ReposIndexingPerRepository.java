@@ -119,7 +119,10 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	
 	@Override
 	public void sync(RepoRevision revision) {
+		long start;
+		
 		statuscheck.acquireUninterruptibly();
+		try { // to be sure we release the semaphore
 		
 		logger.info("Sync requested {} rev {}", repository, revision);
 		if (revision.getDate() == null) {
@@ -177,10 +180,12 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		
 		// flag that this sync run is responsible for revisions up to the given one
 		onSync(lock, revision);
-		long start = lock.getNumber() + 1;
+		start = lock.getNumber() + 1;
 		lock = revision;
 		
+		} finally { // everything since semaphore acquire
 		statuscheck.release();
+		}
 		
 		// Trusting onSync to take care of blocking we can run one revision at a time without storing traces of them first.
 		// Scheduling will returng quickly to next revision if implemented with background worker. 
