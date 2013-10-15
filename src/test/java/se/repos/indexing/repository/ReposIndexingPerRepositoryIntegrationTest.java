@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -25,6 +26,7 @@ import org.apache.solr.core.SolrResourceLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
 
 import se.repos.indexing.IdStrategy;
@@ -210,75 +212,97 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		// TODO if we then delete dir2 in the next commit we can demonstrate the issue with marking folders as !head when files have changed in them; need for workaround
 	}	
 	
+	@SuppressWarnings("serial")
 	@Test
 	public void testAbortedRev() throws SolrServerException, IOException {
 		
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
-				"se/repos/indexing/testrepo1.svndump");
+				"se/repos/indexing/testrepo1r3.svndump");
 		assertNotNull(dumpfile);
 		context.getInstance(CmsTestRepository.class).load(dumpfile);
 		
 		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
 		context.getInstance(IndexingSchedule.class).start();
 		
+		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		
 		CmsChangesetReader changesetReader = spy(context.getInstance(CmsChangesetReader.class));
 		((ReposIndexingPerRepository) indexing).setCmsChangesetReader(changesetReader);
 		
-		// these two should possibly be moved to RepositoryIndexStatus
-		try {
-			assertEquals(null, indexing.getRevision());
-		} catch (IllegalStateException e) {
-			// Ok to not support this before indexing
-		}
+		RepoRevision revision1 = RepoRevision.parse("1/2012-09-27T12:05:34.040515Z");
+		RepoRevision revision2 = RepoRevision.parse("2/2013-03-21T19:16:28.271Z");
+		RepoRevision revision3 = RepoRevision.parse("3/2013-03-21T19:16:42.295Z");
 		
-		RepoRevision revision1 = RepoRevision.parse("1/2012-09-27T12:05:34.040515Z"); 
-		indexing.sync(revision1);
-		assertEquals("should have indexed up to the given revision", 1, indexing.getRevision().getNumber());
-		verify(changesetReader, times(1)).read(revision1); // should read only once
-		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
-		
+		// first indexing, two revisions in one sync
+		indexing.sync(revision2);
+		assertEquals("should have indexed up to the given revision", 2, indexing.getRevision().getNumber());
 		QueryResponse r1 = repositem.query(new SolrQuery("type:commit").addSort("rev", ORDER.asc));
-		assertEquals("Rev 0 should have been indexed in addition to 1", 2, r1.getResults().size());
+		assertEquals("Rev 0 should have been indexed in addition to 1 and 2", 3, r1.getResults().size());
 		assertEquals("Rev 0 should be marked as completed", true, r1.getResults().get(0).getFieldValue("complete"));
+		
+		// second indexing
+		indexing.sync(revision3);
+		assertEquals("Revision 3 should have been indexed", 1,
+				repositem.query(new SolrQuery("type:commit AND rev:3 AND complete:true")).getResults().getNumFound());
 		
 		// new indexing service, recover sync status
 		ReposIndexing indexing2 = context.getInstance(ReposIndexing.class);
-		indexing2.sync(revision1); // same revision as before, because polling is done at sync
+		((ReposIndexingPerRepository) indexing2).setCmsChangesetReader(changesetReader);
+		indexing2.sync(revision3); // same revision as before, because polling is done at sync
 		assertNotNull("New indexing should poll for indexed revision",
 				indexing2.getRevision());
 		assertEquals("New indexing should poll for highest indexed (started) revision", 
-				1, indexing2.getRevision().getNumber());
-		verify(changesetReader, times(1)).read(revision1); // should read only once
+				3, indexing2.getRevision().getNumber());
 		
 		// mess with the index to see how sync status is handled
-		SolrInputDocument fake2 = new SolrInputDocument();
-		String id2 = r1.getResults().get(1).getFieldValue("id").toString().replace("#1", "#2");
-		fake2.setField("id", id2);
-		fake2.setField("complete", true);
-		repositem.add(fake2);
+		SolrInputDocument markAsFailed = new SolrInputDocument();
+		markAsFailed.setField("id", r1.getResults().get(1).getFieldValue("id").toString().replace("#1", "#2"));
+		markAsFailed.setField("complete", new HashMap<String, Boolean>() {{
+			put("set", false);
+		}});
+		repositem.add(markAsFailed);
 		repositem.commit();
-		System.out.println("Added fake rev index entry " + id2);
-		assertEquals("Service isn't required (nor expected) to handle cuncurrent indexing", 1, indexing.getRevision().getNumber());
+		assertEquals("Service isn't required (or expected) to poll again, can assume no cuncurrent indexing",
+				3, indexing.getRevision().getNumber());
 		
+		// index after incomplete (though normally rev 3 wouldn't exist if rev 2 is incomplete)
 		ReposIndexing indexing3 = context.getInstance(ReposIndexing.class);
-		indexing3.sync(revision1); // polling now done at sync
-		assertEquals("New indexing service should not mistake aborted indexing as completed", 1, indexing3.getRevision().getNumber());
-		verify(changesetReader, times(1)).read(revision1); // should read only once
-		
-		RepoRevision revision2 = new RepoRevision(2, new Date(revision1.getDate().getTime() + 1));
+		((ReposIndexingPerRepository) indexing3).setCmsChangesetReader(changesetReader);
 		try {
-			indexing3.sync(revision2);
-			fail("Should attempt to index rev 2 because it is marked as in progress and the new indexing instance does not know the state of that operation so it has to assume that it was aborted");
-		} catch (RuntimeException e) {
-			if (e.getCause() instanceof org.tmatesoft.svn.core.SVNException) {
-				// expected, there is no revision 2
-			} else {
-				throw e;
-			}
+			indexing3.sync(revision3);
+			fail("Should throw exception because this is an index state that our code should never be able to produce, as it is expected to abort on any error");
+		} catch (IllegalStateException e) {
+			// expected
 		}
-		verify(changesetReader, times(1)).read(revision1); // should read only once
-		verify(changesetReader, times(1)).read(revision2);
+		
+		markAsFailed.setField("id", r1.getResults().get(1).getFieldValue("id").toString().replace("#1", "#3"));
+		markAsFailed.setField("complete", new HashMap<String, Boolean>() {{
+			put("set", false);
+		}});
+		repositem.add(markAsFailed);
+		repositem.commit();
+		indexing3.sync(revision3);
+		assertEquals("Revision 2 and 3 should have been indexed", 4,
+				repositem.query(new SolrQuery("type:commit AND complete:true")).getResults().getNumFound());
+		
+		verify(changesetReader, times(1)).read(revision1, revision2); // first
+		verify(changesetReader, times(1)).read(revision2); // first
+		verify(changesetReader, times(1)).read(revision2, revision3); // after recover
+		verify(changesetReader, times(2)).read(revision3); // second, no read needed for third, read again after recover
+		
+		// checking with verify is difficult, can also be done with capture
+		ArgumentCaptor<RepoRevision> revsAlone = ArgumentCaptor.forClass(RepoRevision.class);
+		verify(changesetReader, times(3)).read(revsAlone.capture());
+		ArgumentCaptor<RepoRevision> revsWith = ArgumentCaptor.forClass(RepoRevision.class);
+		ArgumentCaptor<RepoRevision> revsRef = ArgumentCaptor.forClass(RepoRevision.class);
+		verify(changesetReader, times(2)).read(revsWith.capture(), revsRef.capture());
+		assertEquals(revision1, revsWith.getAllValues().get(0));
+		assertEquals(revision2, revsRef.getAllValues().get(0));
+		assertEquals(revision2, revsAlone.getAllValues().get(0));
+		assertEquals(revision3, revsAlone.getAllValues().get(1));
+		assertEquals(revision2, revsWith.getAllValues().get(1));
+		assertEquals(revision3, revsRef.getAllValues().get(1));
+		assertEquals(revision3, revsAlone.getAllValues().get(2));
 	}
 	
 	@Test

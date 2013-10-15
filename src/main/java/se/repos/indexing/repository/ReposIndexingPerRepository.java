@@ -201,8 +201,8 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		// Scheduling will returng quickly to next revision if implemented with background worker. 
 		for (long i = start; i <= lock.getNumber(); i++) {
 			Date revt = revisionLookup.getRevisionTimestamp(repository, i);
-			logger.debug("Creating indexing unit {} {}", i, revt);
 			RepoRevision next = new RepoRevision(i, revt);
+			logger.debug("Creating indexing unit {}", next);
 			IndexingUnitRevision read = getIndexingUnit(next, lock);
 			schedule.add(read);
 		}
