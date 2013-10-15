@@ -121,6 +121,11 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	public void sync(RepoRevision revision) {
 		long start;
 		
+		if (revision.getDate() == null) {
+			logger.warn("Sync revision {} lacks timestamp. Retrieving from repsitory.");
+			revision = new RepoRevision(revision.getNumber(), revisionLookup.getRevisionTimestamp(repository, revision.getNumber()));
+		}
+		
 		statuscheck.acquireUninterruptibly();
 		try { // to be sure we release the semaphore
 		
@@ -176,6 +181,11 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		
 		if (lock == null) {
 			throw new AssertionError("Failed to calculate index status.");
+		}
+		
+		if (lock.equals(revision)) {
+			logger.debug("Nothing to do at revision {}", revision);
+			return;
 		}
 		
 		// flag that this sync run is responsible for revisions up to the given one

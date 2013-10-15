@@ -280,5 +280,31 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		verify(changesetReader, times(1)).read(revision1); // should read only once
 		verify(changesetReader, times(1)).read(revision2);
 	}
-
+	
+	@Test
+	public void testSyncTwice() throws SolrServerException, IOException {
+		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
+				"se/repos/indexing/testrepo1.svndump");
+		assertNotNull(dumpfile);
+		context.getInstance(CmsTestRepository.class).load(dumpfile);
+		
+		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
+		context.getInstance(IndexingSchedule.class).start();
+		
+		indexing.sync(RepoRevision.parse("1/2012-09-27T12:05:34.040Z"));
+		
+		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		
+		QueryResponse r1 = repositem.query(new SolrQuery("type:commit AND rev:1"));
+		assertEquals(true, r1.getResults().get(0).getFieldValue("complete"));
+		
+		ReposIndexing indexing2 = context.getInstance(ReposIndexing.class);
+		assertTrue("This test is uninteresting if context has a singleton", indexing2 != indexing);
+		indexing2.sync(RepoRevision.parse("1/2012-09-27T12:05:34.040Z"));
+		repositem.commit(); // to be sure that second sync doesn't do any solr operations
+		
+		QueryResponse r2 = repositem.query(new SolrQuery("type:commit AND rev:1"));
+		assertEquals(true, r2.getResults().get(0).getFieldValue("complete"));
+	}
+	
 }

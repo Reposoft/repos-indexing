@@ -115,7 +115,13 @@ public class RepositoryIndexStatus {
 		}
 		SolrDocument r = results.get(0);
 		Long rev = (Long) r.getFieldValue("rev");
+		if (rev == null) {
+			throw new AssertionError("Commit entry lacks rev field: " + r);
+		}
 		Date revt = (Date) r.getFieldValue("revt");
+		if (revt == null) {
+			throw new AssertionError("Commit entry lacks revt field: " + r);
+		}
 		return new RepoRevision(rev, revt);
 	}
 
@@ -158,6 +164,7 @@ public class RepositoryIndexStatus {
 		docStart.addField("repoid", repoid);
 		docStart.addField("type", "commit");
 		docStart.addField("rev", idStrategy.getIdRevision(revision));
+		docStart.addField("revt", revision.getDate());
 		docStart.addField("complete", complete);
 		docStart.addField("t", new Date());
 		this.solrAdd(docStart);
