@@ -6,7 +6,10 @@ package se.repos.indexing;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import se.repos.indexing.item.HandlerChecksum;
 import se.repos.indexing.item.HandlerHeadinfo;
@@ -26,39 +29,56 @@ import se.repos.indexing.solrj.MarkerCommitSolrjRepositem;
 
 public abstract class IndexingHandlers {
 
-	public static final Iterable<Class<? extends IndexingItemHandler>> STANDARD_FIRST = new LinkedList<Class<? extends IndexingItemHandler>>() {
-		private static final long serialVersionUID = 1L;
-		{
-			add(ScheduleBackground.class);
-			add(HandlerIndexTime.class);
-			add(HandlerHeadinfo.class);
-			add(HandlerPathinfo.class);
-			add(IndexingItemHandlerPropertiesEnable.class);
-			add(HandlerProperties.class);
-			add(IndexingItemHandlerPropertiesDisable.class); // the others can read from indexing doc instead
-			add(HandlerSendIncrementalSolrjRepositem.class);
-			add(ScheduleAwaitNewer.class);
-			add(HandlerContentEnable.class);
-			add(HandlerChecksum.class);
-		}
-	};
-
-	public static final Iterable<Class<? extends IndexingItemHandler>> STANDARD_LAST = new LinkedList<Class<? extends IndexingItemHandler>>() {
-		private static final long serialVersionUID = 1L;
-		{
-			add(HandlerContentDisable.class);
-			add(HandlerSendSolrjRepositem.class);
-			add(MarkerRevisionComplete.class);
-			add(MarkerCommitSolrjRepositem.class);
-		}
-	};
+	// with this we can change definition of the different handler groups and rename the steps
+	public enum Group {
+		Unblock,
+		Structure,
+		Fast,
+		Nice,
+		Final
+	}
+	
+	@SuppressWarnings("serial")
+	private static final Map<Group, Iterable<Class<? extends IndexingItemHandler>>> STANDARD = Collections.unmodifiableMap(
+		new HashMap<IndexingHandlers.Group, Iterable<Class<? extends IndexingItemHandler>>>() {{
+			//put(Group.X, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
+			//}}));
+			put(Group.Unblock, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
+				add(ScheduleBackground.class);
+			}}));
+			put(Group.Structure, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
+				add(HandlerIndexTime.class);
+				add(HandlerHeadinfo.class);
+				add(HandlerPathinfo.class);
+			}}));
+			put(Group.Fast, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
+				add(IndexingItemHandlerPropertiesEnable.class);
+				add(HandlerProperties.class);
+				add(IndexingItemHandlerPropertiesDisable.class); // the others can read from indexing doc instead
+			}}));
+			put(Group.Nice, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
+				add(HandlerSendIncrementalSolrjRepositem.class);
+				add(ScheduleAwaitNewer.class);
+				add(HandlerContentEnable.class);
+				add(HandlerChecksum.class);				
+			}}));
+			put(Group.Final, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
+				add(HandlerContentDisable.class);
+				add(HandlerSendSolrjRepositem.class);
+				add(MarkerRevisionComplete.class);
+				add(MarkerCommitSolrjRepositem.class);				
+			}}));
+		}});
 	
 	/**
 	 * Bind standard handler classes to a guice multibinder, without compile time dependencies
 	 * @param guiceMultibinder instance of com.google.inject.multibindings.Multibinder for IndexingItemHandler
 	 */
 	public static void configureFirst(Object guiceMultibinder) {
-		to(guiceMultibinder, STANDARD_FIRST);
+		to(guiceMultibinder, STANDARD.get(Group.Unblock));
+		to(guiceMultibinder, STANDARD.get(Group.Structure));
+		to(guiceMultibinder, STANDARD.get(Group.Fast));
+		to(guiceMultibinder, STANDARD.get(Group.Nice));
 	}
 
 	/**
@@ -66,7 +86,7 @@ public abstract class IndexingHandlers {
 	 * @param guiceMultibinder instance of com.google.inject.multibindings.Multibinder for IndexingItemHandler
 	 */
 	public static void configureLast(Object guiceMultibinder) {
-		to(guiceMultibinder, STANDARD_LAST);
+		to(guiceMultibinder, STANDARD.get(Group.Final));
 	}
 	
 	public static void to(Object guiceMultibinder, Iterable<Class<? extends IndexingItemHandler>> handlers) {

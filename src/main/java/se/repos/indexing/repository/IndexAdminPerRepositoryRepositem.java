@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2004-2012 Repos Mjukvara AB
+ */
 package se.repos.indexing.repository;
 
 import java.util.LinkedList;
@@ -5,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.apache.solr.client.solrj.SolrServer;
 
@@ -13,6 +17,7 @@ import se.repos.indexing.IndexAdmin;
 import se.repos.indexing.solrj.SolrDelete;
 import se.simonsoft.cms.item.CmsRepository;
 
+@Singleton // Notification receivers won't be notified if this isn't a singleton
 public class IndexAdminPerRepositoryRepositem implements IndexAdmin {
 
 	private CmsRepository repository;

@@ -30,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
 
 import se.repos.indexing.IdStrategy;
+import se.repos.indexing.IndexAdmin;
 import se.repos.indexing.IndexingHandlers;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.ReposIndexing;
@@ -94,6 +95,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 			bind(SolrServer.class).annotatedWith(Names.named("repositem")).toInstance(repositem);
 			bind(ReposIndexing.class).to(ReposIndexingPerRepository.class);
 			bind(IndexingSchedule.class).to(IndexingScheduleBlockingOnly.class);
+			bind(IndexAdmin.class).to(IndexAdminPerRepositoryRepositem.class);
 			
 			Multibinder<IndexingItemHandler> handlers = Multibinder.newSetBinder(binder(), IndexingItemHandler.class);
 			IndexingHandlers.configureFirst(handlers);

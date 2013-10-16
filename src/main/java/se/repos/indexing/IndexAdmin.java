@@ -1,11 +1,11 @@
+/**
+ * Copyright (C) 2004-2012 Repos Mjukvara AB
+ */
 package se.repos.indexing;
-
-import com.google.inject.Singleton;
 
 /**
  * Administrative tasks on index.
  */
-@Singleton // Notification receivers won't be notified if this isn't a singleton
 public interface IndexAdmin {
 
 	/**
