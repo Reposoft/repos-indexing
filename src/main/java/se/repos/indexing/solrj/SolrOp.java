@@ -31,6 +31,6 @@ public abstract class SolrOp implements Runnable {
 		}
 	}
 	
-	public abstract void runOp() throws SolrServerException, IOException;
+	protected abstract void runOp() throws SolrServerException, IOException;
 	
 }

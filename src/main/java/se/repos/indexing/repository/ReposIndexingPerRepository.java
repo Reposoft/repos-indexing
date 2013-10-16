@@ -15,6 +15,7 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import se.repos.indexing.IndexAdmin;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IndexingItemProgress;
@@ -87,6 +88,11 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	@Inject
 	public void setRevisionLookup(@Named("inspection") CmsRepositoryLookup lookup) {
 		this.revisionLookup = lookup;
+	}
+	
+	@Inject
+	public void setIndexAdmin(IndexAdmin forAddingNotification) {
+		forAddingNotification.addPostAction(new IndexAdminNotificationHandler());
 	}
 	
 //
@@ -297,6 +303,22 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			throw new IllegalStateException("No indexing operation has been executed yet");
 		}
 		return lock;
+	}
+	
+	private class IndexAdminNotificationHandler implements IndexAdmin {
+		@Override
+		public void clear() {
+			logger.info("Got notification that index was cleared for repository {}, resetting internal state", repository);
+			lock = null;
+			if (schedule.isComplete()) {
+				// probably we'll overwrite anything committed after clear, or should we throw exception and change IndexAdmin so that clear is not done in this case?
+				logger.warn("Schedul is still running at index clear. May produce inconsistent index.");
+			}
+		}
+		@Override
+		public void addPostAction(IndexAdmin notificationReceiver) {
+			throw new UnsupportedOperationException("Should not be called for receivers");
+		}
 	}
 	
 }
