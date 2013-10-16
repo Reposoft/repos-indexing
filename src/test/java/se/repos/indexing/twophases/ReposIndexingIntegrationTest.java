@@ -25,6 +25,7 @@ import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.schema.SchemaRepositemTest;
 import se.repos.indexing.testconfig.IndexingTestModule;
+import se.simonsoft.cms.backend.svnkit.CmsRepositorySvn;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.testing.svn.CmsTestRepository;
 import se.simonsoft.cms.testing.svn.SvnTestSetup;
@@ -127,12 +128,13 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 				"se/repos/indexing/testrepo1.svndump");
 		assertNotNull(dumpfile);
 		CmsTestRepository repo = SvnTestSetup.getInstance().getRepository().load(dumpfile);
+		CmsRepositorySvn repository = CmsRepositorySvn.fromTesting(repo);
 		
-		assertEquals("Should report null as last complete revision when the index is empty", null, indexing.getRevComplete(repo));
+		assertEquals("Should report null as last complete revision when the index is empty", null, indexing.getRevComplete(repository));
 		
-		indexing.sync(repo, new RepoRevision(1, new Date(1))); // 2012-09-27T12:05:34.040515Z
-		assertNotNull("Should track indexing", indexing.getRevComplete(repo));
-		assertEquals("should have indexed up to the given revision", 1, indexing.getRevComplete(repo).getNumber());
+		indexing.sync(repository, new RepoRevision(1, new Date(1))); // 2012-09-27T12:05:34.040515Z
+		assertNotNull("Should track indexing", indexing.getRevComplete(repository));
+		assertEquals("should have indexed up to the given revision", 1, indexing.getRevComplete(repository).getNumber());
 		
 
 		QueryResponse r1 = getSolr().query(new SolrQuery("type:commit").addSort("rev", ORDER.asc));
@@ -141,11 +143,11 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 		
 		// new indexing service, recover sync status
 		ReposIndexing indexing2 = getIndexing();
-		indexing2.sync(repo, new RepoRevision(1, new Date(1))); // polling now done at sync
+		indexing2.sync(repository, new RepoRevision(1, new Date(1))); // polling now done at sync
 		assertNotNull("New indexing should poll for indexed revision",
-				indexing2.getRevComplete(repo));
+				indexing2.getRevComplete(repository));
 		assertTrue("New indexing should poll for highest indexed revision", 
-				indexing2.getRevComplete(repo).getNumber() == 1);
+				indexing2.getRevComplete(repository).getNumber() == 1);
 	
 		// mess with the index to see how sync status is handled
 		SolrInputDocument fake2 = new SolrInputDocument();
@@ -154,15 +156,15 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 		fake2.setField("complete", true);
 		getSolr().add(fake2);
 		getSolr().commit();
-		assertEquals("Service is not expected to handle cuncurrent indexing", 1, indexing2.getRevComplete(repo).getNumber());
+		assertEquals("Service is not expected to handle cuncurrent indexing", 1, indexing2.getRevComplete(repository).getNumber());
 		
 		ReposIndexing indexing3 = getIndexing();
-		indexing3.sync(repo, new RepoRevision(1, new Date(1))); // polling now done at sync
-		assertEquals("New indexing service should not mistake aborted indexing as completed", 1, indexing3.getRevComplete(repo).getNumber());
+		indexing3.sync(repository, new RepoRevision(1, new Date(1))); // polling now done at sync
+		assertEquals("New indexing service should not mistake aborted indexing as completed", 1, indexing3.getRevComplete(repository).getNumber());
 		//not implemented//assertEquals("New indexing service should see that a revision has started but not completed", 2, indexing3.getRevProgress(repo).getNumber());
 		
 		try {
-			indexing3.sync(repo, new RepoRevision(2, new Date(2)));
+			indexing3.sync(repository, new RepoRevision(2, new Date(2)));
 			fail("Should attempt to index rev 2 because it is marked as in progress and the new indexing instance does not know the state of that operation so it has to assume that it was aborted");
 		} catch (Exception e) {
 			// expected, there is no revision 2
@@ -175,9 +177,10 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 				"se/repos/indexing/testrepo1r3.svndump");
 		assertNotNull(dumpfile);
 		CmsTestRepository repo = SvnTestSetup.getInstance().getRepository().load(dumpfile);
+		CmsRepositorySvn repository = CmsRepositorySvn.fromTesting(repo);
 		
 		ReposIndexing indexing = getIndexing();
-		indexing.sync(repo, new RepoRevision(1, new Date(1)));
+		indexing.sync(repository, new RepoRevision(1, new Date(1)));
 		
 		SolrDocumentList r1 = getSolr().query(new SolrQuery("id:*@1").setSort("path", ORDER.asc)).getResults();
 		assertEquals(3, r1.size());
@@ -189,7 +192,7 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 			assertEquals("at " + r1.get(i).get("path"), true, r1.get(i).get("head"));
 		}
 		
-		indexing.sync(repo, new RepoRevision(2, new Date(2)));
+		indexing.sync(repository, new RepoRevision(2, new Date(2)));
 		SolrDocumentList r2r1 = getSolr().query(new SolrQuery("id:*@1").setSort("path", ORDER.asc)).getResults();
 		// TODO support folders assertEquals("/dir " + r2r1.get(0), true, r2r1.get(0).get("head"));
 		assertEquals("/dir/t2.txt " + r2r1.get(1), true, r2r1.get(1).get("head"));
@@ -197,7 +200,7 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 		SolrDocumentList r2 = getSolr().query(new SolrQuery("id:*@2").setSort("path", ORDER.asc)).getResults();
 		assertEquals("next revision should be head, " + r2.get(0), true, r2.get(0).get("head"));
 		
-		indexing.sync(repo, new RepoRevision(3, new Date(3)));
+		indexing.sync(repository, new RepoRevision(3, new Date(3)));
 		// everything from r1 should now have been replaced with later versions
 		SolrDocumentList r3r1 = getSolr().query(new SolrQuery("id:*@1").setSort("path", ORDER.asc)).getResults();
 		

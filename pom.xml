@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<artifactId>repos-indexing</artifactId>
-	<version>1-SNAPSHOT</version>
+	<version>0.6</version>
 	<packaging>jar</packaging>
 	
 	<name>Repos Indexing</name>
@@ -48,7 +48,7 @@
 		<dependency>
 			<groupId>se.simonsoft</groupId>
 			<artifactId>cms-testing</artifactId>
-			<version>0.9-SNAPSHOT</version>
+			<version>0.9.1</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

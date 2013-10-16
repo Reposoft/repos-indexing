@@ -78,9 +78,10 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		final CmsTestRepository repository = SvnTestSetup.getInstance().getRepository();
 		
 		Module backend = new AbstractModule() { @Override protected void configure() {
-			bind(CmsRepository.class).toInstance(repository);
-			bind(CmsRepositorySvn.class).toInstance(new CmsRepositorySvn(repository.getUrl(), repository.getAdminPath()));
-			bind(CmsTestRepository.class).toInstance(repository); // backend specific type, should be called CmsSvnTestRepository
+			CmsRepositorySvn configRepository = CmsRepositorySvn.fromTesting(repository);
+			bind(CmsRepository.class).toInstance(configRepository);
+			bind(CmsRepositorySvn.class).toInstance(configRepository);
+			bind(CmsTestRepository.class).toInstance(repository); // should there really be services that expect this type?
 			
 			bind(CmsChangesetReader.class).to(CmsChangesetReaderSvnkitLookRepo.class);
 			bind(CmsContentsReader.class).to(CmsContentsReaderSvnkitLookRepo.class);

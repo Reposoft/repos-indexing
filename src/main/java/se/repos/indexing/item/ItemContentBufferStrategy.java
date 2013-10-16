@@ -12,7 +12,7 @@ public interface ItemContentBufferStrategy {
 
 	/**
 	 * Called only for files, returns per pegged item access to content.
-	 * @param repository TODO remove this argument or change to CmsRepository
+	 * @param repository TODO remove this argument and rely on per-repository services
 	 * @param revision
 	 * @param path
 	 * @param pathinfo
