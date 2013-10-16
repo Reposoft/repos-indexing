@@ -24,9 +24,10 @@ public interface IdStrategy {
 	public String getIdHead(CmsRepository repository, CmsItemPath path);
 	
 	/**
+	 * @param revision needed because itemId does not contain a full revision
 	 * @return same as {@link #getId(CmsRepository, RepoRevision, CmsItemPath)}
 	 */
-	public String getId(CmsItemId itemId);
+	public String getId(CmsItemId itemId, RepoRevision revision);
 	
 	/**
 	 * @return same as {@link #getIdHead(CmsRepository, CmsItemPath)}

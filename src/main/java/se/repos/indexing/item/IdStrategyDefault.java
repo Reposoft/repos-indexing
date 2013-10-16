@@ -8,6 +8,7 @@ import se.simonsoft.cms.item.CmsItemId;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
+import se.simonsoft.cms.item.impl.CmsItemIdUrl;
 
 public class IdStrategyDefault implements IdStrategy {
 
@@ -49,30 +50,40 @@ public class IdStrategyDefault implements IdStrategy {
 		return Long.toString(revision.getNumber());
 	}
 	
+	protected String getIdHost(CmsRepository repository) {
+		return repository.getHost();
+	}
+	
 	@Override
 	public String getIdRepository(CmsRepository repository) {
-		return repository.getHost() + repository.getUrlAtHost();
+		return getIdHost(repository) + repository.getUrlAtHost();
 	}
 	
 	@Override
-	public String getId(CmsRepository repository, RepoRevision revision, CmsItemPath path) {
-		return getIdHead(repository, path) + getPegSeparator() + getIdRevision(revision); 
-	}
-
-	@Override
-	public String getIdHead(CmsRepository repository, CmsItemPath path) {
-		return getIdRepository(repository) + (path == null ? getRootPath() : path); 
-	}
-	
-	@Override
-	public String getId(CmsItemId itemId) {
-		return getId(itemId.getRepository(), getRevision(itemId), itemId.getRelPath());
+	public String getId(CmsItemId itemId, RepoRevision revision) {
+		if (revision == null) {
+			throw new IllegalArgumentException("Use getIdHead for id without revision");
+		}
+		if (itemId.getPegRev() != null && !revision.equals(new RepoRevision(itemId.getPegRev(), null))) {
+			throw new IllegalArgumentException("Provided revision " + revision + " does not match id "+ itemId);
+		}
+		return getIdHead(itemId) + getPegSeparator() + getIdRevision(revision); 
 	}
 	
 	@Override
 	public String getIdHead(CmsItemId itemId) {
-		return getIdHead(itemId.getRepository(), itemId.getRelPath());
-	}	
+		return itemId.getRepository().getHost() + itemId.getUrlAtHost();
+	}
+	
+	@Override
+	public String getId(CmsRepository repository, RepoRevision revision, CmsItemPath path) {
+		return getId(new CmsItemIdUrl(repository, path), revision); 
+	}
+
+	@Override
+	public String getIdHead(CmsRepository repository, CmsItemPath path) {
+		return getIdHead(new CmsItemIdUrl(repository, path));
+	}
 	
 	@Override
 	public String getIdCommit(CmsRepository repository, RepoRevision revision) {
