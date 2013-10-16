@@ -39,7 +39,7 @@ public abstract class IndexingHandlers {
 	}
 	
 	@SuppressWarnings("serial")
-	private static final Map<Group, Iterable<Class<? extends IndexingItemHandler>>> STANDARD = Collections.unmodifiableMap(
+	public static final Map<Group, Iterable<Class<? extends IndexingItemHandler>>> STANDARD = Collections.unmodifiableMap(
 		new HashMap<IndexingHandlers.Group, Iterable<Class<? extends IndexingItemHandler>>>() {{
 			//put(Group.X, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
 			//}}));
