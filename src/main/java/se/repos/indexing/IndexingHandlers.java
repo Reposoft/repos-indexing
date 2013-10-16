@@ -35,6 +35,7 @@ public abstract class IndexingHandlers {
 		Structure,
 		Fast,
 		Nice,
+		Content,
 		Final
 	}
 	
@@ -60,7 +61,9 @@ public abstract class IndexingHandlers {
 				add(HandlerSendIncrementalSolrjRepositem.class);
 				add(ScheduleAwaitNewer.class);
 				add(HandlerContentEnable.class);
-				add(HandlerChecksum.class);				
+			}}));
+			put(Group.Content, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
+				add(HandlerChecksum.class);
 			}}));
 			put(Group.Final, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
 				add(HandlerContentDisable.class);
@@ -79,6 +82,7 @@ public abstract class IndexingHandlers {
 		to(guiceMultibinder, STANDARD.get(Group.Structure));
 		to(guiceMultibinder, STANDARD.get(Group.Fast));
 		to(guiceMultibinder, STANDARD.get(Group.Nice));
+		to(guiceMultibinder, STANDARD.get(Group.Content));
 	}
 
 	/**
