@@ -29,6 +29,21 @@ import se.repos.indexing.solrj.MarkerCommitSolrjRepositem;
 
 public abstract class IndexingHandlers {
 
+	/**
+	 * This is not implemented, but we do need an API for extending the default chain.
+	 * 
+	 * There is {@link IndexingHandlers#configureFirst(Object)} and {@link IndexingHandlers#configureLast(Object)}
+	 * but those are probably only usefulr for tests where you add a hanldler or two.
+	 * 
+	 * For custom ordering there's {@link Group} and {@link IndexingHandlers#STANDARD}, but those are difficult to use.
+	 * 
+	 * The actual need for extending is to insert handlers at various points,
+	 * and possibly rearrange in cases like moving Background marker a few steps down.
+	 */
+	static interface HandlerChain {
+		
+	}	
+	
 	// with this we can change definition of the different handler groups and rename the steps
 	public enum Group {
 		Unblock,
