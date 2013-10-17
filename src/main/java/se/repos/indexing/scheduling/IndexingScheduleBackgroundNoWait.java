@@ -4,7 +4,7 @@
 package se.repos.indexing.scheduling;
 
 /**
- * Syupports {@link ScheduleBackground} but not {@link ScheduleAwaitNewer}.
+ * Supports {@link ScheduleBackground} but not {@link ScheduleAwaitNewer}.
  *
  */
 public class IndexingScheduleBackgroundNoWait {

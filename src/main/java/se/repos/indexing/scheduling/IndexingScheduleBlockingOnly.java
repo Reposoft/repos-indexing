@@ -4,7 +4,6 @@
 package se.repos.indexing.scheduling;
 
 import java.util.Collections;
-import java.util.Iterator;
 
 import javax.inject.Singleton;
 
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
+import se.repos.indexing.solrj.HandlerSendIncrementalSolrjRepositem;
 
 /**
  * Ignores all markers and runs a standard indexing loop, each item in turn processed with all handlers.
@@ -57,34 +57,32 @@ public class IndexingScheduleBlockingOnly implements IndexingSchedule {
 	}
 
 	public void run(IndexingUnit unit) {
-		Marker marker = null;
-		while (true) {
-			for (IndexingItemProgress i : unit.getItems()) {
-				Iterator<IndexingItemHandler> handlers = unit.getHandlers(i);
-				while (handlers.hasNext()) {
-					IndexingItemHandler handler = handlers.next();
-					handler.handle(i);
-					if (handler instanceof Marker) {
-						if (marker == null) {
-							marker = (Marker) handler;
-						} else {
-							if (!handler.equals(marker)) {
-								throw new IllegalArgumentException("Item has a different marker ordering than previous, got " + handler + " for " + i);
-							}
-						}
-						logger.trace("Stopped at marker {} for item {}", marker, i);
-						break;
-					}
-				}
+		HandlerIteration it = new HandlerIteration(new HandlerIteration.MarkerDecision() {
+			
+			@Override
+			public boolean before(IndexingItemHandler handler, IndexingItemProgress item) {
+				return 
+						!(handler instanceof HandlerSendIncrementalSolrjRepositem); // skip because it reduces performance in blocking run
 			}
-			if (marker == null) {
-				break;
-			} else {
-				marker.trigger();
-				marker = null;
+			
+			@Override
+			public boolean before(Marker marker) {
+				if (marker instanceof ScheduleBackground) return false;
+				if (marker instanceof ScheduleAwaitNewer) return false;
+				return true; // such as RevisionComplete
 			}
+			
+			@Override
+			public boolean after(Marker marker) {
+				return true; // always continue though all items and handlers
+			}
+			
+		});
+		
+		if (!it.proceed(unit)) {
+			throw new AssertionError("Using blocking s");
 		}
-	} 
+	}
 	
 	@Override
 	public Iterable<IndexingUnit> getQueue() {

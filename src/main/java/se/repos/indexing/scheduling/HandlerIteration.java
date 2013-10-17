@@ -20,22 +20,28 @@ class HandlerIteration {
 
 	private static final Logger logger = LoggerFactory.getLogger(HandlerIteration.class);
 	
+	private MarkerDecision decision;
+	
 	public HandlerIteration(MarkerDecision decision) {
-		
+		this.decision = decision;
 	}
 	
-	public void run(IndexingUnit unit) {
-		// TODO straight from BlockingOnly, meeds to be adapted to fulfil the contract of MarkerDecision
-		Marker marker = null;
+	/**
+	 * @param unit with the iterator state to start from
+	 * @return true if complete
+	 */
+	public boolean proceed(IndexingUnit unit) {
 		while (true) {
+			Marker marker = null;
+			boolean markerDecision = false;			
 			for (IndexingItemProgress i : unit.getItems()) {
 				Iterator<IndexingItemHandler> handlers = unit.getHandlers(i);
 				while (handlers.hasNext()) {
 					IndexingItemHandler handler = handlers.next();
-					handler.handle(i);
 					if (handler instanceof Marker) {
 						if (marker == null) {
 							marker = (Marker) handler;
+							markerDecision = decision.before(marker);
 						} else {
 							if (!handler.equals(marker)) {
 								throw new IllegalArgumentException("Item has a different marker ordering than previous, got " + handler + " for " + i);
@@ -44,29 +50,50 @@ class HandlerIteration {
 						logger.trace("Stopped at marker {} for item {}", marker, i);
 						break;
 					}
+					if (markerDecision || decision.before(handler, i)) {
+						handler.handle(i);
+					} else {
+						logger.trace("Scheduler {} skipped handler {} for item {}", this, handler, i);
+					}
 				}
 			}
 			if (marker == null) {
-				break;
-			} else {
-				marker.trigger();
-				marker = null;
+				return true;
 			}
-		}		
+			if (markerDecision) {
+				marker.trigger();
+				if (!decision.after(marker)) {
+					return false;
+				}
+			}
+		}
 	}
 
 	public interface MarkerDecision {
 		
 		/**
 		 * Choses to {@link Marker#trigger()} or ignore a {@link Marker#ignore()} a Marker.
+		 * 
 		 * @return true to run {@link IndexingItemHandler#handle(se.repos.indexing.item.IndexingItemProgress)}
 		 */
 		boolean before(Marker marker);
 		
 		/**
-		 * If {@link #before(Marker)} returns true this is called after handle items.
+		 * Called for handlers, not markers.
+		 * 
+		 * @return true to execute the handler for the item, false to skip
 		 */
-		void after(Marker marker);
+		boolean before(IndexingItemHandler handler, IndexingItemProgress item);
+		
+		/**
+		 * If {@link #before(Marker)} returns true this is called after handle items.
+		 * If not iteration proceeds beyond this marker.
+		 * 
+		 * By returning false iteration can be stopped, and the scheduler can later resume iteration at the state remembered by the {@link IndexingUnit}.
+		 * 
+		 * @return true to continue iteration, false to pause (until next {@link HandlerIteration#proceed(IndexingUnit)})
+		 */
+		boolean after(Marker marker);
 		
 	}
 	
