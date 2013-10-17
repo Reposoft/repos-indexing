@@ -72,7 +72,7 @@ class HandlerIteration {
 						if (decision.before(handler, i)) {
 							handler.handle(i);
 						} else {
-							logger.debug("Scheduler {} skipped handler {} for item {}", this, handler, i);
+							logger.trace("Scheduler {} skipped handler {} for item {}", this, handler, i);
 						}
 					}
 				}

@@ -288,6 +288,5 @@ public class HandlerIterationTest {
 	private class Handler4 extends TraceHandler {  Handler4(Collection<HandlerCall> calls) { super(calls); } }
 	private class Marker1 extends TraceMarker {  Marker1(Collection<HandlerCall> calls) { super(calls); } }
 	private class Marker2 extends TraceMarker {  Marker2(Collection<HandlerCall> calls) { super(calls); } }
-	private class Marker3 extends TraceMarker {  Marker3(Collection<HandlerCall> calls) { super(calls); } }
 
 }
