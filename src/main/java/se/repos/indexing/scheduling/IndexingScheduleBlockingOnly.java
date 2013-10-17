@@ -80,7 +80,7 @@ public class IndexingScheduleBlockingOnly implements IndexingSchedule {
 		});
 		
 		if (!it.proceed(unit)) {
-			throw new AssertionError("Using blocking s");
+			throw new AssertionError("Using blocking schedule so iteration should complete");
 		}
 	}
 	

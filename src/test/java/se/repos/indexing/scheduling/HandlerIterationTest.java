@@ -4,10 +4,10 @@
 package se.repos.indexing.scheduling;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,14 +19,13 @@ import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
 import se.repos.indexing.scheduling.HandlerIteration.MarkerDecision;
-import se.repos.indexing.solrj.HandlerSendIncrementalSolrjRepositem;
 
 public class HandlerIterationTest {
 
 	@Test
-	public void testNoInterrupt() {
-		IndexingItemProgress item1 = mock(IndexingItemProgress.class);
-		IndexingItemProgress item2 = mock(IndexingItemProgress.class);
+	public void testRunEverything() {
+		IndexingItemProgress item1 = mock(IndexingItemProgress.class, "Item1");
+		IndexingItemProgress item2 = mock(IndexingItemProgress.class, "Item2");
 		Set<IndexingItemProgress> changeset1 = new LinkedHashSet<IndexingItemProgress>();
 		changeset1.add(item1);
 		changeset1.add(item2);
@@ -40,49 +39,189 @@ public class HandlerIterationTest {
 		
 		IndexingUnit unit = new IndexingUnit(changeset1, handlers);
 		
-		HandlerIteration iteration = new HandlerIteration(new MarkerDecision() {
+		HandlerIteration runeverything = new HandlerIteration(new MarkerDecision() {
 			@Override
 			public boolean before(IndexingItemHandler handler, IndexingItemProgress item) {
-				// TODO Auto-generated method stub
-				return false;
+				return true;
 			}
 			
 			@Override
 			public boolean before(Marker marker) {
-				// TODO Auto-generated method stub
-				return false;
+				return true;
 			}
 			
 			@Override
 			public boolean after(Marker marker) {
-				// TODO Auto-generated method stub
-				return false;
+				return true;
 			}
 		});
 		
-		iteration.proceed(unit);
+		runeverything.proceed(unit);
 		
+		System.out.println(calls);
+		
+		Iterator<HandlerCall> c = calls.iterator();
+		assertEquals("Handler1+Item1", c.next().toString());
+		assertEquals("Should proceed with first item until a marker is seen",
+				"Handler2+Item1", c.next().toString());
+		assertEquals("handle should be called for markers too",
+				"Marker1+Item1", c.next().toString());
+
+		assertEquals("before next marker both items should run",
+				"Handler1+Item2", c.next().toString());
+		assertEquals("Handler2+Item2", c.next().toString());
+		assertEquals("Marker1+Item2", c.next().toString());
+		
+		assertEquals("should then trigger marker",
+				"Marker1", c.next().toString());
+		
+		assertEquals("should then proceed to next handler",
+				"Handler3+Item1", c.next().toString());
+		assertEquals("should then proceed to next handler",
+				"Handler3+Item2", c.next().toString());
+		assertFalse(c.hasNext());
 	}
+	
+	@Test
+	public void testIgnoreHandler() {
+		IndexingItemProgress item1 = mock(IndexingItemProgress.class, "Item1");
+		IndexingItemProgress item2 = mock(IndexingItemProgress.class, "Item2");
+		Set<IndexingItemProgress> changeset1 = new LinkedHashSet<IndexingItemProgress>();
+		changeset1.add(item1);
+		changeset1.add(item2);
+		
+		List<HandlerCall> calls = new LinkedList<HandlerCall>();
+		List<IndexingItemHandler> handlers = new LinkedList<IndexingItemHandler>();
+		handlers.add(new Handler1(calls));
+		handlers.add(new Handler2(calls));
+		handlers.add(new Marker1(calls));
+		handlers.add(new Handler3(calls));
+		
+		IndexingUnit unit = new IndexingUnit(changeset1, handlers);
+		
+		HandlerIteration runeverything = new HandlerIteration(new MarkerDecision() {
+			@Override
+			public boolean before(IndexingItemHandler handler, IndexingItemProgress item) {
+				return !(handler instanceof Handler2);
+			}
+			
+			@Override
+			public boolean before(Marker marker) {
+				return true;
+			}
+			
+			@Override
+			public boolean after(Marker marker) {
+				return true;
+			}
+		});
+		
+		runeverything.proceed(unit);
+		
+		System.out.println(calls);
+		
+		Iterator<HandlerCall> c = calls.iterator();
+		assertEquals("Handler1+Item1", c.next().toString());
+		assertEquals("should skip handler2",
+				"Marker1+Item1", c.next().toString());
+		
+		assertEquals("should stop at marker and proceed with next item",
+				"Handler1+Item2", c.next().toString());
+		assertEquals("should skip handler2 for item2 also",
+				"Marker1+Item2", c.next().toString());
+		
+		assertEquals("should then trigger marker",
+				"Marker1", c.next().toString());
+		
+		assertEquals("should then proceed to next handler",
+				"Handler3+Item1", c.next().toString());
+		assertEquals("should then proceed to next handler",
+				"Handler3+Item2", c.next().toString());
+		assertFalse(c.hasNext());
+	}
+	
+	@Test
+	public void testSkipMarker() {
+		IndexingItemProgress item1 = mock(IndexingItemProgress.class, "Item1");
+		IndexingItemProgress item2 = mock(IndexingItemProgress.class, "Item2");
+		Set<IndexingItemProgress> changeset1 = new LinkedHashSet<IndexingItemProgress>();
+		changeset1.add(item1);
+		changeset1.add(item2);
+		
+		List<HandlerCall> calls = new LinkedList<HandlerCall>();
+		List<IndexingItemHandler> handlers = new LinkedList<IndexingItemHandler>();
+		handlers.add(new Handler1(calls));
+		handlers.add(new Handler2(calls));
+		handlers.add(new Marker1(calls));
+		handlers.add(new Handler3(calls));
+		handlers.add(new Marker2(calls));
+		handlers.add(new Handler4(calls));
+		
+		IndexingUnit unit = new IndexingUnit(changeset1, handlers);
+		
+		HandlerIteration runeverything = new HandlerIteration(new MarkerDecision() {
+			@Override
+			public boolean before(IndexingItemHandler handler, IndexingItemProgress item) {
+				return true;
+			}
+			
+			@Override
+			public boolean before(Marker marker) {
+				return !(marker instanceof Marker1);
+			}
+			
+			@Override
+			public boolean after(Marker marker) {
+				return true;
+			}
+		});
+		
+		try {
+			runeverything.proceed(unit);
+		} finally {
+			System.out.println(calls);
+		}
+		
+		Iterator<HandlerCall> c = calls.iterator();
+		assertEquals("Handler1+Item1", c.next().toString());
+		assertEquals("Should proceed with first item until a marker is seen",
+				"Handler2+Item1", c.next().toString());
+		assertEquals("Decision is to ignore the marker, should be flagged before first item",
+				"Marker1+ignore", c.next().toString());
+		assertEquals("Marker should be skipped so iteration should proceed through the item",
+				"Handler3+Item1", c.next().toString());
+		assertEquals("If iteration should proceed on ignored markers, it means that we'll ask for a decision for all markers at the first item reaching them",
+				"", ""); // but this doesn't mean we get the Marker2 trigger/ignore now, right?
+		
+		assertEquals("ran into Marker2 which should not be ignored so iteration goes to next item",
+				"Handler1+Item2", c.next().toString());
+		assertFalse(c.hasNext()); // TODO complete test
+	}	
 	
 	private class HandlerCall {
 		
 		IndexingItemHandler handler;
 		IndexingItemProgress item;
-		boolean isTrigger;
 		boolean isIgnore;
 		
 		HandlerCall(IndexingItemHandler handler, IndexingItemProgress progress) {
 			this.handler = handler;
 			this.item = progress;
-			this.isTrigger = false;
 			this.isIgnore = false;			
 		}
 		
 		HandlerCall(Marker marker, boolean isTrigger) {
 			this.handler = marker;
 			this.item = null;
-			this.isTrigger = isTrigger;
 			this.isIgnore = !isTrigger;
+		}
+
+		@Override
+		public String toString() {
+			return ""
+					+ handler.getClass().getSimpleName()
+					+ (isIgnore ? "+ignore" : "")
+					+ (item != null ? "+" + item : "");
 		}
 		
 	}
@@ -103,6 +242,11 @@ public class HandlerIterationTest {
 		@Override
 		public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 			return null;
+		}
+
+		@Override
+		public String toString() {
+			return this.getClass().getSimpleName();
 		}
 		
 	}

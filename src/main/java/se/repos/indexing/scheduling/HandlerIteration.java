@@ -33,38 +33,44 @@ class HandlerIteration {
 	public boolean proceed(IndexingUnit unit) {
 		while (true) {
 			Marker marker = null;
-			boolean markerDecision = false;			
-			for (IndexingItemProgress i : unit.getItems()) {
+			boolean markerActive = false;
+			Iterator<IndexingItemProgress> uit = unit.getItems().iterator();
+			while (uit.hasNext()) {
+				IndexingItemProgress i = uit.next();
 				Iterator<IndexingItemHandler> handlers = unit.getHandlers(i);
 				while (handlers.hasNext()) {
 					IndexingItemHandler handler = handlers.next();
 					if (handler instanceof Marker) {
 						if (marker == null) {
 							marker = (Marker) handler;
-							markerDecision = decision.before(marker);
+							markerActive = decision.before(marker);
 						} else {
 							if (!handler.equals(marker)) {
 								throw new IllegalArgumentException("Item has a different marker ordering than previous, got " + handler + " for " + i);
 							}
 						}
-						logger.trace("Stopped at marker {} for item {}", marker, i);
-						break;
-					}
-					if (markerDecision || decision.before(handler, i)) {
-						handler.handle(i);
+						logger.debug("Stopped at marker {} for item {}", marker, i);
+						if (markerActive) {
+							marker.handle(i);
+							break; // no more handlers on this item
+						}
 					} else {
-						logger.trace("Scheduler {} skipped handler {} for item {}", this, handler, i);
+						if (decision.before(handler, i)) {
+							handler.handle(i);
+						} else {
+							logger.debug("Scheduler {} skipped handler {} for item {}", this, handler, i);
+						}
+					}
+				}
+				if (!uit.hasNext() && markerActive) {
+					marker.trigger();
+					if (!decision.after(marker)) {
+						return false;
 					}
 				}
 			}
 			if (marker == null) {
 				return true;
-			}
-			if (markerDecision) {
-				marker.trigger();
-				if (!decision.after(marker)) {
-					return false;
-				}
 			}
 		}
 	}
