@@ -333,5 +333,29 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		QueryResponse r2 = repositem.query(new SolrQuery("type:commit AND rev:1"));
 		assertEquals(true, r2.getResults().get(0).getFieldValue("complete"));
 	}
+
+	@Test
+	public void testSyncHighLow() throws SolrServerException, IOException {
+		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
+				"se/repos/indexing/testrepo1r3.svndump");
+		assertNotNull(dumpfile);
+		context.getInstance(CmsTestRepository.class).load(dumpfile);
+		
+		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
+		context.getInstance(IndexingSchedule.class).start();
+		
+		indexing.sync(RepoRevision.parse("2/2013-03-21T19:16:28.271Z"));
+		
+		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		
+		assertEquals(3, repositem.query(new SolrQuery("type:commit AND complete:true")).getResults().size());
+		
+		ReposIndexing indexing2 = context.getInstance(ReposIndexing.class);
+		assertTrue("This test is uninteresting if context has a singleton", indexing2 != indexing);
+		indexing2.sync(RepoRevision.parse("1/2012-09-27T12:05:34.040Z"));
+		repositem.commit(); // to be sure that second sync doesn't do any solr operations
+		
+		assertEquals(3, repositem.query(new SolrQuery("type:commit AND complete:true")).getResults().size());
+	}	
 	
 }

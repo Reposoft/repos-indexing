@@ -189,7 +189,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			throw new AssertionError("Failed to calculate index status.");
 		}
 		
-		if (lock.equals(revision)) {
+		if (lock.isNewerOrEqual(revision)) {
 			logger.debug("Nothing to do at revision {}", revision);
 			return;
 		}
