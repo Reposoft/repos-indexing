@@ -42,7 +42,8 @@ public class IndexAdminPerRepositoryRepositemTest {
 		
 		indexAdmin.clear();
 		
-		verify(repositem).deleteByQuery("repoid:\"localhost:1234/svn/r\"", 0);
+		verify(repositem).deleteByQuery("repoid:\"localhost:1234/svn/r\"");
+		verify(repositem).commit();
 		assertEquals("Should notify", 1, calls.size());
 	}
 
