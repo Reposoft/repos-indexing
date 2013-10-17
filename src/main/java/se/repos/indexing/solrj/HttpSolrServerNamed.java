@@ -36,7 +36,7 @@ public class HttpSolrServerNamed extends HttpSolrServer {
 
 	@Override
 	public String toString() {
-		return super.getClass().getName() + "(" + identifier + ")";
+		return getClass().getSuperclass().getName() + "(" + identifier + ")";
 	}
 	
 }
