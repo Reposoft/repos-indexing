@@ -49,6 +49,7 @@ public class HandlerPathinfo implements IndexingItemHandler {
 		CmsItemPath path = item.getPath();
 		
 		d.setField("id", idStrategy.getId(repository, revision, path));
+		d.setField("idhead", idStrategy.getIdHead(repository, path));
 		
 		d.setField("repo", repository.getName());
 		d.setField("repoparent", repository.getParentPath());
