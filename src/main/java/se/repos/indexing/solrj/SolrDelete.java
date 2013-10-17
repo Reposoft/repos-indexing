@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 
 public class SolrDelete extends SolrOp {
 	
-	public static final int COMMIT_WITHIN_MILLIS = 1;
-	
 	private static final Logger logger = LoggerFactory.getLogger(SolrDelete.class);
 	
 	private String query;
@@ -26,7 +24,7 @@ public class SolrDelete extends SolrOp {
 
 	@Override
 	public void runOp() throws SolrServerException, IOException {
-		UpdateResponse delete = core.deleteByQuery(query, COMMIT_WITHIN_MILLIS);
+		UpdateResponse delete = core.deleteByQuery(query);
 		logger.debug("Delete response: {}", delete);
 	}
 
