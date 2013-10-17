@@ -18,6 +18,7 @@ import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexAdmin;
 import se.repos.indexing.solrj.SolrCommit;
 import se.repos.indexing.solrj.SolrDelete;
+import se.repos.indexing.solrj.SolrOptimize;
 import se.simonsoft.cms.item.CmsRepository;
 
 @Singleton // Notification receivers won't be notified if this isn't a singleton
@@ -53,6 +54,7 @@ public class IndexAdminPerRepositoryRepositem implements IndexAdmin {
 		for (IndexAdmin p : postActions) {
 			p.clear();
 		}
+		new SolrOptimize(repositem).run();
 	}
 
 }

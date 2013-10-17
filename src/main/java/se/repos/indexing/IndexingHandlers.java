@@ -84,7 +84,8 @@ public abstract class IndexingHandlers {
 				add(HandlerContentDisable.class);
 				add(HandlerSendSolrjRepositem.class);
 				add(MarkerRevisionComplete.class);
-				add(MarkerCommitSolrjRepositem.class);				
+				add(MarkerCommitSolrjRepositem.class);
+				// do we need to optimize? we never delete from this core, except at clean/resync //add(MarkerOptimizeSolrjRepositem.class);
 			}}));
 		}});
 	

@@ -131,6 +131,9 @@
 		<!-- References, resolved to "idhead" field values unless revision is explicit and it resolves to "id" -->
 		<field name="refid" type="string" indexed="true" stored="true" multiValued="true"/>
 		
+		<!-- Custom tags from added handlers, normally used for filtering -->
+		<field name="flag" type="string" indexed="true" stored="true" multiValued="true"/>
+		
 	</fields>
 
 	<!-- field to use to determine and enforce document uniqueness. -->
