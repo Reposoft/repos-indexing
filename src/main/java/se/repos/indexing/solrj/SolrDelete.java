@@ -7,10 +7,15 @@ import java.io.IOException;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.UpdateResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SolrDelete extends SolrOp {
-
-	public static final long COMMIT_WITHIN_MILLIS = 0;
+	
+	public static final int COMMIT_WITHIN_MILLIS = 1;
+	
+	private static final Logger logger = LoggerFactory.getLogger(SolrDelete.class);
 	
 	private String query;
 	
@@ -21,7 +26,8 @@ public class SolrDelete extends SolrOp {
 
 	@Override
 	public void runOp() throws SolrServerException, IOException {
-		core.deleteByQuery(query, 0);
+		UpdateResponse delete = core.deleteByQuery(query, COMMIT_WITHIN_MILLIS);
+		logger.debug("Delete response: {}", delete);
 	}
 
 }

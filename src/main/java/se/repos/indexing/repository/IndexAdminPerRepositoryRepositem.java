@@ -11,6 +11,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.solr.client.solrj.SolrServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexAdmin;
@@ -20,6 +22,8 @@ import se.simonsoft.cms.item.CmsRepository;
 @Singleton // Notification receivers won't be notified if this isn't a singleton
 public class IndexAdminPerRepositoryRepositem implements IndexAdmin {
 
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
 	private CmsRepository repository;
 	private IdStrategy idStrategy;
 	private SolrServer repositem;
@@ -42,6 +46,7 @@ public class IndexAdminPerRepositoryRepositem implements IndexAdmin {
 	@Override
 	public void clear() {
 		String query = "repoid:\"" + idStrategy.getIdRepository(repository).replace("\"", "\\\"") + '"';
+		logger.info("Clearing repository {} using query {}", repository, query);
 		new SolrDelete(repositem, query).run();
 		for (IndexAdmin p : postActions) {
 			p.clear();
