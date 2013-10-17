@@ -3,7 +3,6 @@
  */
 package se.repos.indexing.twophases;
 
-import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,8 +23,6 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Named;
 
 import se.repos.indexing.IdStrategy;
-import se.repos.indexing.IndexConnectException;
-import se.repos.indexing.IndexWriteException;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.HandlerHeadinfo;
 import se.repos.indexing.repository.ReposIndexingPerRepository;

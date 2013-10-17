@@ -121,7 +121,7 @@ public class IndexingDocIncrementalSolrj implements
 	public Object getFieldValue(String name) {
 		if (fieldsUpdated.contains(name)) {
 			Object v = doc.getFieldValue(name);
-			return ((Map) v).values().iterator().next();
+			return ((Map<?, ?>) v).values().iterator().next();
 		}
 		return doc.getFieldValue(name);
 	}

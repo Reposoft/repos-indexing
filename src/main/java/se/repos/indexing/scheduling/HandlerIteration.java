@@ -3,7 +3,9 @@
  */
 package se.repos.indexing.scheduling;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,7 @@ class HandlerIteration {
 	public boolean proceed(IndexingUnit unit) {
 		while (true) {
 			Marker marker = null;
-			boolean markerActive = false;
+			Collection<Marker> skip = new LinkedList<Marker>();
 			Iterator<IndexingItemProgress> uit = unit.getItems().iterator();
 			while (uit.hasNext()) {
 				IndexingItemProgress i = uit.next();
@@ -41,31 +43,37 @@ class HandlerIteration {
 				while (handlers.hasNext()) {
 					IndexingItemHandler handler = handlers.next();
 					if (handler instanceof Marker) {
+						Marker m = (Marker) handler;
 						if (marker == null) {
-							marker = (Marker) handler;
-							markerActive = decision.before(marker);
-						} else {
-							if (!handler.equals(marker)) {
-								throw new IllegalArgumentException("Item has a different marker ordering than previous, got " + handler + " for " + i);
+							if (decision.before(m)) {
+								marker = m;
+							} else {
+								logger.trace("Skip marker {}");
+								skip.add(m);
+								m.ignore();
 							}
 						}
-						logger.debug("Stopped at marker {} for item {}", marker, i);
-						if (markerActive) {
-							marker.handle(i);
-							break; // no more handlers on this item
-						}
+						if (skip.contains(m)) {
+							logger.trace("Skip marker {} as decided for first item", m);
+						} else if (m.equals(marker)) {
+							logger.trace("Handling marker {}", m);
+							m.handle(i);
+							if (!uit.hasNext()) {
+								marker.trigger();
+								if (!decision.after(marker)) {
+									return false;
+								}
+							}	
+							break;
+						} else {
+							throw new IllegalArgumentException("Item has a different marker ordering than previous, got " + handler + " for " + i);
+						} 
 					} else {
 						if (decision.before(handler, i)) {
 							handler.handle(i);
 						} else {
 							logger.debug("Scheduler {} skipped handler {} for item {}", this, handler, i);
 						}
-					}
-				}
-				if (!uit.hasNext() && markerActive) {
-					marker.trigger();
-					if (!decision.after(marker)) {
-						return false;
 					}
 				}
 			}

@@ -186,17 +186,30 @@ public class HandlerIterationTest {
 		assertEquals("Handler1+Item1", c.next().toString());
 		assertEquals("Should proceed with first item until a marker is seen",
 				"Handler2+Item1", c.next().toString());
-		assertEquals("Decision is to ignore the marker, should be flagged before first item",
+		assertEquals("Decision is to ignore the marker, should be flagged before first item (unlike trigger which is after last item)",
 				"Marker1+ignore", c.next().toString());
 		assertEquals("Marker should be skipped so iteration should proceed through the item",
 				"Handler3+Item1", c.next().toString());
 		assertEquals("If iteration should proceed on ignored markers, it means that we'll ask for a decision for all markers at the first item reaching them",
-				"", ""); // but this doesn't mean we get the Marker2 trigger/ignore now, right?
+				"Marker2+Item1", c.next().toString());
 		
-		assertEquals("ran into Marker2 which should not be ignored so iteration goes to next item",
+		assertEquals("Marker2 isn't ignored so iteration should go to Item2 next",
 				"Handler1+Item2", c.next().toString());
-		assertFalse(c.hasNext()); // TODO complete test
-	}	
+		assertEquals("Handler2+Item2", c.next().toString());
+		assertEquals("Handler3+Item2", c.next().toString());
+		assertEquals("Marker2+Item2", c.next().toString());
+		
+		assertEquals("After Item2 all is level so marker2 should be triggered",
+				"Marker2", c.next().toString());
+		assertEquals("Then there's a handler left",
+				"Handler4+Item1", c.next().toString());
+		assertEquals("Handler4+Item2", c.next().toString());
+		assertFalse(c.hasNext());
+	}
+	
+	// TODO test single handler? some logic is triggered on first one and some on last one.
+	
+	// TODO test single item? some logic is triggered on last one.
 	
 	private class HandlerCall {
 		
