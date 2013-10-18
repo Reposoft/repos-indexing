@@ -38,22 +38,27 @@ public class IndexAdminPerRepositoryRepositem implements IndexAdmin {
 		this.repository = repository;
 		this.idStrategy = idStrategy;
 		this.repositem = repositem;
+		logger.info("IndexAdmin initialized for repository {}", repository);
 	}
 	
 	@Override
 	public void addPostAction(IndexAdmin notificationReceiver) {
 		this.postActions.add(notificationReceiver);
+		logger.info("Added IndexAdmin notification to {}", notificationReceiver);
 	}
 
 	@Override
 	public void clear() {
 		String query = "repoid:\"" + idStrategy.getIdRepository(repository).replace("\"", "\\\"") + '"';
-		logger.info("Clearing repository {} using query {}", repository, query);
+		logger.info("Clearing index for repository {} using query {}", repository, query);
 		new SolrDelete(repositem, query).run();
 		new SolrCommit(repositem).run();
 		for (IndexAdmin p : postActions) {
 			p.clear();
 		}
+		if (postActions.size() == 0) {
+			logger.warn("There are no notifications configured. Is there really no stateful indexing? Or is there multiple instances of admin? At {}", this);
+		} 
 		new SolrOptimize(repositem).run();
 	}
 
