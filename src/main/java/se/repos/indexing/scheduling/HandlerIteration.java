@@ -33,6 +33,7 @@ class HandlerIteration {
 	 * @return true if complete
 	 */
 	public boolean proceed(IndexingUnit unit) {
+		java.util.Collection<IndexingItemHandler> seen = logger.isTraceEnabled() ? new java.util.HashSet<IndexingItemHandler>() : null;
 		while (true) {
 			Marker marker = null;
 			Collection<Marker> skip = new LinkedList<Marker>();
@@ -42,13 +43,25 @@ class HandlerIteration {
 				Iterator<IndexingItemHandler> handlers = unit.getHandlers(i);
 				while (handlers.hasNext()) {
 					IndexingItemHandler handler = handlers.next();
+					if (logger.isTraceEnabled()) {
+						if (!seen.contains(handler)) {
+							seen.add(handler);
+							logger.trace("Running {} {} for the first time this unit", handler instanceof Marker ? "marker" : "handler", handler);
+						}
+						if (!uit.hasNext()) {
+							logger.trace("Running {} {} for the last time this unit", handler instanceof Marker ? "marker" : "handler", handler);
+						}
+					}
+					if (handler instanceof java.lang.reflect.Proxy) {
+						logger.warn("Handler {} is a dynamic proxy. Even if the proxied class is a Marker it can't be handled as such.", handler); // can't cast, right?
+					}
 					if (handler instanceof Marker) {
 						Marker m = (Marker) handler;
 						if (marker == null) {
 							if (decision.before(m)) {
 								marker = m;
 							} else {
-								logger.trace("Skip marker {}");
+								logger.trace("Skip marker {} for this indexing unit", m);
 								skip.add(m);
 								m.ignore();
 							}
@@ -59,6 +72,7 @@ class HandlerIteration {
 							logger.trace("Handling marker {}", m);
 							m.handle(i);
 							if (!uit.hasNext()) {
+								logger.trace("Trigger marker {}, all items level", m);
 								marker.trigger();
 								if (!decision.after(marker)) {
 									return false;
@@ -72,7 +86,7 @@ class HandlerIteration {
 						if (decision.before(handler, i)) {
 							handler.handle(i);
 						} else {
-							logger.trace("Scheduler {} skipped handler {} for item {}", this, handler, i);
+							logger.trace("Skip handler {} for item {} as decided by {}", handler, i, decision);
 						}
 					}
 				}

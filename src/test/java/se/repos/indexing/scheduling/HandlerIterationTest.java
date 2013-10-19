@@ -99,7 +99,7 @@ public class HandlerIterationTest {
 		
 		IndexingUnit unit = new IndexingUnit(changeset1, handlers);
 		
-		HandlerIteration runeverything = new HandlerIteration(new MarkerDecision() {
+		HandlerIteration skipHandler2 = new HandlerIteration(new MarkerDecision() {
 			@Override
 			public boolean before(IndexingItemHandler handler, IndexingItemProgress item) {
 				return !(handler instanceof Handler2);
@@ -116,7 +116,7 @@ public class HandlerIterationTest {
 			}
 		});
 		
-		runeverything.proceed(unit);
+		skipHandler2.proceed(unit);
 		
 		System.out.println(calls);
 		
@@ -159,7 +159,7 @@ public class HandlerIterationTest {
 		
 		IndexingUnit unit = new IndexingUnit(changeset1, handlers);
 		
-		HandlerIteration runeverything = new HandlerIteration(new MarkerDecision() {
+		HandlerIteration skipMarker1 = new HandlerIteration(new MarkerDecision() {
 			@Override
 			public boolean before(IndexingItemHandler handler, IndexingItemProgress item) {
 				return true;
@@ -177,7 +177,7 @@ public class HandlerIterationTest {
 		});
 		
 		try {
-			runeverything.proceed(unit);
+			skipMarker1.proceed(unit);
 		} finally {
 			System.out.println(calls);
 		}
@@ -207,9 +207,53 @@ public class HandlerIterationTest {
 		assertFalse(c.hasNext());
 	}
 	
-	// TODO test single handler? some logic is triggered on first one and some on last one.
-	
-	// TODO test single item? some logic is triggered on last one.
+	@Test
+	public void testSingleItem() {
+		IndexingItemProgress item1 = mock(IndexingItemProgress.class, "Item1");
+		Set<IndexingItemProgress> changeset1 = new LinkedHashSet<IndexingItemProgress>();
+		changeset1.add(item1);
+		
+		List<HandlerCall> calls = new LinkedList<HandlerCall>();
+		List<IndexingItemHandler> handlers = new LinkedList<IndexingItemHandler>();
+		handlers.add(new Handler1(calls));
+		handlers.add(new Handler2(calls));
+		handlers.add(new Handler3(calls));
+		handlers.add(new Marker1(calls));
+		handlers.add(new Marker2(calls));
+		handlers.add(new Handler4(calls));
+		
+		IndexingUnit unit = new IndexingUnit(changeset1, handlers);
+		
+		HandlerIteration skipsome = new HandlerIteration(new MarkerDecision() {
+			@Override
+			public boolean before(IndexingItemHandler handler, IndexingItemProgress item) {
+				return !(handler instanceof Handler2);
+			}
+			
+			@Override
+			public boolean before(Marker marker) {
+				return !(marker instanceof Marker1);
+			}
+			
+			@Override
+			public boolean after(Marker marker) {
+				return true;
+			}
+		});
+		
+		skipsome.proceed(unit);
+		
+		System.out.println(calls);
+		
+		Iterator<HandlerCall> c = calls.iterator();
+		assertEquals("Handler1+Item1", c.next().toString());
+		assertEquals("Handler3+Item1", c.next().toString());
+		assertEquals("Marker1+ignore", c.next().toString());
+		assertEquals("Marker2+Item1", c.next().toString());
+		assertEquals("Marker2", c.next().toString());
+		assertEquals("Handler4+Item1", c.next().toString());
+		assertFalse(c.hasNext());
+	}
 	
 	private class HandlerCall {
 		
