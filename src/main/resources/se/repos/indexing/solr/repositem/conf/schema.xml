@@ -134,6 +134,9 @@
 		<!-- Custom tags from added handlers, normally used for filtering -->
 		<field name="flag" type="string" indexed="true" stored="true" multiValued="true"/>
 		
+		<!-- Unique ID for an item, survives revisions and moves, can be allocated before add, a concept not implemented by default -->
+		<field name="uid" type="string" indexed="true" stored="true" multiValued="false" />
+		
 	</fields>
 
 	<!-- field to use to determine and enforce document uniqueness. -->
