@@ -42,7 +42,8 @@ public class MarkerOptimizeSolrj implements MarkerWhenIdle {
 
 	@Override
 	public void trigger() {
-		if (revision.getNumber() % revisionInterval == 0) {
+		long n = revision.getNumber();
+		if (n > 0 && revision.getNumber() % revisionInterval == 0) {
 			new SolrOptimize(core).run();
 		}		
 	}

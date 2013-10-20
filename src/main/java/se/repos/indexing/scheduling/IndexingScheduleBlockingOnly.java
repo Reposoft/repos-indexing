@@ -27,7 +27,7 @@ public class IndexingScheduleBlockingOnly implements IndexingSchedule {
 	private boolean running = false;
 	
 	/**
-	 * Blocking is always started, no queue.
+	 * Blocking doesn't need a queue, but should support start and stop.
 	 */
 	@Override
 	public IndexingSchedule start() throws IllegalStateException {
