@@ -32,7 +32,7 @@
     <lst name="defaults">
       <str name="omitHeader">true</str>
     </lst>
-  </requestHandler>  
+  </requestHandler>
   
   <requestHandler name="/replication" class="solr.ReplicationHandler" startup="lazy" /> 
 
