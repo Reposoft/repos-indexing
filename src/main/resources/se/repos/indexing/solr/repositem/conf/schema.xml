@@ -122,13 +122,15 @@
 		<field name="text_error" type="text_general" indexed="true" stored="true" multiValued="false" />
 		<!-- General field for embedded metadata, colon on field name replaced with dot  -->
 		<dynamicField name="embd_*" type="metadata" indexed="true" stored="true" multiValued="false" />
+		<!-- Useful commonality that can be found in prop_* or embd_* or somewhere else added as copyField or custom indeding handler -->
+		<field name="title" type="text_general" indexed="true" stored="true" multiValued="false" />
+		<field name="keywords" type="metadata" indexed="true" stored="true" multiValued="false" />
 		
-		<!-- References, unresolved, including external -->
-		<field name="ref" type="string" indexed="true" stored="true" multiValued="true"/>
-		<!-- References, resolved to "url" field values, excluding query string and fragments (such as revisions) -->
+		<!-- References, unresolved, including external, different types for example ref_link -->
+		<dynamicField name="ref_*" type="string" indexed="true" stored="true" multiValued="true"/>
+		<!-- All references, resolved to "url" field values, excluding query string and fragments (such as revisions) -->
 		<field name="refurl" type="string" indexed="true" stored="true" multiValued="true"/>
-		<!-- Given a link between resources it is impossible to resolve that to an id with a specific revision unless it has a "peg revision" in the URL -->
-		<!-- References, resolved to "idhead" field values unless revision is explicit and it resolves to "id" -->
+		<!-- All references, resolved to "idhead" field values unless revision is explicit and it resolves to "id" -->
 		<field name="refid" type="string" indexed="true" stored="true" multiValued="true"/>
 		
 		<!-- Custom tags from added handlers, normally used for filtering -->
