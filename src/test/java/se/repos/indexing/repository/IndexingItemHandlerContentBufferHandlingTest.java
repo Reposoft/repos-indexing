@@ -7,7 +7,6 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
-import java.util.Set;
 
 import org.junit.Test;
 

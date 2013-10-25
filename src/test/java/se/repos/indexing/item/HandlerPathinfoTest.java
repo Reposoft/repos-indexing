@@ -30,7 +30,7 @@ public class HandlerPathinfoTest {
 		CmsChangesetItem item = mock(CmsChangesetItem.class);
 		IndexingItemProgress p = new IndexingItemStandalone(repo, rev, item);
 		
-		when(item.getPath()).thenReturn(new CmsItemPath("/my/dir/file.txt"));
+		when(item.getPath()).thenReturn(new CmsItemPath("/my/dir/a file.txt"));
 		when(item.isFile()).thenReturn(true);
 		when(item.isFolder()).thenReturn(false);
 		when(item.getRevisionChanged()).thenReturn(new RepoRevision(rev.getNumber() - 2, new Date(rev.getDate().getTime() - 1000)));
@@ -44,11 +44,11 @@ public class HandlerPathinfoTest {
 		pathinfo.handle(p);
 		
 		IndexingDoc f = p.getFields();
-		assertEquals("/my/dir/file.txt", f.getFieldValue("path"));
-		assertEquals("file.txt", f.getFieldValue("pathname"));
+		assertEquals("/my/dir/a file.txt", f.getFieldValue("path"));
+		assertEquals("a file.txt", f.getFieldValue("pathname"));
 		assertEquals("/my/dir", f.getFieldValue("pathdir"));
 		assertEquals("txt", f.getFieldValue("pathext"));
-		assertEquals("/svn/repo1/my/dir/file.txt", f.getFieldValue("pathfull"));
+		assertEquals("/svn/repo1/my/dir/a file.txt", f.getFieldValue("pathfull"));
 		Collection<Object> in = f.getFieldValues("pathin");
 		assertEquals(2, in.size());
 		Iterator<Object> init = in.iterator();
@@ -66,7 +66,7 @@ public class HandlerPathinfoTest {
 		Iterator<Object> partit = part.iterator();
 		assertEquals("my", partit.next());
 		assertEquals("dir", partit.next());
-		assertEquals("file.txt", partit.next());
+		assertEquals("a file.txt", partit.next());
 		assertEquals(3, part.size());
 		
 		assertEquals('A', f.getFieldValue("pathstat"));
@@ -78,8 +78,8 @@ public class HandlerPathinfoTest {
 		assertEquals(rev.getNumber() - 2, f.getFieldValue("revc"));
 		assertEquals(new Date(rev.getDate().getTime() - 1000), f.getFieldValue("revct"));
 		
-		assertEquals("https://h.ost:1080/svn/repo1/my/dir/file.txt", f.getFieldValue("url"));
-		assertEquals("/svn/repo1/my/dir/file.txt", f.getFieldValue("urlpath"));
+		assertEquals("https://h.ost:1080/svn/repo1/my/dir/a%20file.txt", f.getFieldValue("url"));
+		assertEquals("/svn/repo1/my/dir/a%20file.txt", f.getFieldValue("urlpath"));
 		
 		assertEquals("repo1", f.getFieldValue("repo"));
 		assertEquals("h.ost:1080", f.getFieldValue("repohost"));

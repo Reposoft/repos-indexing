@@ -8,15 +8,12 @@ import static org.mockito.Mockito.*;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-
-import com.sun.xml.internal.xsom.impl.scd.Iterators.Map;
 
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;

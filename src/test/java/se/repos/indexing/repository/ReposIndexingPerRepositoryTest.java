@@ -6,11 +6,9 @@ package se.repos.indexing.repository;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import org.apache.log4j.spi.RepositorySelector;
 import org.apache.solr.client.solrj.SolrServer;
 import org.junit.Test;
 
-import se.repos.indexing.IndexingState;
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.item.IdStrategyDefault;
 import se.repos.indexing.scheduling.IndexingSchedule;

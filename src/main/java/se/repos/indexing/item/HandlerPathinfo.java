@@ -16,6 +16,7 @@ import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
+import se.simonsoft.cms.item.impl.CmsItemIdUrl;
 
 /**
  * Metadata but not versioned properties about an item,
@@ -113,9 +114,9 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			d.setField("copyhas", true); // or pathcopyhas?
 		}
 		
-		String pathurl = urlencode(path);
-		d.setField("url", repository.getUrl() + pathurl);
-		d.setField("urlpath", repository.getUrlAtHost() + pathurl);
+		CmsItemIdUrl url = new CmsItemIdUrl(repository, path);
+		d.setField("url", url.getUrl());
+		d.setField("urlpath", url.getUrlAtHost());
 	}
 	
 	@Override
