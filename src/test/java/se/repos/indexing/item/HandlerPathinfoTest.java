@@ -70,7 +70,7 @@ public class HandlerPathinfoTest {
 		assertEquals(3, part.size());
 		
 		assertEquals('A', f.getFieldValue("pathstat"));
-		assertEquals(null, f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but it does it matter to search?
+		assertEquals(null, f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but does it matter to search?
 		assertEquals("file", f.getFieldValue("type"));
 		
 		assertEquals(rev.getNumber(), f.getFieldValue("rev"));
@@ -85,8 +85,66 @@ public class HandlerPathinfoTest {
 		assertEquals("h.ost:1080", f.getFieldValue("repohost"));
 		assertEquals("/svn", f.getFieldValue("repoparent"));
 		assertEquals("h.ost:1080/svn/repo1", f.getFieldValue("repoid"));
-		// TODO logical ID
-		
 	}
 
+	@Test
+	public void testHandlePropchangeAndCopy() {
+		HandlerPathinfo pathinfo = new HandlerPathinfo();
+		pathinfo.setIdStrategy(new IdStrategyDefault());
+		CmsRepository repo = new CmsRepository("https://h.ost:1080/svn/repo1");
+		RepoRevision rev = new RepoRevision(10L, new Date());
+		
+		CmsChangesetItem item = mock(CmsChangesetItem.class);
+		IndexingItemProgress p = new IndexingItemStandalone(repo, rev, item);
+		
+		when(item.getPath()).thenReturn(new CmsItemPath("/my/dir/a file.txt"));
+		when(item.isFile()).thenReturn(true);
+		when(item.isFolder()).thenReturn(false);
+		when(item.getRevisionChanged()).thenReturn(new RepoRevision(rev.getNumber() - 2, new Date(rev.getDate().getTime() - 1000)));
+		
+		when(item.isAdd()).thenReturn(false);
+		when(item.isContent()).thenReturn(false);
+		when(item.isContentModified()).thenReturn(false);
+		when(item.isProperties()).thenReturn(true);
+		when(item.isPropertiesModified()).thenReturn(true);
+		when(item.isCopySource()).thenReturn(true);
+		
+		pathinfo.handle(p);
+		
+		IndexingDoc f = p.getFields();
+		
+		assertEquals(null, f.getFieldValue("pathstat"));
+		assertEquals('M', f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but does it matter to search?
+		assertEquals(true, f.getFieldValue("copyhas"));
+		
+		CmsChangesetItem item2 = mock(CmsChangesetItem.class);
+		IndexingItemProgress p2 = new IndexingItemStandalone(repo, rev, item2);
+		
+		when(item2.getPath()).thenReturn(new CmsItemPath("/my/dir/another file.txt"));
+		when(item2.isFile()).thenReturn(true);
+		when(item2.isFolder()).thenReturn(false);
+		when(item2.getRevisionChanged()).thenReturn(new RepoRevision(rev.getNumber() - 2, new Date(rev.getDate().getTime() - 1000)));
+		
+		when(item2.isAdd()).thenReturn(true);
+		when(item2.isContent()).thenReturn(true);
+		when(item2.isContentModified()).thenReturn(false);
+		when(item2.isProperties()).thenReturn(true);
+		when(item2.isPropertiesModified()).thenReturn(false);
+		when(item2.isCopySource()).thenReturn(false);
+		when(item2.isCopy()).thenReturn(true);
+		when(item2.getCopyFromPath()).thenReturn(new CmsItemPath("/my/dir/a file.txt"));
+		when(item2.getCopyFromRevision()).thenReturn(new RepoRevision(rev.getNumber() - 4, new Date(rev.getDate().getTime() - 4000)));
+		
+		pathinfo.handle(p2);
+		IndexingDoc f2 = p2.getFields();
+		assertEquals('A', f2.getFieldValue("pathstat"));
+		assertEquals(null, f2.getFieldValue("pathstatprop"));
+		assertEquals(false, f2.getFieldValue("copyhas"));
+		assertEquals("/my/dir/a file.txt", f2.getFieldValue("copyfrom"));
+		assertEquals(6L, f2.getFieldValue("copyfromrev"));
+		assertNotNull(f2.getFieldValue("copyfromrevt"));
+	}
+	
+	
+	
 }

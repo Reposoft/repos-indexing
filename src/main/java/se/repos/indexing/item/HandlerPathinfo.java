@@ -3,8 +3,6 @@
  */
 package se.repos.indexing.item;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -24,7 +22,6 @@ import se.simonsoft.cms.item.impl.CmsItemIdUrl;
  */
 public class HandlerPathinfo implements IndexingItemHandler {
 
-	private static final String URLENCODE_CHARSET = "UTF-8";
 	public static final String TYPE_FILE = "file";
 	public static final String TYPE_FOLDER = "folder";
 	
@@ -110,8 +107,11 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			d.setField("pathstatprop", STAT_MODIFY);
 		}
 		
-		if (item.isCopy()) { // TODO is this flag set for deletions that are copy-from sources in the same commit? no- do we need hasCopy?
-			d.setField("copyhas", true); // or pathcopyhas?
+		d.setField("copyhas", item.isCopySource());
+		if (item.isCopy()) {
+			d.setField("copyfrom", item.getCopyFromPath().toString());
+			d.setField("copyfromrev", item.getCopyFromRevision().getNumber());
+			d.setField("copyfromrevt", item.getCopyFromRevision().getDate());
 		}
 		
 		CmsItemIdUrl url = new CmsItemIdUrl(repository, path);
@@ -122,22 +122,6 @@ public class HandlerPathinfo implements IndexingItemHandler {
 	@Override
 	public Set<Class<? extends IndexingItemHandler>> getDependencies() {
 		return null;
-	}
-	
-	private String urlencode(CmsItemPath path) {
-		StringBuffer b = new StringBuffer();
-		for (String p : path.getPathSegments()) {
-			b.append('/').append(urlencode(p));
-		}
-		return b.toString();
-	}
-	
-	private String urlencode(String str) {
-		try {
-			return URLEncoder.encode(str, URLENCODE_CHARSET);
-		} catch (UnsupportedEncodingException e) {
-			throw new IllegalStateException("Server does not support charset " + URLENCODE_CHARSET, e);
-		}
 	}
 	
 }
