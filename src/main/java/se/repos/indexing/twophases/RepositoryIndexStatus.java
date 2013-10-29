@@ -158,7 +158,11 @@ public class RepositoryIndexStatus {
 		String repoid = idStrategy.getIdRepository(repository);
 		SolrInputDocument docStart = new SolrInputDocument();
 		docStart.addField("id", id);
+		docStart.addField("repo", repository.getName());
 		docStart.addField("repoid", repoid);
+		docStart.addField("repoparent", repository.getParentPath());
+		docStart.addField("repohost", repository.getHost());
+		
 		docStart.addField("type", "commit");
 		docStart.addField("rev", idStrategy.getIdRevision(revision));
 		docStart.addField("revt", revision.getDate());
