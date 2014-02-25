@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.inject.Named;
 
-import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.HandlerHeadinfo;
 import se.repos.indexing.repository.ReposIndexingPerRepository;
@@ -32,6 +31,7 @@ import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
+import se.simonsoft.cms.item.indexing.IdStrategy;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 /**

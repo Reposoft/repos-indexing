@@ -14,12 +14,12 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexAdmin;
 import se.repos.indexing.solrj.SolrCommit;
 import se.repos.indexing.solrj.SolrDelete;
 import se.repos.indexing.solrj.SolrOptimize;
 import se.simonsoft.cms.item.CmsRepository;
+import se.simonsoft.cms.item.indexing.IdStrategy;
 
 @Singleton // Notification receivers won't be notified if this isn't a singleton
 public class IndexAdminPerRepositoryRepositem implements IndexAdmin {

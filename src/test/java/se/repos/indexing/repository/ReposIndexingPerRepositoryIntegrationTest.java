@@ -29,12 +29,10 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
 
-import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexAdmin;
 import se.repos.indexing.IndexingHandlers;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.ReposIndexing;
-import se.repos.indexing.item.IdStrategyDefault;
 import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.scheduling.IndexingSchedule;
@@ -63,6 +61,9 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+
+import se.simonsoft.cms.item.indexing.IdStrategy;
+import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 
 public class ReposIndexingPerRepositoryIntegrationTest {
 

@@ -6,10 +6,8 @@ package se.repos.indexing.testconfig;
 import org.apache.solr.client.solrj.SolrServer;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
 
-import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.ReposIndexing;
-import se.repos.indexing.item.IdStrategyDefault;
 import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.repos.indexing.item.HandlerPathinfo;
 import se.repos.indexing.item.HandlerProperties;
@@ -32,6 +30,9 @@ import se.simonsoft.cms.item.inspection.CmsContentsReader;
 import com.google.inject.AbstractModule;
 import com.google.inject.multibindings.Multibinder;
 import com.google.inject.name.Names;
+
+import se.simonsoft.cms.item.indexing.IdStrategy;
+import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 
 /**
  * Indexing configuration for our tests in this module.

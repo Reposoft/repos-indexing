@@ -14,10 +14,10 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.Test;
 
-import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexAdmin;
-import se.repos.indexing.item.IdStrategyDefault;
 import se.simonsoft.cms.item.CmsRepository;
+import se.simonsoft.cms.item.indexing.IdStrategy;
+import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 
 public class IndexAdminPerRepositoryRepositemTest {
 

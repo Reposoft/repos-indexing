@@ -9,12 +9,13 @@ import java.util.Date;
 
 import org.junit.Test;
 
-import se.repos.indexing.IdStrategy;
 import se.simonsoft.cms.item.CmsItemId;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.impl.CmsItemIdArg;
+import se.simonsoft.cms.item.indexing.IdStrategy;
+import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 
 public class IdStrategyDefaultTest {
 

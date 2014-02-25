@@ -148,7 +148,7 @@ public class ItemContentsMemorySizeLimit implements ItemContentBufferStrategy {
 				} catch (FileNotFoundException e1) {
 					throw new IllegalStateException("Failed to write to templ file for contents buffer");
 				}
-				reader.getContents(repository, revision, path, out);
+				reader.getContents(repository, revision, path, out);			
 			}
 			try {
 				return new FileInputStream(tempfile);

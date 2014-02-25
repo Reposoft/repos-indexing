@@ -3,10 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<artifactId>repos-indexing</artifactId>
-	<version>0.7.4</version>
+	<version>0.7.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	
-	<name>Repos Indexing</name>
+	<name>${project.artifactId}-${project.version}</name>
 	<url>http://www.repos.se/</url>
 	
 	<parent>
@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>se.simonsoft</groupId>
 			<artifactId>cms-item</artifactId>
-			<version>2.1.2</version>
+			<version>2.1.4</version>
 		</dependency>
 		<dependency>
 			<groupId>se.simonsoft</groupId>

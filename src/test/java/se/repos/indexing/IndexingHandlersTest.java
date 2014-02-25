@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import se.repos.indexing.item.IdStrategyDefault;
 import se.repos.indexing.item.IndexingItemProgress;
 import se.repos.indexing.item.HandlerPathinfo;
 import se.repos.indexing.item.HandlerProperties;
@@ -23,6 +22,9 @@ import com.google.inject.Key;
 import com.google.inject.Module;
 import com.google.inject.TypeLiteral;
 import com.google.inject.multibindings.Multibinder;
+
+import se.simonsoft.cms.item.indexing.IdStrategy;
+import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 
 public class IndexingHandlersTest {
 

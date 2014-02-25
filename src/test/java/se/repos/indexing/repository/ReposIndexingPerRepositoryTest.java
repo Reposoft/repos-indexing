@@ -10,9 +10,9 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.junit.Test;
 
 import se.repos.indexing.ReposIndexing;
-import se.repos.indexing.item.IdStrategyDefault;
 import se.repos.indexing.scheduling.IndexingSchedule;
 import se.simonsoft.cms.item.CmsRepository;
+import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 
 public class ReposIndexingPerRepositoryTest {
 

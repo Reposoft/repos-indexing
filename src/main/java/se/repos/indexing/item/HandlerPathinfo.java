@@ -7,7 +7,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import se.repos.indexing.IdStrategy;
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.IndexingItemHandler;
 import se.simonsoft.cms.item.CmsItemPath;
@@ -15,6 +14,7 @@ import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.impl.CmsItemIdUrl;
+import se.simonsoft.cms.item.indexing.IdStrategy;
 
 /**
  * Metadata but not versioned properties about an item,
