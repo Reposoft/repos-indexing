@@ -162,7 +162,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
 		
-		SolrDocumentList r1 = repositem.query(new SolrQuery("id:*@1").setSort("path", ORDER.asc)).getResults();
+		SolrDocumentList r1 = repositem.query(new SolrQuery("id:*@0000000001").setSort("path", ORDER.asc)).getResults();
 		assertEquals(3, r1.size());
 		assertEquals("/dir", r1.get(0).getFieldValue("path"));
 		for (int i = 0; i < 3; i++) {
@@ -173,16 +173,16 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		}
 		
 		indexing.sync(new RepoRevision(2, new Date(2)));
-		SolrDocumentList r2r1 = repositem.query(new SolrQuery("id:*@1").setSort("path", ORDER.asc)).getResults();
+		SolrDocumentList r2r1 = repositem.query(new SolrQuery("id:*@0000000001").setSort("path", ORDER.asc)).getResults();
 		// TODO support folders assertEquals("/dir " + r2r1.get(0), true, r2r1.get(0).get("head"));
 		assertEquals("/dir/t2.txt " + r2r1.get(1), true, r2r1.get(1).get("head"));
 		assertEquals("should have updated old /t1.txt" + r2r1.get(2), false, r2r1.get(2).get("head"));
-		SolrDocumentList r2 = repositem.query(new SolrQuery("id:*@2").setSort("path", ORDER.asc)).getResults();
+		SolrDocumentList r2 = repositem.query(new SolrQuery("id:*@0000000002").setSort("path", ORDER.asc)).getResults();
 		assertEquals("next revision should be head, " + r2.get(0), true, r2.get(0).get("head"));
 		
 		indexing.sync(new RepoRevision(3, new Date(3)));
 		// everything from r1 should now have been replaced with later versions
-		SolrDocumentList r3r1 = repositem.query(new SolrQuery("id:*@1").setSort("path", ORDER.asc)).getResults();
+		SolrDocumentList r3r1 = repositem.query(new SolrQuery("id:*@0000000001").setSort("path", ORDER.asc)).getResults();
 		
 		assertEquals("/dir", r3r1.get(0).get("path"));
 		assertEquals("/dir/t2.txt", r3r1.get(1).get("path"));
@@ -193,12 +193,12 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals("Old file that is now gone because of folder delete should not be head", false, r3r1.get(1).get("head"));
 		assertEquals("The file that was changed in r3 should now be marked as non-head", false, r3r1.get(2).get("head"));
 		
-		SolrDocumentList r3r2 = repositem.query(new SolrQuery("id:*@2").setSort("path", ORDER.asc)).getResults();
+		SolrDocumentList r3r2 = repositem.query(new SolrQuery("id:*@0000000002").setSort("path", ORDER.asc)).getResults();
 		assertEquals("There was only a file edit in rev 2", 1, r3r2.size());
 		assertEquals("/t1.txt", r3r2.get(0).get("path"));
 		assertEquals("Rev 2 is still HEAD for this file", true, r3r2.get(0).get("head"));
 		
-		SolrDocumentList r3r3 = repositem.query(new SolrQuery("id:*@3").setSort("path", ORDER.asc)).getResults();
+		SolrDocumentList r3r3 = repositem.query(new SolrQuery("id:*@0000000003").setSort("path", ORDER.asc)).getResults();
 		assertEquals("Deletions should be indexed so we know when an item disappeared", "/dir", r3r3.get(0).get("path"));
 		// TODO assertEquals("Deletions should always be !head", false, r3r3.get(0).get("head"));
 		assertEquals("Deletions should always be !head", false, r3r3.get(1).get("head"));
@@ -260,7 +260,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		// mess with the index to see how sync status is handled
 		SolrInputDocument markAsFailed = new SolrInputDocument();
-		markAsFailed.setField("id", r1.getResults().get(1).getFieldValue("id").toString().replace("#1", "#2"));
+		markAsFailed.setField("id", r1.getResults().get(1).getFieldValue("id").toString().replace("#0000000001", "#0000000002"));
 		markAsFailed.setField("complete", new HashMap<String, Boolean>() {{
 			put("set", false);
 		}});
@@ -279,7 +279,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 			// expected
 		}
 		
-		markAsFailed.setField("id", r1.getResults().get(1).getFieldValue("id").toString().replace("#1", "#3"));
+		markAsFailed.setField("id", r1.getResults().get(1).getFieldValue("id").toString().replace("#0000000001", "#0000000003"));
 		markAsFailed.setField("complete", new HashMap<String, Boolean>() {{
 			put("set", false);
 		}});

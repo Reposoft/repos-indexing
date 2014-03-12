@@ -24,7 +24,7 @@ public class IdStrategyDefaultTest {
 		IdStrategy strategy = new IdStrategyDefault();
 		CmsRepository repo = new CmsRepository("http://some.host:123/svn/repo1");
 		RepoRevision rev = new RepoRevision(1, new Date());
-		assertEquals("some.host:123/svn/repo1/a/b.txt@1", strategy.getId(repo, rev, new CmsItemPath("/a/b.txt")));
+		assertEquals("some.host:123/svn/repo1/a/b.txt@0000000001", strategy.getId(repo, rev, new CmsItemPath("/a/b.txt")));
 		// Do we ever use the repository ID directly? //assertNotEquals("repository id must be distinguished from root item id",
 		//		strategy.getIdRepository(repo), strategy.getIdHead(repo, null));
 		assertTrue("repoid should be prefix to item ids", strategy.getId(repo, rev, new CmsItemPath("/a/b.txt"))
@@ -70,11 +70,11 @@ public class IdStrategyDefaultTest {
 		CmsRepository repo = new CmsRepository("http://some.host:123/svn/repo1");
 		RepoRevision rev = new RepoRevision(1, new Date());
 		
-		assertEquals("some.host:123/svn/repo1/a%20b/c.txt@1", strategy.getId(repo, rev, new CmsItemPath("/a b/c.txt")));
+		assertEquals("some.host:123/svn/repo1/a%20b/c.txt@0000000001", strategy.getId(repo, rev, new CmsItemPath("/a b/c.txt")));
 		
-		assertEquals("some.host:123/svn/repo1/a/%3F.txt@1", strategy.getId(repo, rev, new CmsItemPath("/a/?.txt"))); // quite possibly not a valid path
+		assertEquals("some.host:123/svn/repo1/a/%3F.txt@0000000001", strategy.getId(repo, rev, new CmsItemPath("/a/?.txt"))); // quite possibly not a valid path
 		
-		assertEquals("some.host:123/svn/repo1/a%40b/c.txt@1", strategy.getId(repo, rev, new CmsItemPath("/a@b/c.txt")));
+		assertEquals("some.host:123/svn/repo1/a%40b/c.txt@0000000001", strategy.getId(repo, rev, new CmsItemPath("/a@b/c.txt")));
 		
 	}
 	
@@ -83,7 +83,7 @@ public class IdStrategyDefaultTest {
 		IdStrategy strategy = new IdStrategyDefault();
 		CmsRepository repo = new CmsRepository("http://some.host:123/svn/repo%20space");
 		RepoRevision rev = new RepoRevision(1, new Date());
-		assertEquals("some.host:123/svn/repo%20space/a/b.txt@1", strategy.getId(repo, rev, new CmsItemPath("/a/b.txt")));
+		assertEquals("some.host:123/svn/repo%20space/a/b.txt@0000000001", strategy.getId(repo, rev, new CmsItemPath("/a/b.txt")));
 		CmsRepository repoFromPath = new CmsRepository("http://some.host:123", "/svn", "repo space");
 		// behavior still undefined in CmsRepository //assertEquals("some.host:123/svn/repo%20space/a/b.txt@1", strategy.getId(repoFromPath, rev, new CmsItemPath("/a/b.txt")));
 	}
