@@ -151,7 +151,7 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 	
 		// mess with the index to see how sync status is handled
 		SolrInputDocument fake2 = new SolrInputDocument();
-		String id2 = r1.getResults().get(1).getFieldValue("id").toString().replace("#00000001", "#00000002");
+		String id2 = r1.getResults().get(1).getFieldValue("id").toString().replace("#0000000001", "#0000000002");
 		fake2.setField("id", id2);
 		fake2.setField("complete", true);
 		getSolr().add(fake2);
