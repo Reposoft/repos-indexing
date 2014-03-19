@@ -19,6 +19,7 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import se.repos.indexing.IndexingItemHandler;
@@ -171,6 +172,7 @@ public class ReposIndexingIntegrationTest extends SolrTestCaseJ4 {
 		}
 	}
 	
+	@Ignore // this is tested with non deprecated sync in se.repos.indexing.repository.ReposIndexingPerRepositoryIntegrationTest.
 	@Test
 	public void testMarkItemHead() throws SolrServerException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
