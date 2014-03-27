@@ -80,6 +80,8 @@
 		<field name="path"     type="string" indexed="true"  stored="true"  multiValued="false"/>
 		<!-- file or folder name -->
 		<field name="pathname" type="string" indexed="true"  stored="false" multiValued="false"/>
+		<!-- file or folder name before extension, , i.e. the part before the last dot -->
+		<field name="pathnamebase" type="string" indexed="true"  stored="false" multiValued="false"/>
 		<!-- extension, i.e. the part after the last dot -->
 		<field name="pathext"  type="string" indexed="true"  stored="false" multiValued="false"/>
 		<!-- path in repository up to parent (including for folders), no trailing slash -->
@@ -122,7 +124,11 @@
 		<field name="text_error" type="text_general" indexed="true" stored="true" multiValued="false" />
 		<!-- General field for embedded metadata, colon on field name replaced with dot  -->
 		<dynamicField name="embd_*" type="metadata" indexed="true" stored="true" multiValued="false" />
-		<!-- Useful commonality that can be found in prop_* or embd_* or somewhere else added as copyField or custom indeding handler -->
+		<!-- General field for XMP metadata, colon on field name replaced with dot  -->
+		<dynamicField name="xmp_*" type="metadata" indexed="true" stored="true" multiValued="false" />
+		<!-- Most basic form of "name" for an item, copy of pathnamebase (no extension).  -->
+		<field name="name" type="filename" indexed="true" stored="true" multiValued="false" />
+		<!-- Useful commonality that can be found in prop_* or embd_* or somewhere else added as copyField or custom indexing handler -->
 		<field name="title" type="text_general" indexed="true" stored="true" multiValued="false" />
 		<field name="keywords" type="metadata" indexed="true" stored="true" multiValued="false" />
 		
@@ -140,6 +146,9 @@
 		<field name="uid" type="string" indexed="true" stored="true" multiValued="false" />
 		
 	</fields>
+	
+	<!-- Name from pathnamebase (no extension), with different word delimiter. -->
+	<copyField source="pathnamebase" dest="name"/>
 
 	<!-- field to use to determine and enforce document uniqueness. -->
 	<uniqueKey>id</uniqueKey>
@@ -159,6 +168,15 @@
 		<fieldType name="metadata" class="solr.TextField">
 			<analyzer>
 				<tokenizer class="solr.PatternTokenizerFactory" pattern="[\s,;]+" />
+				<!-- Any negative aspects of case-insensitivity on metadata? -->
+				<filter class="solr.LowerCaseFilterFactory" />
+			</analyzer>
+		</fieldType>
+		
+		<fieldType name="filename" class="solr.TextField">
+			<analyzer>
+				<tokenizer class="solr.PatternTokenizerFactory" pattern="[\s,;_-]+" />
+				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
 		</fieldType>
 	

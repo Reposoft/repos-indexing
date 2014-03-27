@@ -56,6 +56,7 @@ public class HandlerPathinfo implements IndexingItemHandler {
 		
 		d.setField("path", path.toString());
 		d.setField("pathname", path.getName());
+		d.setField("pathnamebase", path.getNameBase());
 		d.setField("pathext", path.getExtension());
 		
 		String repopath = repository.getPath();
