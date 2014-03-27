@@ -168,7 +168,7 @@
 		<fieldType name="metadata" class="solr.TextField">
 			<analyzer>
 				<tokenizer class="solr.PatternTokenizerFactory" pattern="[\s,;]+" />
-				<!-- Any negative aspects of case-insensitivity on metadata? -->
+				<!-- Case insensitive. The negative aspect might be for URLs in svn properties, but those fields are stored anyway. -->
 				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
 		</fieldType>
@@ -176,6 +176,7 @@
 		<fieldType name="filename" class="solr.TextField">
 			<analyzer>
 				<tokenizer class="solr.PatternTokenizerFactory" pattern="[\s,;_-]+" />
+				<!-- Most file systems are case insensitive, and insensitive search is still preferable. -->
 				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
 		</fieldType>

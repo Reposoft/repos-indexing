@@ -98,8 +98,12 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		//how?//assertEquals("Should separate on pipe", 1, solr.query(new SolrQuery("prop_custom.lang:de-DE")).getResults().getNumFound());
 		assertEquals("Should separate on whitespace", 1, solr.query(new SolrQuery("prop_custom.tags:JUnit")).getResults().getNumFound());
 		
-		assertEquals("Making property search case insentitive wouldn't be good when props contain URLs etc",
+		/*
+		assertEquals("Making property search case insensitive wouldn't be good when props contain URLs etc",
 				0, solr.query(new SolrQuery("prop_custom.tags:junit")).getResults().getNumFound());
+		*/
+		assertEquals("Expecting property search to be case insensitive.",
+				1, solr.query(new SolrQuery("prop_custom.tags:junit")).getResults().getNumFound());
 	}
 
 }
