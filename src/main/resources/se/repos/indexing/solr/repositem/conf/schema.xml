@@ -79,22 +79,22 @@
 		<!-- path from repository root, starting with slash -->
 		<field name="path"     type="string" indexed="true"  stored="true"  multiValued="false"/>
 		<!-- file or folder name -->
-		<field name="pathname" type="string" indexed="true"  stored="false" multiValued="false"/>
+		<field name="pathname" type="string" indexed="true"  stored="true" multiValued="false"/>
 		<!-- file or folder name before extension, , i.e. the part before the last dot -->
-		<field name="pathnamebase" type="string" indexed="true"  stored="false" multiValued="false"/>
+		<field name="pathnamebase" type="string" indexed="true"  stored="true" multiValued="false"/>
 		<!-- extension, i.e. the part after the last dot -->
-		<field name="pathext"  type="string" indexed="true"  stored="false" multiValued="false"/>
+		<field name="pathext"  type="string" indexed="true"  stored="true" multiValued="false"/>
 		<!-- path in repository up to parent (including for folders), no trailing slash -->
-		<field name="pathdir"  type="string" indexed="true"  stored="false" multiValued="false"/>
+		<field name="pathdir"  type="string" indexed="true"  stored="true" multiValued="false"/>
 		<!-- all parent folders -->
-		<field name="pathin"   type="string" indexed="true"  stored="false" multiValued="true"/>
+		<field name="pathin"   type="string" indexed="true"  stored="true" multiValued="true"/>
 		<!-- all path components -->
-		<field name="pathpart" type="string" indexed="true"  stored="false" multiValued="true"/>
+		<field name="pathpart" type="string" indexed="true"  stored="true" multiValued="true"/>
 		
 		<!-- path from server root, URL-encoded?, url-at-host/urlpath? -->
-		<field name="pathfull"  type="string" indexed="true"  stored="false" multiValued="false"/>
+		<field name="pathfull"  type="string" indexed="true"  stored="true" multiValued="false"/>
 		<!-- all parent folders from server root -->
-		<field name="pathfullin"   type="string" indexed="true"  stored="false" multiValued="true"/>
+		<field name="pathfullin"   type="string" indexed="true"  stored="true" multiValued="true"/>
 		
 		<!-- classifies item as belonging to 1+ areas of the file hierarchy, such as "trunk"/"branch"/"tag"/"release"/"translation"/"template" -->
 		<field name="patharea" type="string" indexed="true" stored="true" multiValued="true" />
