@@ -15,6 +15,8 @@ import org.junit.After;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
+
 public class SchemaRepositemTest extends SolrTestCaseJ4 {
 
 	public static String solrhome = "se/repos/indexing/solr";
@@ -103,6 +105,43 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		*/
 		assertEquals("Expecting property search to be case insensitive.",
 				1, solr.query(new SolrQuery("prop_custom.tags:junit")).getResults().getNumFound());
+	}
+	
+	// Documents the effect of the caveat in http://wiki.apache.org/solr/Atomic_Updates
+	@Test
+	public void testHeadFlagUpdateEffect() throws Exception {
+		SolrServer solr = getSolr();
+		
+		IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
+		doc.addField("id", "f#01");
+		doc.addField("head", true);
+		doc.addField("pathstat", "A");
+		doc.addField("path", "dir/file.txt");
+		doc.addField("pathext", "txt");
+		doc.addField("text", "quite secret content, though searchable");
+		solr.add(doc.getSolrDoc());
+		solr.commit();
+		assertEquals("Should be searchable on path", 1, solr.query(new SolrQuery("path:dir*")).getResults().getNumFound());
+		assertEquals("Should be searchable on pathext", 1, solr.query(new SolrQuery("pathext:txt")).getResults().getNumFound());
+		assertEquals("Should be searchable on text", 1, solr.query(new SolrQuery("text:secret")).getResults().getNumFound());
+		
+		IndexingDocIncrementalSolrj docd = new IndexingDocIncrementalSolrj();
+		docd.addField("id", "f#02");
+		docd.addField("head", true);
+		docd.addField("pathstat", "D");
+		docd.addField("path", "dir/file.txt");
+		docd.addField("pathext", "txt");		
+		doc.setUpdateMode(true);
+		doc.setField("head", false);
+		solr.add(docd.getSolrDoc());
+		solr.add(doc.getSolrDoc());
+		solr.commit();
+		assertEquals("Both head and historical should be searchable on path",
+				2, solr.query(new SolrQuery("path:dir*")).getResults().getNumFound());
+		assertEquals("Both head and historical should be searchable on pathext",
+				2, solr.query(new SolrQuery("pathext:txt")).getResults().getNumFound());		
+		assertEquals("Historical should still be searchable on text after head flag update",
+				1, solr.query(new SolrQuery("text:secret")).getResults().getNumFound());
 	}
 
 }
