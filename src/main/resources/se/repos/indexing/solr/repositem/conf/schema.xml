@@ -136,8 +136,6 @@
 		
 		<!-- References, unresolved, including external, different types for example ref_link -->
 		<dynamicField name="ref_*" type="string" indexed="true" stored="true" multiValued="true"/>
-		<!-- All references, resolved to "url" field values, excluding query string and fragments (such as revisions) -->
-		<field name="refurl" type="string" indexed="true" stored="true" multiValued="true"/>
 		<!-- All references, resolved to "idhead" field values unless revision is explicit and it resolves to "id" -->
 		<field name="refid" type="string" indexed="true" stored="true" multiValued="true"/>
 		
