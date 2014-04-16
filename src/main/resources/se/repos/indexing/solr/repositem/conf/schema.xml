@@ -134,9 +134,13 @@
 		<field name="title" type="text_general" indexed="true" stored="true" multiValued="false" />
 		<field name="keywords" type="metadata" indexed="true" stored="true" multiValued="false" />
 		
-		<!-- References, unresolved, including external, different types for example ref_link -->
+		<!-- References, free form per type. Possibly unresolved, external, revision locked etc. -->
 		<dynamicField name="ref_*" type="string" indexed="true" stored="true" multiValued="true"/>
-		<!-- All references, resolved to "idhead" field values unless revision is explicit and it resolves to "id" -->
+		<!--
+			Strong enough references to motivate an alert to users that this item might be affected if the referenced item is modified.
+			Copied from the applicable ref_* field by the extracting handlers, and resolved to "idhead" field values.
+			Revision locked references should be excluded because they can not be affected.
+		-->
 		<field name="refid" type="string" indexed="true" stored="true" multiValued="true"/>
 		
 		<!-- Custom tags from added handlers, normally used for filtering -->
