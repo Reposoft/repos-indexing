@@ -139,9 +139,10 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		assertEquals("Both head and historical should be searchable on path",
 				2, solr.query(new SolrQuery("path:dir*")).getResults().getNumFound());
 		assertEquals("Both head and historical should be searchable on pathext",
-				2, solr.query(new SolrQuery("pathext:txt")).getResults().getNumFound());		
-		assertEquals("Historical should still be searchable on text after head flag update",
-				1, solr.query(new SolrQuery("text:secret")).getResults().getNumFound());
+				2, solr.query(new SolrQuery("pathext:txt")).getResults().getNumFound());
+		// Text search for historical has been scoped out
+		//assertEquals("Historical should still be searchable on text after head flag update",
+		//		1, solr.query(new SolrQuery("text:secret")).getResults().getNumFound());
 	}
 
 }
