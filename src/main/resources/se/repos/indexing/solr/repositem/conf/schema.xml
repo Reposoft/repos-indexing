@@ -134,7 +134,12 @@
 		<field name="title" type="text_general" indexed="true" stored="true" multiValued="false" />
 		<field name="keywords" type="metadata" indexed="true" stored="true" multiValued="false" />
 		
-		<!-- References, free form per type. Possibly unresolved, external, revision locked etc. -->
+		<!-- 
+			References, free form per type.
+			References are modeled from this item/revision to other resources.
+			A reference is typically an Include, Link, XRef etc that is more or less required when presenting this item.  
+			Possibly unresolved, external, revision locked etc. 
+		-->
 		<dynamicField name="ref_*" type="string" indexed="true" stored="true" multiValued="true"/>
 		<!--
 			Strong enough references to motivate an alert to users that this item might be affected if the referenced item is modified.
@@ -142,6 +147,21 @@
 			Revision locked references should be excluded because they can not be affected.
 		-->
 		<field name="refid" type="string" indexed="true" stored="true" multiValued="true"/>
+		
+		<!-- 
+			Relations, free form per type.
+			Relations are modeled from this item/revision to other resources, but might conceptually be bidirectional.
+			A relation describes any type of relation btw 2 items, e.g. variants (branches, releases, translations), transformations (different file formats) etc.
+			The related objects are typically NOT required when presenting this item.  
+			Possibly unresolved, external, revision locked etc. 
+		-->
+		<dynamicField name="rel_*" type="string" indexed="true" stored="true" multiValued="true"/>
+		<!--
+			Strong enough relations to motivate enforcing/recommending relation integrity.
+			Copied from the applicable rel_* field by the extracting handlers, and resolved to "id" field values.
+			Revision locked relations are included.
+		-->
+		<field name="relid" type="string" indexed="true" stored="true" multiValued="true"/>
 		
 		<!-- Custom tags from added handlers, normally used for filtering -->
 		<field name="flag" type="string" indexed="true" stored="true" multiValued="true"/>
