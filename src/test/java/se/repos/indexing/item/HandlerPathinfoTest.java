@@ -146,6 +146,28 @@ public class HandlerPathinfoTest {
 		assertNotNull(f2.getFieldValue("copyfromrevt"));
 	}
 	
-	
+	@Test
+	public void testHandleUrl() {	
+		HandlerPathinfo pathinfo = new HandlerPathinfo();
+		pathinfo.setIdStrategy(new IdStrategyDefault());
+		@SuppressWarnings("serial")
+		CmsRepository repo = new CmsRepository("https://h.ost:1080/svn/repo1") {
+			@Override
+			protected String urlencodeSegment(String pathSegment) {
+				return super.urlencodeSegment(pathSegment).replace('.', '$'); // very special encoding
+			}
+		};
+		RepoRevision rev = new RepoRevision(10L, new Date());
+		
+		CmsChangesetItem item = mock(CmsChangesetItem.class);
+		IndexingItemProgress p = new IndexingItemStandalone(repo, rev, item);
+		when(item.getPath()).thenReturn(new CmsItemPath("/my file.txt"));
+		when(item.getRevisionChanged()).thenReturn(rev);
+		
+		pathinfo.handle(p);
+		
+		assertEquals("Should use CmsRepository's URL encoding",
+				"https://h.ost:1080/svn/repo1/my%20file$txt", p.getFields().getFieldValue("url"));
+	}
 	
 }

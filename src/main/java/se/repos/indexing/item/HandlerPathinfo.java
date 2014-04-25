@@ -13,7 +13,7 @@ import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
-import se.simonsoft.cms.item.impl.CmsItemIdUrl;
+import se.simonsoft.cms.item.CmsItemId;
 import se.simonsoft.cms.item.indexing.IdStrategy;
 
 /**
@@ -115,7 +115,7 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			d.setField("copyfromrevt", item.getCopyFromRevision().getDate());
 		}
 		
-		CmsItemIdUrl url = new CmsItemIdUrl(repository, path);
+		CmsItemId url = repository.getItemId().withRelPath(path);
 		d.setField("url", url.getUrl());
 		d.setField("urlpath", url.getUrlAtHost());
 	}
