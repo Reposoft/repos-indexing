@@ -47,6 +47,7 @@ public class HandlerPathinfoTest {
 		IndexingDoc f = p.getFields();
 		assertEquals("/my/dir/a file.txt", f.getFieldValue("path"));
 		assertEquals("a file.txt", f.getFieldValue("pathname"));
+		assertEquals("a file", f.getFieldValue("pathnamebase"));
 		assertEquals("/my/dir", f.getFieldValue("pathdir"));
 		assertEquals("txt", f.getFieldValue("pathext"));
 		assertEquals("/svn/repo1/my/dir/a file.txt", f.getFieldValue("pathfull"));
