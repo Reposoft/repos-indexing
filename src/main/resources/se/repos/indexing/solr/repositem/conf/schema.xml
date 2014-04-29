@@ -128,8 +128,6 @@
 		<dynamicField name="xmp_*" type="metadata" indexed="true" stored="true" multiValued="false" />
 		<!-- Most basic form of "name" for an item, copy of pathnamebase (no extension).  -->
 		<field name="name" type="filename" indexed="true" stored="true" multiValued="false" />
-		<!-- File extension in a tokenized field (enable parentheses in query), copy of pathext. -->
-		<field name="extension" type="filename" indexed="true" stored="true" multiValued="false" />
 		<!-- Useful commonality that can be found in prop_* or embd_* or somewhere else added as copyField or custom indexing handler -->
 		<field name="title" type="text_general" indexed="true" stored="true" multiValued="false" />
 		<field name="keywords" type="metadata" indexed="true" stored="true" multiValued="false" />
@@ -173,9 +171,6 @@
 	
 	<!-- Name from pathnamebase (no extension), with different word delimiter. -->
 	<copyField source="pathnamebase" dest="name"/>
-	
-	<!-- File extension from pathext, with different word delimiter. -->
-	<copyField source="pathext" dest="extension"/>
 
 	<!-- field to use to determine and enforce document uniqueness. -->
 	<uniqueKey>id</uniqueKey>
