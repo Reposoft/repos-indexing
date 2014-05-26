@@ -256,16 +256,24 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	protected IndexingUnitRevision getIndexingUnit(RepoRevision revision, RepoRevision referenceRevision) {
 		
 		CmsChangeset changeset = null;
-		CmsItemProperties revprops = contentsReader.getRevisionProperties(revision);
+		CmsItemProperties revprops = null;
 		
-		String index = revprops.getString("indexing:mode");
-		if (index != null && "none".equals(index)) {
+		try {
+			// Temporarily higher loglevel.
+			logger.warn("Reading revision properties for {}", revision);
+			revprops = contentsReader.getRevisionProperties(revision);
+		} catch (Exception e) {
+			logger.error("Failed to read revision properties for revision: {}" , revision, e);
+		}
+		try {
 			logger.debug("Reading changeset {}{}", revision, referenceRevision == null ? "" : " with reference revision " + referenceRevision);
 			if (revision.equals(referenceRevision)) {
 				changeset = changesetReader.read(revision);
 			} else {
 				changeset = changesetReader.read(revision, referenceRevision);
 			}
+		} catch (Exception e) {
+			logger.error("Failed to read changeset for revision: {}", revision, e);
 		}
 
 		List<CmsChangesetItem> changesetItems = new LinkedList<CmsChangesetItem>();
