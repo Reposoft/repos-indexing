@@ -150,7 +150,7 @@ public class RepositoryIndexStatus {
 	/**
 	 * @return Commit ID field value
 	 */
-	protected String indexRevFlag(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops, boolean complete) {
+	protected String indexRevFlag(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops, /*String error,*/ boolean complete) {
 		if (revprops != null) {
 			throw new UnsupportedOperationException("Revprops indexing not supported");
 		}
@@ -168,6 +168,11 @@ public class RepositoryIndexStatus {
 		docStart.addField("revt", revision.getDate());
 		docStart.addField("complete", complete);
 		docStart.addField("t", new Date());
+		/*
+		if (error != null) {
+			docStart.addField("text_error", error);
+		}
+		*/
 		this.solrAdd(docStart);
 		return id;
 	}

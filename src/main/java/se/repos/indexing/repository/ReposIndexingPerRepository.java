@@ -3,6 +3,8 @@
  */
 package se.repos.indexing.repository;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -257,6 +259,8 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		
 		CmsChangeset changeset = null;
 		CmsItemProperties revprops = null;
+		// TODO: Send error to index.
+		StringWriter err = new StringWriter();
 		
 		try {
 			// Temporarily higher loglevel.
@@ -264,6 +268,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			revprops = contentsReader.getRevisionProperties(revision);
 		} catch (Exception e) {
 			logger.error("Failed to read revision properties for revision: {}" , revision, e);
+			e.printStackTrace(new PrintWriter(err));
 		}
 		try {
 			logger.debug("Reading changeset {}{}", revision, referenceRevision == null ? "" : " with reference revision " + referenceRevision);
@@ -274,6 +279,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			}
 		} catch (Exception e) {
 			logger.error("Failed to read changeset for revision: {}", revision, e);
+			e.printStackTrace(new PrintWriter(err));
 		}
 
 		List<CmsChangesetItem> changesetItems = new LinkedList<CmsChangesetItem>();
