@@ -263,8 +263,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		StringWriter err = new StringWriter();
 		
 		try {
-			// Temporarily higher loglevel.
-			logger.warn("Reading revision properties for {}", revision);
+			logger.debug("Reading revision properties for {}", revision);
 			revprops = contentsReader.getRevisionProperties(revision);
 		} catch (Exception e) {
 			logger.error("Failed to read revision properties for revision: {}" , revision, e);
