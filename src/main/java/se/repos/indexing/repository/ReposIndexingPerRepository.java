@@ -31,6 +31,7 @@ import se.simonsoft.cms.item.events.change.CmsChangeset;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.info.CmsRepositoryLookup;
 import se.simonsoft.cms.item.inspection.CmsChangesetReader;
+import se.simonsoft.cms.item.inspection.CmsContentsReader;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 public class ReposIndexingPerRepository implements ReposIndexing {
@@ -40,6 +41,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	private CmsRepository repository;
 	private IndexingSchedule schedule;
 	private CmsChangesetReader changesetReader;
+	private CmsContentsReader contentsReader;
 	private CmsRepositoryLookup revisionLookup;
 	private Set<IndexingItemHandler> handlers;
 
@@ -72,6 +74,11 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	@Inject
 	public void setCmsChangesetReader(CmsChangesetReader changesetReader) {
 		this.changesetReader = changesetReader;
+	}
+	
+	@Inject
+	public void setCmsContentsReader(CmsContentsReader contentsReader) {
+		this.contentsReader = contentsReader;
 	}
 	
 	@Inject
@@ -244,26 +251,39 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	/**
 	 * @param revision The revision to index
 	 * @param referenceRevision Reference revision, for checking head status
+	 * (whether item is overwritten before/at reference revision)
 	 */
 	protected IndexingUnitRevision getIndexingUnit(RepoRevision revision, RepoRevision referenceRevision) {
-		logger.debug("Reading changeset {}{}", revision, referenceRevision == null ? "" : " with reference revision " + referenceRevision);
-		CmsChangeset changeset;
-		if (revision.equals(referenceRevision)) {
-			changeset = changesetReader.read(revision);
-		} else {
-			changeset = changesetReader.read(revision, referenceRevision);
+		
+		CmsChangeset changeset = null;
+		CmsItemProperties revprops = contentsReader.getRevisionProperties(revision);
+		
+		String index = revprops.getString("indexing:mode");
+		if (index != null && "none".equals(index)) {
+			logger.debug("Reading changeset {}{}", revision, referenceRevision == null ? "" : " with reference revision " + referenceRevision);
+			if (revision.equals(referenceRevision)) {
+				changeset = changesetReader.read(revision);
+			} else {
+				changeset = changesetReader.read(revision, referenceRevision);
+			}
 		}
 
-		CmsItemProperties revprops = null; // TODO with cms-item 2.1.1 get revprops, and change to isEmpty below
+		List<CmsChangesetItem> changesetItems = new LinkedList<CmsChangesetItem>();
+		if (changeset != null) {
+			changesetItems = changeset.getItems(); 
+		}
+		
+		// Temporarily suppressing the revprops because they are not supported by indexing.
+		revprops = null; // TODO with cms-item 2.1.1 get revprops, and change to isEmpty below
 		String commitId;
-		if (changeset.getItems().size() == 0) {
+		if (changesetItems.size() == 0) {
 			commitId = repositoryStatus.indexRevEmpty(repository, revision, revprops);
 		} else {
 			commitId = repositoryStatus.indexRevStart(repository, revision, revprops);
 		}
 		
 		List<IndexingItemProgress> items = new LinkedList<IndexingItemProgress>();
-		for (CmsChangesetItem item : changeset.getItems()) {
+		for (CmsChangesetItem item : changesetItems) {
 			
 			IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
 			doc.addField("revid", commitId);
