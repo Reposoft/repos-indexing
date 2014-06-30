@@ -270,7 +270,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			e.printStackTrace(new PrintWriter(err));
 		}
 		try {
-			logger.debug("Reading changeset {}{}", revision, referenceRevision == null ? "" : " with reference revision " + referenceRevision);
+			logger.info("Reading changeset {}{}", revision, referenceRevision == null ? "" : " with reference revision " + referenceRevision);
 			if (revision.equals(referenceRevision)) {
 				changeset = changesetReader.read(revision);
 			} else {
