@@ -150,7 +150,7 @@ public class RepositoryIndexStatus {
 	/**
 	 * @return Commit ID field value
 	 */
-	protected String indexRevFlag(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops, /*String error,*/ boolean complete) {
+	protected String indexRevFlag(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops, String error, boolean complete) {
 		if (revprops != null) {
 			throw new UnsupportedOperationException("Revprops indexing not supported");
 		}
@@ -168,27 +168,27 @@ public class RepositoryIndexStatus {
 		docStart.addField("revt", revision.getDate());
 		docStart.addField("complete", complete);
 		docStart.addField("t", new Date());
-		/*
+
 		if (error != null) {
 			docStart.addField("text_error", error);
 		}
-		*/
+		
 		this.solrAdd(docStart);
 		return id;
 	}
 
-	public String indexRevStart(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops) {
-		return indexRevFlag(repository, revision, revprops, false);
+	public String indexRevStart(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops, String error) {
+		return indexRevFlag(repository, revision, revprops, error, false);
 	}
 	
 	public String indexRevEmpty(CmsRepository repository,
-			RepoRevision revision, CmsItemProperties revprops) {
-		return indexRevFlag(repository, revision, revprops, true);
+			RepoRevision revision, CmsItemProperties revprops, String error) {
+		return indexRevFlag(repository, revision, revprops, error, true);
 	}
 	
 	public void indexRevStartAndCommit(CmsRepository repository,
 			RepoRevision revision, CmsItemProperties revprops) {
-		indexRevStart(repository, revision, revprops);
+		indexRevStart(repository, revision, revprops, null);
 		new SolrCommit(repositem).run();
 	}
 	

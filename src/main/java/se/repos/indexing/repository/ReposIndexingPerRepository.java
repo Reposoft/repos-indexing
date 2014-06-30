@@ -232,7 +232,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		logger.debug("No revision status in index. Starting from 0.");
 		RepoRevision first = new RepoRevision(0, revisionLookup.getRevisionTimestamp(repository, 0));
 		CmsItemProperties revprops0 = null;
-		repositoryStatus.indexRevEmpty(repository, first, revprops0);
+		repositoryStatus.indexRevEmpty(repository, first, revprops0, null);
 		return first;
 	}
 
@@ -290,9 +290,9 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		revprops = null; // TODO with cms-item 2.1.1 get revprops, and change to isEmpty below
 		String commitId;
 		if (changesetItems.size() == 0) {
-			commitId = repositoryStatus.indexRevEmpty(repository, revision, revprops);
+			commitId = repositoryStatus.indexRevEmpty(repository, revision, revprops, err.toString());
 		} else {
-			commitId = repositoryStatus.indexRevStart(repository, revision, revprops);
+			commitId = repositoryStatus.indexRevStart(repository, revision, revprops, err.toString());
 		}
 		
 		List<IndexingItemProgress> items = new LinkedList<IndexingItemProgress>();

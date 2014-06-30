@@ -246,8 +246,8 @@ public class ReposIndexingImpl implements ReposIndexing {
 	void sync(CmsRepositoryInspection repository, CmsChangesetReader changesets, RepoRevision reference, Iterable<RepoRevision> range) {
 		for (RepoRevision rev : range) {
 			if (rev.getNumber() == 0) {
-				logger.debug("Revprops indexing for rev 0 not implemented"); // changeset reader couldn't handle 0
-				String commitId = repositoryStatus.indexRevStart(repository, rev, null);
+				logger.warn("Revprops indexing for rev 0 not implemented"); // changeset reader couldn't handle 0
+				String commitId = repositoryStatus.indexRevStart(repository, rev, null, null);
 				repositoryStatus.indexRevComplete(commitId);
 				continue;
 			}
@@ -385,7 +385,7 @@ public class ReposIndexingImpl implements ReposIndexing {
 	 */
 	Runnable indexRevStart(CmsRepository repository, CmsChangeset changeset) {
 		RepoRevision revision = changeset.getRevision();
-		String commitId = repositoryStatus.indexRevStart(repository, revision, null);
+		String commitId = repositoryStatus.indexRevStart(repository, revision, null, null);
 		return new RunRevComplete(commitId);
 	}
 	
