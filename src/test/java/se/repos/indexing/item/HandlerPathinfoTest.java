@@ -26,7 +26,8 @@ public class HandlerPathinfoTest {
 		HandlerPathinfo pathinfo = new HandlerPathinfo();
 		pathinfo.setIdStrategy(new IdStrategyDefault());
 		CmsRepository repo = new CmsRepository("https://h.ost:1080/svn/repo1");
-		RepoRevision rev = new RepoRevision(10L, new Date());
+		Date millisTrunc = RepoRevision.parseDate("2012-04-11T12:01:46.600807Z");
+		RepoRevision rev = new RepoRevision(10L, millisTrunc);
 		
 		CmsChangesetItem item = mock(CmsChangesetItem.class);
 		IndexingItemProgress p = new IndexingItemStandalone(repo, rev, item);
@@ -77,6 +78,8 @@ public class HandlerPathinfoTest {
 		
 		assertEquals(rev.getNumber(), f.getFieldValue("rev"));
 		assertEquals(rev.getDate(), f.getFieldValue("revt"));
+		RepoRevision revActual = new RepoRevision((Long) f.getFieldValue("rev"), (Date) f.getFieldValue("revt"));
+		assertEquals("formatting of date might truncate trailing 00", "2012-04-11T12:01:46.600", revActual.getTimeIso()); // The issue might be relates to JSON transfer.
 		assertEquals(rev.getNumber() - 2, f.getFieldValue("revc"));
 		assertEquals(new Date(rev.getDate().getTime() - 1000), f.getFieldValue("revct"));
 		
