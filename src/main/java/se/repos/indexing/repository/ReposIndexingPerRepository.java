@@ -259,7 +259,6 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		
 		CmsChangeset changeset = null;
 		CmsItemProperties revprops = null;
-		// TODO: Send error to index.
 		StringWriter err = new StringWriter();
 		
 		try {
@@ -284,10 +283,13 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		List<CmsChangesetItem> changesetItems = new LinkedList<CmsChangesetItem>();
 		if (changeset != null) {
 			changesetItems = changeset.getItems(); 
+			if (!changeset.isDeriveEnabled()) {
+				logger.warn("Derived (copy/move) paths are not indexed.");
+			}
 		}
 		
 		// Temporarily suppressing the revprops because they are not supported by indexing.
-		revprops = null; // TODO with cms-item 2.1.1 get revprops, and change to isEmpty below
+		revprops = null; // TODO remove this suppression of revprops
 		String commitId;
 		if (changesetItems.size() == 0) {
 			commitId = repositoryStatus.indexRevEmpty(repository, revision, revprops, err.toString());
@@ -295,11 +297,13 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			commitId = repositoryStatus.indexRevStart(repository, revision, revprops, err.toString());
 		}
 		
+		// TODO: if revprops are available, extract author and comment
 		List<IndexingItemProgress> items = new LinkedList<IndexingItemProgress>();
 		for (CmsChangesetItem item : changesetItems) {
 			
 			IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
 			doc.addField("revid", commitId);
+			// TODO: set fields revauthor and revcomment if possible
 			
 			IndexingItemProgressPhases progress = new IndexingItemProgressPhases(repository, revision, item, doc);
 			

@@ -168,6 +168,8 @@ public class RepositoryIndexStatus {
 		docStart.addField("revt", revision.getDate());
 		docStart.addField("complete", complete);
 		docStart.addField("t", new Date());
+		
+		// TODO: Add all revprops to proprev_* with transformation of ':'
 
 		if (error != null) {
 			docStart.addField("text_error", error);
