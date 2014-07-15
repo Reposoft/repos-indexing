@@ -40,9 +40,12 @@
 		<field name="complete" type="boolean" indexed="true" stored="true" multiValued="false" />
 
 		<!-- commit type fields -->
+		<!-- Should also be set on file (not sure about folder) -->
+		<!-- Note that these revision properties apply to rev, not necessarily to revc (after copy).  -->
 		<field name="revauthor" type="string" indexed="true" stored="true" multiValued="false" />
 		<field name="revcomment" type="string" indexed="true" stored="true" multiValued="false" />
-		<!-- revprops? -->
+		<!-- revision properties, colon (:) in prop name replaced with dot (.) -->
+		<dynamicField name="proprev_*" type="metadata" indexed="true" stored="true" multiValued="false" />
 		
 		<!-- revision for which the index doc is made -->
 		<field name="rev"  type="long" indexed="true" stored="true" multiValued="false" />
