@@ -288,22 +288,23 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			}
 		}
 		
-		// Temporarily suppressing the revprops because they are not supported by indexing.
-		revprops = null; // TODO remove this suppression of revprops
 		String commitId;
-		if (changesetItems.size() == 0) {
+		if (changesetItems.isEmpty()) {
 			commitId = repositoryStatus.indexRevEmpty(repository, revision, revprops, err.toString());
 		} else {
 			commitId = repositoryStatus.indexRevStart(repository, revision, revprops, err.toString());
 		}
 		
-		// TODO: if revprops are available, extract author and comment
 		List<IndexingItemProgress> items = new LinkedList<IndexingItemProgress>();
 		for (CmsChangesetItem item : changesetItems) {
 			
 			IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
 			doc.addField("revid", commitId);
-			// TODO: set fields revauthor and revcomment if possible
+			
+			if (revprops != null && (item.isFile() || item.isFolder())) {
+				doc.addField("revauthor", revprops.getString("svn:author"));
+				doc.addField("revcomment", revprops.getString("svn:log"));
+			}
 			
 			IndexingItemProgressPhases progress = new IndexingItemProgressPhases(repository, revision, item, doc);
 			

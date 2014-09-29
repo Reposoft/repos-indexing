@@ -69,6 +69,10 @@ public class RepositoryIndexStatus {
 	protected String quote(String fieldValue) {
 		return '"' + fieldValue.replace("\"", "\\\"") + '"';
 	}
+	
+	protected String getPropRevKey(String key) {
+		return "proprev_".concat(key.replace(':', '.'));
+	}
 
 	/**
 	 * @return started and completed revision, highest number
@@ -151,9 +155,7 @@ public class RepositoryIndexStatus {
 	 * @return Commit ID field value
 	 */
 	protected String indexRevFlag(CmsRepository repository, RepoRevision revision, CmsItemProperties revprops, String error, boolean complete) {
-		if (revprops != null) {
-			throw new UnsupportedOperationException("Revprops indexing not supported");
-		}
+
 		String id = idStrategy.getIdCommit(repository, revision);
 		String repoid = idStrategy.getIdRepository(repository);
 		SolrInputDocument docStart = new SolrInputDocument();
@@ -169,7 +171,11 @@ public class RepositoryIndexStatus {
 		docStart.addField("complete", complete);
 		docStart.addField("t", new Date());
 		
-		// TODO: Add all revprops to proprev_* with transformation of ':'
+		if (revprops != null) {
+			for (String key : revprops.getKeySet()) {
+				docStart.addField(getPropRevKey(key), revprops.getString(key));
+			}
+		}
 
 		if (error != null) {
 			docStart.addField("text_error", error);
