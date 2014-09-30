@@ -170,8 +170,6 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 				continue; // TODO use lookup on path + head=true to get historical folder revision and start marking head again
 			}
 			assertEquals("at " + r1.get(i).get("path"), true, r1.get(i).get("head"));
-			System.out.println("r1.get(" + i + ").revauthor: " + r1.get(i).getFieldValue("revauthor"));
-			System.out.println("r1.get(" + i + ").revcomment: " + r1.get(i).getFieldValue("revcomment"));
 		}
 		
 		indexing.sync(new RepoRevision(2, new Date(2)));
