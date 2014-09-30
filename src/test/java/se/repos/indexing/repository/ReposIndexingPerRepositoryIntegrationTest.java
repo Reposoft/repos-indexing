@@ -170,6 +170,8 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 				continue; // TODO use lookup on path + head=true to get historical folder revision and start marking head again
 			}
 			assertEquals("at " + r1.get(i).get("path"), true, r1.get(i).get("head"));
+			System.out.println("r1.get(" + i + ").revauthor: " + r1.get(i).getFieldValue("revauthor"));
+			System.out.println("r1.get(" + i + ").revcomment: " + r1.get(i).getFieldValue("revcomment"));
 		}
 		
 		indexing.sync(new RepoRevision(2, new Date(2)));
@@ -187,6 +189,8 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals("/dir", r3r1.get(0).get("path"));
 		assertEquals("/dir/t2.txt", r3r1.get(1).get("path"));
 		assertEquals("/t1.txt", r3r1.get(2).get("path"));
+		assertEquals("Should have revauthor.", "solsson", r3r1.get(2).getFieldValue("revauthor"));
+		assertEquals("Should have revcomment.", "Two files with two lines each", r3r1.get(2).getFieldValue("revcomment"));
 		assertEquals("Revision 1 had only these files, nothing else should have been indexed on rev 1 since then", 3, r3r1.size());
 
 		// TODO support folders assertEquals("Folder is deleted and thus no longer in head", false, r3r1.get(0).get("head"));
@@ -196,10 +200,14 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		SolrDocumentList r3r2 = repositem.query(new SolrQuery("id:*@0000000002").setSort("path", ORDER.asc)).getResults();
 		assertEquals("There was only a file edit in rev 2", 1, r3r2.size());
 		assertEquals("/t1.txt", r3r2.get(0).get("path"));
+		assertEquals("Should have revauthor.", "test", r3r2.get(0).getFieldValue("revauthor"));
+		assertEquals("Should have revcomment.", "file modification", r3r2.get(0).getFieldValue("revcomment"));
 		assertEquals("Rev 2 is still HEAD for this file", true, r3r2.get(0).get("head"));
 		
 		SolrDocumentList r3r3 = repositem.query(new SolrQuery("id:*@0000000003").setSort("path", ORDER.asc)).getResults();
 		assertEquals("Deletions should be indexed so we know when an item disappeared", "/dir", r3r3.get(0).get("path"));
+		assertEquals("Should have revauthor.", "test", r3r3.get(0).getFieldValue("revauthor"));
+		assertEquals("Should have revcomment.", "folder move without changes to the contained file", r3r3.get(0).getFieldValue("revcomment"));
 		// TODO assertEquals("Deletions should always be !head", false, r3r3.get(0).get("head"));
 		assertEquals("Deletions should always be !head", false, r3r3.get(1).get("head"));
 		assertEquals("Derived delete", "/dir/t2.txt", r3r3.get(1).get("path"));
@@ -208,6 +216,24 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		// TODO assertEquals("This revision is HEAD", true, r3r3.get(2).get("head"));
 		assertEquals("Derived", "/dir2/t2.txt", r3r3.get(3).get("path"));
 		assertEquals(true, r3r3.get(3).get("head"));
+		
+		SolrDocumentList r4 = repositem.query(new SolrQuery("type:commit")).getResults();
+		assertEquals(null, r4.get(0).getFieldValue("proprev_svn.log"));
+		assertEquals(null, r4.get(0).getFieldValue("proprev_svn.author"));
+		assertEquals(null, r4.get(0).getFieldValue("proprev_svn.date"));
+		
+		assertEquals("Two files with two lines each", r4.get(1).getFieldValue("proprev_svn.log"));
+		assertEquals("solsson", r4.get(1).getFieldValue("proprev_svn.author"));
+		assertEquals("2012-09-27T12:05:34.040515Z", r4.get(1).getFieldValue("proprev_svn.date"));
+		
+		assertEquals("file modification", r4.get(2).getFieldValue("proprev_svn.log"));
+		assertEquals("test", r4.get(2).getFieldValue("proprev_svn.author"));
+		assertEquals("2013-03-21T19:16:28.271167Z", r4.get(2).getFieldValue("proprev_svn.date"));
+		
+		assertEquals("folder move without changes to the contained file", r4.get(3).getFieldValue("proprev_svn.log"));
+		assertEquals("test", r4.get(3).getFieldValue("proprev_svn.author"));
+		assertEquals("2013-03-21T19:16:42.295071Z", r4.get(3).getFieldValue("proprev_svn.date"));
+		
 		
 		// TODO we could propedit on dir2 and check that rev 3 of it becomes !head
 		
