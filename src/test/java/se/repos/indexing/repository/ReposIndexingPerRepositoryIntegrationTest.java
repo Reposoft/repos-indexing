@@ -206,6 +206,8 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals("Deletions should be indexed so we know when an item disappeared", "/dir", r3r3.get(0).get("path"));
 		assertEquals("Should have revauthor.", "test", r3r3.get(0).getFieldValue("revauthor"));
 		assertEquals("Should have revcomment.", "folder move without changes to the contained file", r3r3.get(0).getFieldValue("revcomment"));
+		assertEquals("Should have revcauthor when not 'derived' from folder copy", "test", r3r3.get(0).getFieldValue("revcauthor"));
+		assertEquals("Should have revccomment when not 'derived' from folder copy", "folder move without changes to the contained file", r3r3.get(0).getFieldValue("revccomment"));		
 		// TODO assertEquals("Deletions should always be !head", false, r3r3.get(0).get("head"));
 		assertEquals("Deletions should always be !head", false, r3r3.get(1).get("head"));
 		assertEquals("Derived delete", "/dir/t2.txt", r3r3.get(1).get("path"));

@@ -44,6 +44,9 @@
 		<!-- Note that these revision properties apply to rev, not necessarily to revc (after copy).  -->
 		<field name="revauthor" type="string" indexed="true" stored="true" multiValued="false" />
 		<field name="revcomment" type="string" indexed="true" stored="true" multiValued="false" />
+		<!-- Corresponds to revc, unset when unknown -->
+		<field name="revcauthor" type="string" indexed="true" stored="true" multiValued="false" />
+		<field name="revccomment" type="string" indexed="true" stored="true" multiValued="false" />
 		<!-- revision properties, colon (:) in prop name replaced with dot (.) -->
 		<dynamicField name="proprev_*" type="metadata" indexed="true" stored="true" multiValued="false" />
 		

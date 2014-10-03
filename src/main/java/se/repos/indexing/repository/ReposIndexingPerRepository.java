@@ -304,6 +304,12 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			if (revprops != null && (item.isFile() || item.isFolder())) {
 				doc.addField("revauthor", revprops.getString("svn:author"));
 				doc.addField("revcomment", revprops.getString("svn:log"));
+				if (item.isDerived()) {
+					// TODO can ge get commit revision without retrieving previous indexed entry?
+				} else {
+					doc.addField("revcauthor", revprops.getString("svn:author"));
+					doc.addField("revccomment", revprops.getString("svn:log"));
+				}
 			}
 			
 			IndexingItemProgressPhases progress = new IndexingItemProgressPhases(repository, revision, item, doc);
