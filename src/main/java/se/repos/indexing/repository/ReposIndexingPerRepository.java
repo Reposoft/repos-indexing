@@ -305,7 +305,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 				doc.addField("revauthor", revprops.getString("svn:author"));
 				doc.addField("revcomment", revprops.getString("svn:log"));
 				if (item.isDerived()) {
-					// TODO can ge get commit revision without retrieving previous indexed entry?
+					// TODO can we get commit revision without retrieving previous indexed entry?
 				} else {
 					doc.addField("revcauthor", revprops.getString("svn:author"));
 					doc.addField("revccomment", revprops.getString("svn:log"));
