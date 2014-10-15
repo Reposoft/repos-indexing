@@ -174,4 +174,21 @@ public class HandlerPathinfoTest {
 				"https://h.ost:1080/svn/repo1/my%20file$txt", p.getFields().getFieldValue("url"));
 	}
 	
+	@Test
+	public void testHandleDerived() {
+		HandlerPathinfo pathinfo = new HandlerPathinfo();
+		pathinfo.setIdStrategy(new IdStrategyDefault());
+		CmsRepository repo = new CmsRepository("https://h.ost:1080/svn/repo1");
+		RepoRevision rev = new RepoRevision(10L, new Date());
+		
+		CmsChangesetItem item = mock(CmsChangesetItem.class);
+		IndexingItemProgress p = new IndexingItemStandalone(repo, rev, item);
+		
+		when(item.getPath()).thenReturn(new CmsItemPath("/my/dir/a file.txt"));
+		when(item.isDerived()).thenReturn(true);
+		when(item.getRevisionChanged()).thenThrow(new UnsupportedOperationException("commit revision not supported for derived items in cms-backend-svnkit 1.1.0"));
+		
+		pathinfo.handle(p);
+	}
+	
 }

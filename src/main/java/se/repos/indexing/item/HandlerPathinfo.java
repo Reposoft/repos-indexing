@@ -91,8 +91,14 @@ public class HandlerPathinfo implements IndexingItemHandler {
 		
 		d.setField("rev", revision.getNumber());
 		d.setField("revt", revision.getDate());
-		d.setField("revc", item.getRevisionChanged().getNumber());
-		d.setField("revct", item.getRevisionChanged().getDate());
+		if (item.isDerived()) {
+			// This is incorrect but it is the legacy behavior to set path revision = commit revision for derived items even though they differ
+			d.setField("revc", revision.getNumber());
+			d.setField("revct", revision.getDate());
+		} else {
+			d.setField("revc", item.getRevisionChanged().getNumber());
+			d.setField("revct", item.getRevisionChanged().getDate());
+		}
 		
 		if (item.isAdd()) {
 			d.setField("pathstat", STAT_ADD);
