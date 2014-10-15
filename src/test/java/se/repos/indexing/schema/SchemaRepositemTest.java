@@ -3,6 +3,9 @@
  */
 package se.repos.indexing.schema;
 
+import java.io.IOException;
+import java.util.Date;
+
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServer;
@@ -13,9 +16,17 @@ import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.After;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import static org.mockito.Mockito.*;
+import se.repos.indexing.item.HandlerPathinfo;
+import se.repos.indexing.item.IndexingItemProgress;
 import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
+import se.simonsoft.cms.item.CmsItemPath;
+import se.simonsoft.cms.item.CmsRepository;
+import se.simonsoft.cms.item.RepoRevision;
+import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 
 public class SchemaRepositemTest extends SolrTestCaseJ4 {
 
@@ -145,4 +156,28 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 				0, solr.query(new SolrQuery("text:secret")).getResults().getNumFound());
 	}
 
+	@Test
+	@Ignore // very incomplete
+	public void testPathAnalysis() throws SolrServerException, IOException {
+		SolrServer solr = getSolr();		
+		// Not really unit testing the schema here because the path logic in the handler is too relevant - could be switched to 
+		IndexingItemProgress p = mock(IndexingItemProgress.class);
+		CmsRepository repo = new CmsRepository("http://ex.ampl:444/s/rep1");
+		when(p.getRepository()).thenReturn(repo);
+		when(p.getRevision()).thenReturn(new RepoRevision(35L, new Date()));
+		CmsChangesetItem item = mock(CmsChangesetItem.class);
+		when(item.getPath())
+			.thenReturn(new CmsItemPath("/dir/doc main.xml"))
+			.thenReturn(new CmsItemPath("/dir sect/doc appendix.xml"));
+			;
+		IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
+		when(p.getFields()).thenReturn(doc);
+		when(p.getItem()).thenReturn(item);
+		HandlerPathinfo handlerPathinfo = new HandlerPathinfo();
+		handlerPathinfo.handle(p);
+		solr.add(doc.getSolrDoc());
+		
+		fail("need to test effects of analyzed path* fields and confirm the need for name and extension");
+	}
+	
 }
