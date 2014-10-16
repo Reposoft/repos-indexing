@@ -71,7 +71,7 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 		} else if (earlierMarkedOverwritten.containsKey(item.getPath())) {
 			RepoRevision obsoleted = earlierMarkedOverwritten.get(item.getPath());
 			if (!item.getRevisionObsoleted().equals(obsoleted)) {
-				throw new IllegalStateException("Obsoleted revision " + item.getRevisionObsoleted() + " for " + item + " does not match " + obsoleted + "when it was last indexed");
+				throw new IllegalStateException("Obsoleted revision " + item.getRevisionObsoleted() + " for " + item + " does not match " + obsoleted + " when it was last indexed");
 			}
 			earlierMarkedOverwritten.remove(item.getPath());
 			logger.trace("Skipping !head flag because {} was known to be later overwritten when indexed at {}", item.getPath(), obsoleted);
