@@ -1,7 +1,11 @@
+/**
+ * Copyright (C) 2004-2012 Repos Mjukvara AB
+ */
 package se.repos.indexing.item;
 
 import static org.junit.Assert.*;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import se.simonsoft.cms.item.CmsItemPath;
@@ -34,11 +38,13 @@ Exception in thread "main" java.lang.IllegalStateException: Obsoleted revision 5
 public class CmsItemPathNonvalidatingTest {
 
 	@Test
+	@Ignore // Current spec is to validate and skip invalid, so reporting consumers don't get these invalid matches
 	public void testFilenameEndingWithWhitespace() {
 		new CmsItemPath("/xml/product_documents/Installation Instructions/DVCompact/Sections for DVCompact ");
 	}
 	
 	@Test
+	@Ignore // Current spec is to validate and skip invalid, so reporting consumers don't get these invalid matches
 	public void testAnyCharsFromAnyFilesystem() {
 		// except backslash
 		new CmsItemPath("/folder/½!\"#¤%&()=?`¶@£${[]}±+΅~^*'|<>");
