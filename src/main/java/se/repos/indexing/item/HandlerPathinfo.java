@@ -54,14 +54,24 @@ public class HandlerPathinfo implements IndexingItemHandler {
 		d.setField("repohost", repository.getHost());
 		d.setField("repoid", idStrategy.getIdRepository(repository));
 		
+		// Temporary fix for root propset support, maybe not needed with cms-item 2.4.2+
+		if (CmsItemPath.ROOT.equals(path)) {
+			d.setField("path", "");
+			d.setField("pathname", "");
+			d.setField("pathnamebase", "");
+			d.setField("pathext", "");
+		} else { // end temporary fix
+		
 		d.setField("path", path.toString());
 		d.setField("pathname", path.getName());
 		d.setField("pathnamebase", path.getNameBase());
 		d.setField("pathext", path.getExtension());
 		
+		} // temporary fix
+		
 		String repopath = repository.getPath();
 		d.setField("pathfull", repopath + path.toString());
-		CmsItemPath parent = path.getParent();
+		CmsItemPath parent = CmsItemPath.ROOT.equals(path) ? null : path.getParent();
 		if (parent != null) {
 			d.setField("pathdir", parent.toString());
 		}
