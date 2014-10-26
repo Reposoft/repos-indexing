@@ -81,6 +81,9 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			parent = parent.getParent();
 		}
 		CmsItemPath repopathparent = new CmsItemPath(repopath);
+		if (CmsItemPath.ROOT.equals(path)) {
+			repopathparent = repopathparent.getParent();
+		}
 		while (repopathparent != null) {
 			d.addField("pathfullin", repopathparent.getPath());
 			repopathparent = repopathparent.getParent();
