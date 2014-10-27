@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	
 	<artifactId>repos-indexing</artifactId>
-	<version>0.9.2-SNAPSHOT</version>
+	<version>0.9.2</version>
 	<packaging>jar</packaging>
 	
 	<name>${project.artifactId}-${project.version}</name>
@@ -43,7 +43,7 @@
 		<dependency>
 			<groupId>se.simonsoft</groupId>
 			<artifactId>cms-item</artifactId>
-			<version>2.4.2-SNAPSHOT</version>
+			<version>2.4.2</version>
 		</dependency>
 		<dependency>
 			<groupId>se.simonsoft</groupId>
@@ -89,7 +89,7 @@
 		<dependency>
 			<groupId>se.simonsoft</groupId>
 			<artifactId>cms-backend-svnkit</artifactId>
-			<version>1.1.1</version>
+			<version>1.1.5</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

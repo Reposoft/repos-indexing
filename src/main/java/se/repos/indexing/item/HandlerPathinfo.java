@@ -30,6 +30,9 @@ public class HandlerPathinfo implements IndexingItemHandler {
 	public static final char STAT_MODIFY = 'M';
 	public static final char STAT_DELETE = 'D';
 	
+	// used to detect special case changeset path = root
+	private static final CmsItemPath REPOROOT = null;
+	
 	private IdStrategy idStrategy;
 	
 	@Inject
@@ -54,24 +57,29 @@ public class HandlerPathinfo implements IndexingItemHandler {
 		d.setField("repohost", repository.getHost());
 		d.setField("repoid", idStrategy.getIdRepository(repository));
 		
+		String repopath = repository.getPath();
+		CmsItemPath parent;
+		
 		// Temporary fix for root propset support, maybe not needed with cms-item 2.4.2+
-		if (CmsItemPath.ROOT.equals(path)) {
+		if (path == REPOROOT) {
 			d.setField("path", "");
 			d.setField("pathname", "");
 			d.setField("pathnamebase", "");
 			d.setField("pathext", "");
-		} else { // end temporary fix
+			d.setField("pathfull", repopath);
+			parent = null;
+		} else {
+			d.setField("path", path.toString());
+			d.setField("pathname", path.getName());
+			d.setField("pathnamebase", path.getNameBase());
+			d.setField("pathext", path.getExtension());
+			d.setField("pathfull", repopath + path.toString());
+			for (String segment : path.getPathSegments()) {
+				d.addField("pathpart", segment);
+			}
+			parent = path.getParent();
+		}
 		
-		d.setField("path", path.toString());
-		d.setField("pathname", path.getName());
-		d.setField("pathnamebase", path.getNameBase());
-		d.setField("pathext", path.getExtension());
-		
-		} // temporary fix
-		
-		String repopath = repository.getPath();
-		d.setField("pathfull", repopath + path.toString());
-		CmsItemPath parent = CmsItemPath.ROOT.equals(path) ? null : path.getParent();
 		if (parent != null) {
 			d.setField("pathdir", parent.toString());
 		}
@@ -87,9 +95,6 @@ public class HandlerPathinfo implements IndexingItemHandler {
 		while (repopathparent != null) {
 			d.addField("pathfullin", repopathparent.getPath());
 			repopathparent = repopathparent.getParent();
-		}
-		for (String segment : path.getPathSegments()) {
-			d.addField("pathpart", segment);
 		}
 		
 		if (item.isFile()) {
