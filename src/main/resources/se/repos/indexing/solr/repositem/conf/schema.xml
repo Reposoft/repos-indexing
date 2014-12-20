@@ -118,6 +118,9 @@
 		
 		<field name="size" type="long" indexed="true" stored="true" multiValued="false" />
 		
+		<!-- stats and other numeric information -->
+		<dynamicField name="count_*" type="long" indexed="true" stored="true" multiValued="false" />
+		
 		<!-- properties, colon (:) in prop name replaced with dot (.) -->
 		<dynamicField name="prop_*" type="metadata" indexed="true" stored="true" multiValued="false" />
 		
