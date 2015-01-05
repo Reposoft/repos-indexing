@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import se.repos.indexing.HandlerException;
+import se.repos.indexing.IndexingHandlerException;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
@@ -93,7 +93,7 @@ class HandlerIteration {
 								logger.trace("Skip handler {} for item {} as decided by {}", handler, i, decision);
 							}
 						}
-					} catch (HandlerException ex) {
+					} catch (IndexingHandlerException ex) {
 						StringWriter stackTraceWriter = new StringWriter();
 						ex.printStackTrace(new PrintWriter(stackTraceWriter));
 						i.getFields().addField("text_error", stackTraceWriter.toString());

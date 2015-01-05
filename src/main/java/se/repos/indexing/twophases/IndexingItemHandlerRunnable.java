@@ -5,7 +5,7 @@ package se.repos.indexing.twophases;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import se.repos.indexing.HandlerException;
+import se.repos.indexing.IndexingHandlerException;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 
@@ -24,7 +24,7 @@ public class IndexingItemHandlerRunnable implements Runnable {
 	public void run() {
 		try {
 			handler.handle(progress);
-		} catch (HandlerException ex) {
+		} catch (IndexingHandlerException ex) {
 			StringWriter stackTraceWriter = new StringWriter();
 			ex.printStackTrace(new PrintWriter(stackTraceWriter));
 			progress.getFields().addField("text_error", stackTraceWriter.toString());
