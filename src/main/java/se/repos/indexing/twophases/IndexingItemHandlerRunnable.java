@@ -3,6 +3,7 @@
  */
 package se.repos.indexing.twophases;
 
+import se.repos.indexing.HandlerException;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
 
@@ -19,7 +20,11 @@ public class IndexingItemHandlerRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		handler.handle(progress);
+		try {
+			handler.handle(progress);
+		} catch (HandlerException ex) {
+			progress.getFields().addField("text_error", ex.getMessage());
+		}
 	}
 
 }

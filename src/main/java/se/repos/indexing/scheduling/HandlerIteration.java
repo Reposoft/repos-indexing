@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import se.repos.indexing.HandlerException;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.Marker;
 import se.repos.indexing.item.IndexingItemProgress;
@@ -42,52 +43,56 @@ class HandlerIteration {
 				IndexingItemProgress i = uit.next();
 				Iterator<IndexingItemHandler> handlers = unit.getHandlers(i);
 				while (handlers.hasNext()) {
-					IndexingItemHandler handler = handlers.next();
-					if (logger.isTraceEnabled()) {
-						if (!seen.contains(handler)) {
-							seen.add(handler);
-							logger.trace("Running {} {} for the first time this unit", handler instanceof Marker ? "marker" : "handler", handler);
-						}
-						if (!uit.hasNext()) {
-							logger.trace("Running {} {} for the last time this unit", handler instanceof Marker ? "marker" : "handler", handler);
-						}
-					}
-					if (handler instanceof java.lang.reflect.Proxy) {
-						logger.warn("Handler {} is a dynamic proxy. Even if the proxied class is a Marker it can't be handled as such.", handler); // can't cast, right?
-					}
-					if (handler instanceof Marker) {
-						Marker m = (Marker) handler;
-						if (marker == null) {
-							if (decision.before(m)) {
-								marker = m;
-							} else {
-								logger.trace("Skip marker {} for this indexing unit", m);
-								skip.add(m);
-								m.ignore();
+					try {
+						IndexingItemHandler handler = handlers.next();
+						if (logger.isTraceEnabled()) {
+							if (!seen.contains(handler)) {
+								seen.add(handler);
+								logger.trace("Running {} {} for the first time this unit", handler instanceof Marker ? "marker" : "handler", handler);
+							}
+							if (!uit.hasNext()) {
+								logger.trace("Running {} {} for the last time this unit", handler instanceof Marker ? "marker" : "handler", handler);
 							}
 						}
-						if (skip.contains(m)) {
-							logger.trace("Skip marker {} as decided for first item", m);
-						} else if (m.equals(marker)) {
-							logger.trace("Handling marker {}", m);
-							m.handle(i);
-							if (!uit.hasNext()) {
-								logger.trace("Trigger marker {}, all items level", m);
-								marker.trigger();
-								if (!decision.after(marker)) {
-									return false;
-								}
-							}	
-							break;
-						} else {
-							throw new IllegalArgumentException("Item has a different marker ordering than previous, got " + handler + " for " + i);
-						} 
-					} else {
-						if (decision.before(handler, i)) {
-							handler.handle(i);
-						} else {
-							logger.trace("Skip handler {} for item {} as decided by {}", handler, i, decision);
+						if (handler instanceof java.lang.reflect.Proxy) {
+							logger.warn("Handler {} is a dynamic proxy. Even if the proxied class is a Marker it can't be handled as such.", handler); // can't cast, right?
 						}
+						if (handler instanceof Marker) {
+							Marker m = (Marker) handler;
+							if (marker == null) {
+								if (decision.before(m)) {
+									marker = m;
+								} else {
+									logger.trace("Skip marker {} for this indexing unit", m);
+									skip.add(m);
+									m.ignore();
+								}
+							}
+							if (skip.contains(m)) {
+								logger.trace("Skip marker {} as decided for first item", m);
+							} else if (m.equals(marker)) {
+								logger.trace("Handling marker {}", m);
+								m.handle(i);
+								if (!uit.hasNext()) {
+									logger.trace("Trigger marker {}, all items level", m);
+									marker.trigger();
+									if (!decision.after(marker)) {
+										return false;
+									}
+								}
+								break;
+							} else {
+								throw new IllegalArgumentException("Item has a different marker ordering than previous, got " + handler + " for " + i);
+							}
+						} else {
+							if (decision.before(handler, i)) {
+								handler.handle(i);
+							} else {
+								logger.trace("Skip handler {} for item {} as decided by {}", handler, i, decision);
+							}
+						}
+					} catch (HandlerException ex) {
+						i.getFields().addField("text_error", ex.getMessage());
 					}
 				}
 			}
