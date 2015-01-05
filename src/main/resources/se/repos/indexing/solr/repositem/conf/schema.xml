@@ -129,8 +129,8 @@
 		
 		<!-- From fulltext extraction -->
 		<field name="text" type="text_general" indexed="true" stored="false" multiValued="false" />
-		<!-- If fulltext and/or embedded metadata extraction fails -->
-		<field name="text_error" type="text_general" indexed="true" stored="true" multiValued="false" />
+		<!-- If fulltext and/or embedded metadata extraction fails. Extended to also contain failures from other handlers. -->
+		<field name="text_error" type="text_general" indexed="true" stored="true" multiValued="true" />
 		<!-- General field for embedded metadata, colon on field name replaced with dot  -->
 		<dynamicField name="embd_*" type="metadata" indexed="true" stored="true" multiValued="false" />
 		<!-- General field for XMP metadata, colon on field name replaced with dot  -->
