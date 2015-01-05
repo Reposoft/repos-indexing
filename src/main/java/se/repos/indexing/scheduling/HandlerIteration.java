@@ -94,6 +94,7 @@ class HandlerIteration {
 							}
 						}
 					} catch (IndexingHandlerException ex) {
+						logger.warn(ex.getMessage());
 						StringWriter stackTraceWriter = new StringWriter();
 						ex.printStackTrace(new PrintWriter(stackTraceWriter));
 						i.getFields().addField("text_error", stackTraceWriter.toString());
