@@ -3,6 +3,8 @@
  */
 package se.repos.indexing.scheduling;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -92,7 +94,9 @@ class HandlerIteration {
 							}
 						}
 					} catch (HandlerException ex) {
-						i.getFields().addField("text_error", ex.getMessage());
+						StringWriter stackTraceWriter = new StringWriter();
+						ex.printStackTrace(new PrintWriter(stackTraceWriter));
+						i.getFields().addField("text_error", stackTraceWriter.toString());
 					}
 				}
 			}
