@@ -268,6 +268,13 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			logger.error("Failed to read revision properties for revision: {}" , revision, e);
 			e.printStackTrace(new PrintWriter(err));
 		}
+		
+		if (revprops != null && "none".equals(revprops.getString("indexing:mode"))) {
+			logger.debug("Got indexing:mode = none for revision {}, marking as complete.", revision);
+			repositoryStatus.indexRevEmpty(repository, revision, revprops, err.toString());
+			return new IndexingUnitRevision(new LinkedList<IndexingItemProgress>(), handlers);
+		}
+		
 		try {
 			logger.info("Reading changeset {}{}", revision, referenceRevision == null ? "" : " with reference revision " + referenceRevision);
 			if (revision.equals(referenceRevision)) {

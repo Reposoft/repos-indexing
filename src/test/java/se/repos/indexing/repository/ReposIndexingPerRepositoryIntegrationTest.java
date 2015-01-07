@@ -385,4 +385,24 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals(3, repositem.query(new SolrQuery("type:commit AND complete:true")).getResults().size());
 	}	
 	
+	@Test
+	public void testIndexingModeNone() throws SolrServerException {
+		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
+				"se/repos/indexing/testrepo1r3-indexing-mode-none.svndump");
+		assertNotNull(dumpfile);
+		context.getInstance(CmsTestRepository.class).load(dumpfile);
+		
+		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
+		context.getInstance(IndexingSchedule.class).start();
+		
+		indexing.sync(RepoRevision.parse("3/2013-03-21T19:16:42.295Z"));
+		assertEquals("should have indexed up to the given revision", 3, indexing.getRevision().getNumber());
+		
+		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		assertEquals("should have indexed rev 1", 4, repositem.query(new SolrQuery("rev:1")).getResults().size());
+		assertEquals("should only index the commit for rev 2", 1, repositem.query(new SolrQuery("rev:2")).getResults().size());
+		assertEquals("should have indexed rev 3", 5, repositem.query(new SolrQuery("rev:3")).getResults().size());
+		
+	}
+	
 }
