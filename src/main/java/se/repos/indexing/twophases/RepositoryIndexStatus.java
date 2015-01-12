@@ -175,6 +175,12 @@ public class RepositoryIndexStatus {
 			for (String key : revprops.getKeySet()) {
 				docStart.addField(getPropRevKey(key), revprops.getString(key));
 			}
+			if (revprops.containsProperty("svn:author")) {
+				docStart.addField("revauthor", revprops.getString("svn:author"));
+			}
+			if (revprops.containsProperty("svn:log")) {
+				docStart.addField("revcomment", revprops.getString("svn:log"));
+			}
 		}
 
 		if (error != null) {
