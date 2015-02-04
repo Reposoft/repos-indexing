@@ -269,7 +269,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			e.printStackTrace(new PrintWriter(err));
 		}
 		
-		if (revprops != null && "none".equals(revprops.getString("indexing:mode"))) {
+		if (revprops != null && revprops.getString("indexing:mode") != null && "none".equals(revprops.getString("indexing:mode").trim())) {
 			logger.debug("Got indexing:mode = none for revision {}, marking as complete.", revision);
 			repositoryStatus.indexRevEmpty(repository, revision, revprops, err.toString());
 			return new IndexingUnitRevision(new LinkedList<IndexingItemProgress>(), handlers);
