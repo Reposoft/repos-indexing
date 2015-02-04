@@ -69,8 +69,16 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 		if (item.isAdd()) {
 			// do nothing because no earlier revision exists
 		} else if (earlierMarkedOverwritten.containsKey(item.getPath())) {
+			// item was earlier marked overwritten (head=false), will do nothing but remove the item from earlierMarkedOverwritten.
+			// this does not apply to copy operations: never historical copy and only head-copy that is move (should be caught by isAdd() above)
+			// #855 I suspect the problem is the combination of folder copy (derived items) and updates in same commit.
+			RepoRevision itemRevisionObsoleted = item.getRevisionObsoleted();
+			if (itemRevisionObsoleted == null) {
+				throw new IllegalStateException("Item " + item + " does not report an obsoleted-revision despite being marked overwritten. Combination of copy and modify?");
+			}
+			
 			RepoRevision obsoleted = earlierMarkedOverwritten.get(item.getPath());
-			if (!item.getRevisionObsoleted().equals(obsoleted)) {
+			if (!itemRevisionObsoleted.equals(obsoleted)) {
 				throw new IllegalStateException("Obsoleted revision " + item.getRevisionObsoleted() + " for " + item + " does not match " + obsoleted + " when it was last indexed");
 			}
 			earlierMarkedOverwritten.remove(item.getPath());
