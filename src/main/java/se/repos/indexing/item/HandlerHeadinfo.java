@@ -15,6 +15,7 @@ import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
 
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.solrj.SolrAdd;
@@ -71,14 +72,17 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 		} else if (earlierMarkedOverwritten.containsKey(item.getPath())) {
 			// item was earlier marked overwritten (head=false), will do nothing but remove the item from earlierMarkedOverwritten.
 			// this does not apply to copy operations: never historical copy and only head-copy that is move (should be caught by isAdd() above)
-			// #855 I suspect the problem is the combination of folder copy (derived items) and updates in same commit.
+			// #855 The problem is the combination of folder copy (derived items) and updates in same commit, when the copy restores a deleted folder.
+			// Not sure why the item is still in earlierMarkedOverwritten. Is the delete operation failing to remove them from that map? Failing to get here?
 			RepoRevision itemRevisionObsoleted = item.getRevisionObsoleted();
 			if (itemRevisionObsoleted == null) {
-				throw new IllegalStateException("Item " + item + " does not report an obsoleted-revision despite being marked overwritten. Combination of copy and modify?");
+				String msg = MessageFormatter.format("Item {} does not report an obsoleted-revision despite being marked overwritten. Combination of copy and modify?", item).getMessage();
+				logger.warn(msg);
+				// #855 No longer throwing ISE. We should preferably improve the svnlook derive functionality to make these items BOTH isAdd/isCopy and isModified.
 			}
 			
 			RepoRevision obsoleted = earlierMarkedOverwritten.get(item.getPath());
-			if (!itemRevisionObsoleted.equals(obsoleted)) {
+			if (itemRevisionObsoleted != null && !itemRevisionObsoleted.equals(obsoleted)) {
 				throw new IllegalStateException("Obsoleted revision " + item.getRevisionObsoleted() + " for " + item + " does not match " + obsoleted + " when it was last indexed");
 			}
 			earlierMarkedOverwritten.remove(item.getPath());
