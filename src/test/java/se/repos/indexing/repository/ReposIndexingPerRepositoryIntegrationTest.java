@@ -241,40 +241,10 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		// TODO if we then delete dir2 in the next commit we can demonstrate the issue with marking folders as !head when files have changed in them; need for workaround
 	}	
+
 	
 	@Test
-	public void testMarkItemHeadCopyIncrementalSync() throws SolrServerException {
-		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
-				"se/repos/indexing/testrepo1r5-copy.svndump");
-		assertNotNull(dumpfile);
-		context.getInstance(CmsTestRepository.class).load(dumpfile);
-		
-		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
-		context.getInstance(IndexingSchedule.class).start();
-		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
-		
-		// Indexing each revision gives reference revision for each sync.
-		indexing.sync(new RepoRevision(1, new Date(1)));
-		
-		indexing.sync(new RepoRevision(2, new Date(2)));
-		
-		indexing.sync(new RepoRevision(3, new Date(3)));
-		
-		indexing.sync(new RepoRevision(4, new Date(4)));
-		
-		indexing.sync(new RepoRevision(5, new Date(5)));
-		// Test that we can incrementally index without failure.
-		
-		SolrDocumentList r4r4 = repositem.query(new SolrQuery("id:*@0000000004").setSort("path", ORDER.asc)).getResults();
-		
-		assertEquals("There was a folder and a file rev 4", 2, r4r4.size());
-		
-		// TODO: Assert on copied item.
-	}
-	
-	@Test
-	public void testMarkItemHeadCopyReindex() throws SolrServerException {
+	public void testMarkItemHeadCopy() throws SolrServerException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
 				"se/repos/indexing/testrepo1r5-copy.svndump");
 		assertNotNull(dumpfile);
@@ -289,13 +259,37 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		indexing.sync(new RepoRevision(5, new Date(5)));
 		
 		// Test that we can reindex without failure.
-		System.out.println("Test that we can reindex without failure.");
 		
 		SolrDocumentList r4r4 = repositem.query(new SolrQuery("id:*@0000000004").setSort("path", ORDER.asc)).getResults();
 		
 		assertEquals("There was a folder and a file rev 4", 2, r4r4.size());
 		
 		// TODO: Assert on copied item.
+	}
+	
+	@Test
+	public void testMarkItemHeadCopyDeleted() throws SolrServerException {
+		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
+				"se/repos/indexing/testrepo1r6-copydeleted.svndump");
+		assertNotNull(dumpfile);
+		context.getInstance(CmsTestRepository.class).load(dumpfile);
+		
+		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
+		context.getInstance(IndexingSchedule.class).start();
+		
+		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		
+		// Confirmed that each revision is indexed with r5 as reference revision.
+		indexing.sync(new RepoRevision(6, new Date(6)));
+				
+		// Test that we can reindex without failure.
+		System.out.println("Test that we can reindex without failure.");
+		
+		SolrDocumentList r6r6 = repositem.query(new SolrQuery("id:*@0000000006").setSort("path", ORDER.asc)).getResults();
+		
+		assertEquals("Restored a folder and two files in rev 6", 3, r6r6.size());
+		
+		// TODO: Assert on restored items.
 	}
 	
 	@SuppressWarnings("serial")

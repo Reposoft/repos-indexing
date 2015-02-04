@@ -1,0 +1,219 @@
+SVN-fs-dump-format-version: 2
+
+UUID: e99f41e3-b7de-4489-9778-c44afade19c7
+
+Revision-number: 0
+Prop-content-length: 56
+Content-length: 56
+
+K 8
+svn:date
+V 27
+2012-09-27T12:05:33.900137Z
+PROPS-END
+
+Revision-number: 1
+Prop-content-length: 131
+Content-length: 131
+
+K 10
+svn:author
+V 7
+solsson
+K 8
+svn:date
+V 27
+2012-09-27T12:05:34.040515Z
+K 7
+svn:log
+V 29
+Two files with two lines each
+PROPS-END
+
+Node-path: dir
+Node-kind: dir
+Node-action: add
+Prop-content-length: 10
+Content-length: 10
+
+PROPS-END
+
+
+Node-path: dir/t2.txt
+Node-kind: file
+Node-action: add
+Prop-content-length: 10
+Text-content-length: 4
+Text-content-md5: 2611be5ce337526d271d4925a1833b0c
+Text-content-sha1: 0310c187adfda73d6f94c470bc4e5ea03e9de590
+Content-length: 14
+
+PROPS-END
+c
+d
+
+
+Node-path: t1.txt
+Node-kind: file
+Node-action: add
+Prop-content-length: 10
+Text-content-length: 4
+Text-content-md5: dd8c6a395b5dd36c56d23275028f526c
+Text-content-sha1: 05dec960e24d918b8a73a1c53bcbbaac2ee5c2e0
+Content-length: 14
+
+PROPS-END
+a
+b
+
+
+Revision-number: 2
+Prop-content-length: 116
+Content-length: 116
+
+K 10
+svn:author
+V 4
+test
+K 8
+svn:date
+V 27
+2013-03-21T19:16:28.271167Z
+K 7
+svn:log
+V 17
+file modification
+PROPS-END
+
+Node-path: t1.txt
+Node-kind: file
+Node-action: change
+Text-content-length: 3
+Text-content-md5: 94364860a0452ac23f3dac45f0091d81
+Text-content-sha1: 4b728c0ea8010167fd4c77724ccee5a769653de0
+Content-length: 3
+
+a
+
+
+
+Revision-number: 3
+Prop-content-length: 148
+Content-length: 148
+
+K 10
+svn:author
+V 4
+test
+K 8
+svn:date
+V 27
+2013-03-21T19:16:42.295071Z
+K 7
+svn:log
+V 49
+folder move without changes to the contained file
+PROPS-END
+
+Node-path: dir2
+Node-kind: dir
+Node-action: add
+Node-copyfrom-rev: 1
+Node-copyfrom-path: dir
+
+
+Node-path: dir
+Node-action: delete
+
+
+Revision-number: 4
+Prop-content-length: 125
+Content-length: 125
+
+K 10
+svn:author
+V 8
+takesson
+K 8
+svn:date
+V 27
+2015-02-04T11:57:25.514020Z
+K 7
+svn:log
+V 22
+Adding t3.txt to dir2.
+PROPS-END
+
+Node-path: dir2/t3.txt
+Node-kind: file
+Node-action: add
+Prop-content-length: 10
+Text-content-length: 13
+Text-content-md5: fb319cc56653b713a8c7a54aa92f6efd
+Text-content-sha1: 98f46145eb13fc9d662fb2d07fe9faf9969be54b
+Content-length: 23
+
+PROPS-END
+another file
+
+
+Revision-number: 5
+Prop-content-length: 129
+Content-length: 129
+
+K 10
+svn:author
+V 8
+takesson
+K 8
+svn:date
+V 27
+2015-02-04T11:58:13.045095Z
+K 7
+svn:log
+V 26
+Deleted dir2 with 2 files.
+PROPS-END
+
+Node-path: dir2
+Node-action: delete
+
+
+Revision-number: 6
+Prop-content-length: 139
+Content-length: 139
+
+K 10
+svn:author
+V 8
+takesson
+K 8
+svn:date
+V 27
+2015-02-04T11:59:47.616452Z
+K 7
+svn:log
+V 36
+Restoring dir2 and modifying t3.txt.
+PROPS-END
+
+Node-path: dir2
+Node-kind: dir
+Node-action: add
+Node-copyfrom-rev: 4
+Node-copyfrom-path: dir2
+
+
+Node-path: dir2/t3.txt
+Node-kind: file
+Node-action: change
+Text-content-length: 60
+Text-content-md5: 208bd2057c4c8b309a656cac9c3a9311
+Text-content-sha1: da3e3d0e0a5e93cb48719ac934be4f41a9c69bca
+Content-length: 60
+
+another file
+Also modifying this file when restoring dir2.
+
+
+
