@@ -245,7 +245,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	@Test
 	public void testMarkItemHeadCopyIncrementalSync() throws SolrServerException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
-				"se/repos/indexing/testrepo1r4-copy.svndump");
+				"se/repos/indexing/testrepo1r5-copy.svndump");
 		assertNotNull(dumpfile);
 		context.getInstance(CmsTestRepository.class).load(dumpfile);
 		
@@ -254,6 +254,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
 		
+		// Indexing each revision gives reference revision for each sync.
 		indexing.sync(new RepoRevision(1, new Date(1)));
 		
 		indexing.sync(new RepoRevision(2, new Date(2)));
@@ -261,6 +262,8 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		indexing.sync(new RepoRevision(3, new Date(3)));
 		
 		indexing.sync(new RepoRevision(4, new Date(4)));
+		
+		indexing.sync(new RepoRevision(5, new Date(5)));
 		// Test that we can incrementally index without failure.
 		
 		SolrDocumentList r4r4 = repositem.query(new SolrQuery("id:*@0000000004").setSort("path", ORDER.asc)).getResults();
@@ -273,7 +276,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	@Test
 	public void testMarkItemHeadCopyReindex() throws SolrServerException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
-				"se/repos/indexing/testrepo1r4-copy.svndump");
+				"se/repos/indexing/testrepo1r5-copy.svndump");
 		assertNotNull(dumpfile);
 		context.getInstance(CmsTestRepository.class).load(dumpfile);
 		
@@ -282,7 +285,8 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
 		
-		indexing.sync(new RepoRevision(4, new Date(4)));
+		// Confirmed that each revision is indexed with r5 as reference revision.
+		indexing.sync(new RepoRevision(5, new Date(5)));
 		
 		// Test that we can reindex without failure.
 		System.out.println("Test that we can reindex without failure.");

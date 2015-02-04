@@ -165,3 +165,25 @@ Also modifying during the copy.
 
 
 
+Revision-number: 5
+Prop-content-length: 138
+Content-length: 138
+
+K 10
+svn:author
+V 8
+takesson
+K 8
+svn:date
+V 27
+2015-02-04T11:30:30.488729Z
+K 7
+svn:log
+V 35
+Deleted the copied file dir2/t2.txt
+PROPS-END
+
+Node-path: dir2/t2.txt
+Node-action: delete
+
+
