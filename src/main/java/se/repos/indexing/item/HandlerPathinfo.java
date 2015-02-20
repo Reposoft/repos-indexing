@@ -25,10 +25,11 @@ public class HandlerPathinfo implements IndexingItemHandler {
 	public static final String TYPE_FILE = "file";
 	public static final String TYPE_FOLDER = "folder";
 	
-	public static final char STAT_ADD = 'A';
-	public static final char STAT_REPLACE = 'R';
-	public static final char STAT_MODIFY = 'M';
-	public static final char STAT_DELETE = 'D';
+	// Must be Strings, otherwise the SolR JSON response will contain "java.lang.Character:A".
+	public static final String STAT_ADD = "A";
+	public static final String STAT_REPLACE = "R";
+	public static final String STAT_MODIFY = "M";
+	public static final String STAT_DELETE = "D";
 	
 	// used to detect special case changeset path = root
 	private static final CmsItemPath REPOROOT = null;
@@ -128,7 +129,7 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			d.setField("pathstat", STAT_MODIFY);
 		}
 		
-		if (item.isPropertiesModified()) {
+		if (item.isPropertiesModified()) { // NOTE: This is using a different field, which makes propstat empty sometimes.
 			d.setField("pathstatprop", STAT_MODIFY);
 		}
 		
