@@ -186,6 +186,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		assertEquals("/dir", r3r1.get(0).get("path"));
 		assertEquals("/dir/t2.txt", r3r1.get(1).get("path"));
+		assertEquals("A", r3r1.get(1).get("pathstat"));
 		assertEquals("/t1.txt", r3r1.get(2).get("path"));
 		assertEquals("Should have revauthor.", "solsson", r3r1.get(2).getFieldValue("revauthor"));
 		assertEquals("Should have revcomment.", "Two files with two lines each", r3r1.get(2).getFieldValue("revcomment"));
