@@ -72,7 +72,7 @@ public class HandlerPathinfoTest {
 		assertEquals("a file.txt", partit.next());
 		assertEquals(3, part.size());
 		
-		assertEquals('A', f.getFieldValue("pathstat"));
+		assertEquals("Must be String in order to get correct JSON from SolR", "A", f.getFieldValue("pathstat"));
 		assertEquals(null, f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but does it matter to search?
 		assertEquals("file", f.getFieldValue("type"));
 		
@@ -119,7 +119,7 @@ public class HandlerPathinfoTest {
 		IndexingDoc f = p.getFields();
 		
 		assertEquals(null, f.getFieldValue("pathstat"));
-		assertEquals('M', f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but does it matter to search?
+		assertEquals("M", f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but does it matter to search?
 		assertEquals(true, f.getFieldValue("copyhas"));
 		
 		CmsChangesetItem item2 = mock(CmsChangesetItem.class);
@@ -142,7 +142,7 @@ public class HandlerPathinfoTest {
 		
 		pathinfo.handle(p2);
 		IndexingDoc f2 = p2.getFields();
-		assertEquals('A', f2.getFieldValue("pathstat"));
+		assertEquals("Must be String in order to get correct JSON from SolR", "A", f2.getFieldValue("pathstat"));
 		assertEquals(null, f2.getFieldValue("pathstatprop"));
 		assertEquals(false, f2.getFieldValue("copyhas"));
 		assertEquals("/my/dir/a file.txt", f2.getFieldValue("copyfrom"));
