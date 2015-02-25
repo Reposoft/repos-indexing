@@ -19,7 +19,7 @@ public abstract class IndexingItemHandlerInternal<T extends IndexingItemProgress
 		try {
 			handleInternal((T) progress);
 		} catch (ClassCastException e) {
-			throw new IllegalStateException("Configuration error. Internal handler " + this.getClass() + " not compatible with indexing progress type " + progress);
+			throw new IllegalStateException("Configuration error. Internal handler " + this.getClass() + " not compatible with indexing progress type " + progress, e);
 		}
 	}
 
