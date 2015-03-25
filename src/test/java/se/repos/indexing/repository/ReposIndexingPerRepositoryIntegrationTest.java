@@ -19,6 +19,7 @@ import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
@@ -290,7 +291,8 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		assertEquals("Restored a folder and two files in rev 6", 3, r6r6.size());
 		
-		// TODO: Assert on restored items.
+		assertEquals("Expected file to be head.", true, r6r6.get(1).getFieldValue("head"));
+		assertEquals("Expected file to be head.", true, r6r6.get(2).getFieldValue("head"));
 	}
 	
 	@SuppressWarnings("serial")
