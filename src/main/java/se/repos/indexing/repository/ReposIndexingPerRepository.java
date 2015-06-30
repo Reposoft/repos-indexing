@@ -305,6 +305,13 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		List<IndexingItemProgress> items = new LinkedList<IndexingItemProgress>();
 		for (CmsChangesetItem item : changesetItems) {
 			
+			if (item.getPath() == null) {
+				// TODO: Need to ensure that repository is indexed at r0 before allowing prop changes to index repository.
+				// #896 For now preventing indexing of repository root.
+				logger.info("Repository root is not indexed: {} {}", repository, revision);
+				continue;
+			}
+			
 			IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
 			doc.addField("revid", commitId);
 			
