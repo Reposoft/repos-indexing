@@ -89,8 +89,9 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			d.addField("pathfullin", repopath + parent.toString());
 			parent = parent.getParent();
 		}
+		// Non-typical use of CmsItemPath: processing the path above repo.
 		CmsItemPath repopathparent = new CmsItemPath(repopath);
-		if (CmsItemPath.ROOT.equals(path)) {
+		if (path == REPOROOT) {
 			repopathparent = repopathparent.getParent();
 		}
 		while (repopathparent != null) {
