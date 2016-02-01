@@ -24,6 +24,7 @@ public class HandlerPathinfo implements IndexingItemHandler {
 
 	public static final String TYPE_FILE = "file";
 	public static final String TYPE_FOLDER = "folder";
+	public static final String TYPE_REPOSITORY = "repository";
 	
 	// Must be Strings, otherwise the SolR JSON response will contain "java.lang.Character:A".
 	public static final String STAT_ADD = "A";
@@ -106,7 +107,12 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			}
 		}
 		if (item.isFolder()) {
-			d.setField("type", TYPE_FOLDER);
+			if (path == REPOROOT) {
+				// #896 Ensure repository root can not turn up as a regular folder.
+				d.setField("type", TYPE_REPOSITORY);
+			} else {
+				d.setField("type", TYPE_FOLDER);
+			}
 		}
 		
 		d.setField("rev", revision.getNumber());

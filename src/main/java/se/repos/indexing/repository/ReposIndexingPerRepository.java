@@ -307,9 +307,8 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			
 			if (item.getPath() == null) {
 				// TODO: Need to ensure that repository is indexed at r0 before allowing prop changes to index repository.
-				// #896 For now preventing indexing of repository root.
-				logger.info("Repository root is not indexed: {} {}", repository, revision);
-				continue;
+				// #896 Difficult to prevent indexing of repository root.
+				logger.info("Repository root is likely not consistently indexed until property set on root: {} {}", repository, revision);
 			}
 			
 			IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
