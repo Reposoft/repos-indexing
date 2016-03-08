@@ -295,6 +295,30 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals("Expected file to be head.", true, r6r6.get(2).getFieldValue("head"));
 	}
 	
+	@Test
+	public void testMarkItemHeadAddDeleted() throws SolrServerException {
+		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
+				"se/repos/indexing/testrepo1r7-adddeleted.svndump");
+		assertNotNull(dumpfile);
+		context.getInstance(CmsTestRepository.class).load(dumpfile);
+		
+		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
+		context.getInstance(IndexingSchedule.class).start();
+		
+		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		
+		// Confirmed that each revision is indexed with r7 as reference revision.
+		indexing.sync(new RepoRevision(7, new Date(7)));
+				
+		// Test that we can reindex without failure.
+		System.out.println("Test that we can reindex without failure.");
+		
+		SolrDocumentList r7r7 = repositem.query(new SolrQuery("id:*@0000000007").setSort("path", ORDER.asc)).getResults();
+		
+		assertEquals("Only a single file removed in rev 7", 1, r7r7.size());
+	}
+	
+	
 	@SuppressWarnings("serial")
 	@Test
 	public void testAbortedRev() throws SolrServerException, IOException {
