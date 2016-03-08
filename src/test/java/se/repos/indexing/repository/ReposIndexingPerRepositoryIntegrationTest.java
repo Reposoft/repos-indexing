@@ -19,7 +19,6 @@ import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
@@ -307,7 +306,11 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
 		
-		// Confirmed that each revision is indexed with r7 as reference revision.
+		// Indexing whole repo in batch does not reproduce the issue. 
+		// Batch index first era of t1.txt.
+		indexing.sync(new RepoRevision(5, new Date(5)));
+		// Incrementally index remaining revisions.
+		indexing.sync(new RepoRevision(6, new Date(6)));
 		indexing.sync(new RepoRevision(7, new Date(7)));
 				
 		// Test that we can reindex without failure.
