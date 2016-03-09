@@ -317,7 +317,14 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		// Incrementally index remaining revisions.
 		indexing.sync(new RepoRevision(6, new Date(6)));
 		indexing.sync(new RepoRevision(7, new Date(7)));
-				
+		
+		/*
+		 * r4: Moves t1.txt to t1-renamed.txt
+		 * r5: Deletes t1-renamed.txt
+		 * r6: Adds a new t1.txt
+		 * r7: Deletes the new t1.txt
+		 */
+		
 		
 		SolrDocumentList r7r7 = repositem.query(new SolrQuery("id:*@0000000007").setSort("path", ORDER.asc)).getResults();
 		
