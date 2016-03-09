@@ -325,6 +325,39 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		 * r7: Deletes the new t1.txt
 		 */
 		
+		SolrDocumentList r7r7 = repositem.query(new SolrQuery("id:*@0000000007").setSort("path", ORDER.asc)).getResults();
+		
+		assertEquals("Only a single file removed in rev 7", 1, r7r7.size());
+		logger.info("Done: {}", dumpFileName);
+	}
+	
+	@Test
+	public void testMarkItemHeadAddDeletedSync4() throws SolrServerException {
+		String dumpFileName = "se/repos/indexing/testrepo1r7-adddeleted.svndump";
+		logger.info("Testing: {}", dumpFileName);
+		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(dumpFileName);
+		assertNotNull(dumpfile);
+		context.getInstance(CmsTestRepository.class).load(dumpfile);
+		
+		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
+		context.getInstance(IndexingSchedule.class).start();
+		
+		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		
+		// Indexing whole repo in batch does not reproduce the issue. 
+		// Batch index first era of t1.txt.
+		indexing.sync(new RepoRevision(4, new Date(4)));
+		indexing.sync(new RepoRevision(5, new Date(5)));
+		// Incrementally index remaining revisions.
+		indexing.sync(new RepoRevision(6, new Date(6)));
+		indexing.sync(new RepoRevision(7, new Date(7)));
+		
+		/*
+		 * r4: Moves t1.txt to t1-renamed.txt
+		 * r5: Deletes t1-renamed.txt
+		 * r6: Adds a new t1.txt
+		 * r7: Deletes the new t1.txt
+		 */
 		
 		SolrDocumentList r7r7 = repositem.query(new SolrQuery("id:*@0000000007").setSort("path", ORDER.asc)).getResults();
 		
