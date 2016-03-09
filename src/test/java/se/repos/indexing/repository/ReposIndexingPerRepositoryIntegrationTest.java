@@ -27,6 +27,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
 
 import se.repos.indexing.IndexAdmin;
@@ -72,6 +74,8 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	private EmbeddedSolrServer forTearDown = null;
 	
 	private Injector context = null;
+	
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Before
 	public void setUp() throws Exception {
@@ -296,8 +300,9 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	
 	@Test
 	public void testMarkItemHeadAddDeleted() throws SolrServerException {
-		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
-				"se/repos/indexing/testrepo1r7-adddeleted.svndump");
+		String dumpFileName = "se/repos/indexing/testrepo1r7-adddeleted.svndump";
+		logger.info("Testing: {}", dumpFileName);
+		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(dumpFileName);
 		assertNotNull(dumpfile);
 		context.getInstance(CmsTestRepository.class).load(dumpfile);
 		
@@ -313,12 +318,11 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		indexing.sync(new RepoRevision(6, new Date(6)));
 		indexing.sync(new RepoRevision(7, new Date(7)));
 				
-		// Test that we can reindex without failure.
-		System.out.println("Test that we can reindex without failure.");
 		
 		SolrDocumentList r7r7 = repositem.query(new SolrQuery("id:*@0000000007").setSort("path", ORDER.asc)).getResults();
 		
 		assertEquals("Only a single file removed in rev 7", 1, r7r7.size());
+		logger.info("Done: {}", dumpFileName);
 	}
 	
 	
