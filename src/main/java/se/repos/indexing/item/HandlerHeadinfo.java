@@ -91,11 +91,15 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 			indexItemMarkPrevious(progress.getRepository(), progress.getRevision(), item);
 		}
 		
-		if (item.isOverwritten()) {
+		if (item.isDelete()) {
+			// #933: Set head to false but do NOT add item to earlierMarkedOverwritten.
+			progress.getFields().setField("head", false);
+			logger.debug("Setting head=false on deleted path: {}", item.getPath());
+		} else if (item.isOverwritten()) {
 			progress.getFields().setField("head", false);
 			earlierMarkedOverwritten.put(item.getPath(), progress.getRevision());
 		} else {
-			progress.getFields().setField("head", !item.isDelete());
+			progress.getFields().setField("head", true);
 		}
 	}
 
