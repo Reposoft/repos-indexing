@@ -118,6 +118,164 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 				1, solr.query(new SolrQuery("prop_custom.tags:junit")).getResults().getNumFound());
 	}
 	
+	@Test
+	public void testFulltextSearchCamelCase() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc = new SolrInputDocument();
+		doc.addField("id", "1");
+		doc.addField("text", "word JavaClassName getMethodName getMethod2Name The ProductNAME followed by text");
+		solr.add(doc);
+		solr.commit();
+		
+		assertEquals("Should match simple word", 1, solr.query(new SolrQuery("text:word")).getResults().getNumFound());
+		assertEquals("Should match words in sequence", 1, solr.query(new SolrQuery("text:followed by text")).getResults().getNumFound());
+		assertEquals("Should match quoted words in sequence", 1, solr.query(new SolrQuery("text:\"followed by text\"")).getResults().getNumFound());
+		assertEquals("Should not match quoted words out of sequence", 0, solr.query(new SolrQuery("text:\"followed text\"")).getResults().getNumFound());
+
+		
+		assertEquals("Should match Java Class Name camelcase", 1, solr.query(new SolrQuery("text:JavaClassName")).getResults().getNumFound());
+		assertEquals("Should match Java Class Name lowercase", 1, solr.query(new SolrQuery("text:javaclassname")).getResults().getNumFound());
+		assertEquals("Should match Java Method Name camelcase", 1, solr.query(new SolrQuery("text:getMethodName")).getResults().getNumFound());
+		assertEquals("Should match Java Method Name lowercase", 1, solr.query(new SolrQuery("text:getmethodname")).getResults().getNumFound());
+		assertEquals("Should match Java Method Name wildcard", 1, solr.query(new SolrQuery("text:getmethod*")).getResults().getNumFound());
+
+		assertEquals("Should match Java Method 2 Name camelcase", 1, solr.query(new SolrQuery("text:getMethod2Name")).getResults().getNumFound());
+		assertEquals("Should match Java Method 2 Name lowercase", 1, solr.query(new SolrQuery("text:getmethod2name")).getResults().getNumFound());
+		assertEquals("Should match Java Method 2 Name wildcard", 1, solr.query(new SolrQuery("text:getmethod2*")).getResults().getNumFound());
+		
+		assertEquals("Should match Product Name case-switch", 1, solr.query(new SolrQuery("text:ProductNAME")).getResults().getNumFound());
+		assertEquals("Should match Product Name lowercase", 1, solr.query(new SolrQuery("text:productname")).getResults().getNumFound());
+		assertEquals("Should match Product Name leading capital", 1, solr.query(new SolrQuery("text:Productname")).getResults().getNumFound());
+		assertEquals("Should match Product Name in context", 1, solr.query(new SolrQuery("text:The ProductNAME followed by text")).getResults().getNumFound());
+		// Will fail if using preserveOriginal="1".
+		assertEquals("Should match Product Name in context - Quoted", 1, solr.query(new SolrQuery("text:\"The ProductNAME followed by text\"")).getResults().getNumFound());
+		assertEquals("Should match Product Name lowercase in context - Quoted", 1, solr.query(new SolrQuery("text:\"The Productname followed by text\"")).getResults().getNumFound());
+
+		// Difficult to combine individual components with quoted search.
+		/*
+		assertEquals("Could match Product Name individual components", 1, solr.query(new SolrQuery("text:product")).getResults().getNumFound());
+		assertEquals("Could match Product Name individual components", 1, solr.query(new SolrQuery("text:name")).getResults().getNumFound());
+		assertEquals("Could match Product Name separated components", 1, solr.query(new SolrQuery("text:product name")).getResults().getNumFound());
+		*/
+	}
+
+	@Test
+	public void testFulltextSearchDelimiters() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc = new SolrInputDocument();
+		doc.addField("id", "1");
+		doc.addField("text", "word top-level");
+		solr.add(doc);
+		solr.commit();
+		
+		assertEquals("Should match simple word", 1, solr.query(new SolrQuery("text:word")).getResults().getNumFound());
+		assertEquals("Should match exact", 1, solr.query(new SolrQuery("text:top-level")).getResults().getNumFound());
+		assertEquals("Should match exact - Quoted", 1, solr.query(new SolrQuery("text:\"top-level\"")).getResults().getNumFound());
+		assertEquals("Could match exact - Quoted space instead of dash", 1, solr.query(new SolrQuery("text:\"top level\"")).getResults().getNumFound());
+		assertEquals("Should match part 1", 1, solr.query(new SolrQuery("text:top")).getResults().getNumFound());
+		assertEquals("Should match part 2", 1, solr.query(new SolrQuery("text:level")).getResults().getNumFound());
+		
+		// Below asserts just documents current behavior, would be fine if they also hit.
+		assertEquals("Unlikely to match catenated", 0, solr.query(new SolrQuery("text:toplevel")).getResults().getNumFound());
+	}
+	
+	
+	@Test @Ignore //Stem Possessive is a feature of the WDF.
+	public void testFulltextSearchEnglishPossessive() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc = new SolrInputDocument();
+		doc.addField("id", "1");
+		doc.addField("text", "word Staffan's & Thomas' code");
+		solr.add(doc);
+		solr.commit();
+		
+		assertEquals("Should match simple word", 1, solr.query(new SolrQuery("text:word")).getResults().getNumFound());
+		assertEquals("Should match name 1", 1, solr.query(new SolrQuery("text:staffan")).getResults().getNumFound());
+		assertEquals("Should match name 2", 1, solr.query(new SolrQuery("text:thomas")).getResults().getNumFound());
+		
+		// Likely only possible with WDF in both pipelines or without WDF.
+		/*
+		assertEquals("Should match possessive name 1", 1, solr.query(new SolrQuery("text:Staffan's")).getResults().getNumFound());
+		assertEquals("Should match possessive name 2", 1, solr.query(new SolrQuery("text:Thomas'")).getResults().getNumFound());
+		*/
+		
+		// Works when WDF is only in index pipeline.
+		assertEquals("Could match quoted no possessive", 1, solr.query(new SolrQuery("text:\"Staffan & Thomas code\"")).getResults().getNumFound());
+		
+		// Likely only possible with WDF in query pipeline or without WDF.
+		/*
+		assertEquals("Could match quoted exact", 1, solr.query(new SolrQuery("text:\"Staffan's & Thomas' code\"")).getResults().getNumFound());
+		*/
+	}
+	
+	@Test
+	public void testFulltextSearchNumbers() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc = new SolrInputDocument();
+		doc.addField("id", "1");
+		doc.addField("text", "word The SD500 product");
+		solr.add(doc);
+		solr.commit();
+		
+		assertEquals("Should match simple word", 1, solr.query(new SolrQuery("text:word")).getResults().getNumFound());
+		assertEquals("Should match exact product", 1, solr.query(new SolrQuery("text:SD500")).getResults().getNumFound());
+		assertEquals("Should match exact product lowercase", 1, solr.query(new SolrQuery("text:sd500")).getResults().getNumFound());
+		assertEquals("Should match exact product quoted", 1, solr.query(new SolrQuery("text:\"SD500\"")).getResults().getNumFound());
+		assertEquals("Should match exact product wildcard", 1, solr.query(new SolrQuery("text:SD5*")).getResults().getNumFound());
+		
+		// WDF needs splitOnNumerics for these, which requires catenate or preserve for above asserts.
+		/*
+		assertEquals("Could match part 1", 1, solr.query(new SolrQuery("text:SD")).getResults().getNumFound());
+		assertEquals("Could match part 2", 1, solr.query(new SolrQuery("text:500")).getResults().getNumFound());
+		*/
+		
+		// These asserts document the desire to have less spurious hits
+		assertEquals("Avoid matching other product SD200", 0, solr.query(new SolrQuery("text:SD200")).getResults().getNumFound());
+		assertEquals("Avoid matching other product XX500", 0, solr.query(new SolrQuery("text:XX500")).getResults().getNumFound());
+
+		
+		assertEquals("Should match quoted context", 1, solr.query(new SolrQuery("text:\"The SD500 product\"")).getResults().getNumFound());
+	}
+	
+	@Test
+	public void testFulltextSearchNumbersHyphen() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc = new SolrInputDocument();
+		doc.addField("id", "1");
+		doc.addField("text", "word The SD-500 product");
+		solr.add(doc);
+		solr.commit();
+		
+		assertEquals("Should match simple word", 1, solr.query(new SolrQuery("text:word")).getResults().getNumFound());
+		assertEquals("Should match exact product", 1, solr.query(new SolrQuery("text:SD-500")).getResults().getNumFound());
+		assertEquals("Should match exact product lowercase", 1, solr.query(new SolrQuery("text:sd-500")).getResults().getNumFound());
+		
+		// With hyphen also the StandardTokenizer will split.
+		assertEquals("Could match part 1", 1, solr.query(new SolrQuery("text:SD")).getResults().getNumFound());
+		assertEquals("Could match part 2", 1, solr.query(new SolrQuery("text:500")).getResults().getNumFound());
+		
+		assertEquals("Could match quoted context", 1, solr.query(new SolrQuery("text:\"The SD-500 product\"")).getResults().getNumFound());
+	}
+	
+	@Test
+	public void testFulltextSearchEmail() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc = new SolrInputDocument();
+		doc.addField("id", "1");
+		doc.addField("text", "contact support@example.com");
+		solr.add(doc);
+		solr.commit();
+		
+		assertEquals("Should match simple word", 1, solr.query(new SolrQuery("text:contact")).getResults().getNumFound());
+		// Likely NOT possible with WDF in index pipeline.
+		assertEquals("Should match exact email", 1, solr.query(new SolrQuery("text:support@example.com")).getResults().getNumFound());
+		assertEquals("Should match exact email - Quoted", 1, solr.query(new SolrQuery("text:\"support@example.com\"")).getResults().getNumFound());
+		
+		assertEquals("Could match part 1", 1, solr.query(new SolrQuery("text:support")).getResults().getNumFound());
+		assertEquals("Could match part 2", 1, solr.query(new SolrQuery("text:example.com")).getResults().getNumFound());	
+	}
+	
+	
 	// Documents the effect of the caveat in http://wiki.apache.org/solr/Atomic_Updates
 	@Test
 	public void testHeadFlagUpdateEffect() throws Exception {
