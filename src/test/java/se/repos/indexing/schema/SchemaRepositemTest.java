@@ -118,6 +118,62 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 				1, solr.query(new SolrQuery("prop_custom.tags:junit")).getResults().getNumFound());
 	}
 	
+	@Test
+	public void testFulltextSearchCamelCase() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc = new SolrInputDocument();
+		doc.addField("id", "1");
+		doc.addField("text", "word JavaClassName getMethodName The ProductNAME followed by text");
+		solr.add(doc);
+		solr.commit();
+		
+		assertEquals("Should match simple word", 1, solr.query(new SolrQuery("text:word")).getResults().getNumFound());
+		assertEquals("Should match words in sequence", 1, solr.query(new SolrQuery("text:followed by text")).getResults().getNumFound());
+		assertEquals("Should match quoted words in sequence", 1, solr.query(new SolrQuery("text:\"followed by text\"")).getResults().getNumFound());
+		assertEquals("Should not match quoted words out of sequence", 0, solr.query(new SolrQuery("text:\"followed text\"")).getResults().getNumFound());
+
+		
+		assertEquals("Should match Java Class Name camelcase", 1, solr.query(new SolrQuery("text:JavaClassName")).getResults().getNumFound());
+		assertEquals("Should match Java Class Name lowercase", 1, solr.query(new SolrQuery("text:javaclassname")).getResults().getNumFound());
+		assertEquals("Should match Java Method Name camelcase", 1, solr.query(new SolrQuery("text:getMethodName")).getResults().getNumFound());
+		assertEquals("Should match Java Method Name lowercase", 1, solr.query(new SolrQuery("text:getmethodname")).getResults().getNumFound());
+		assertEquals("Should match Java Method Name wildcard", 1, solr.query(new SolrQuery("text:getmethod*")).getResults().getNumFound());
+		
+		assertEquals("Should match Product Name case-switch", 1, solr.query(new SolrQuery("text:ProductNAME")).getResults().getNumFound());
+		assertEquals("Should match Product Name lowercase", 1, solr.query(new SolrQuery("text:productname")).getResults().getNumFound());
+		assertEquals("Should match Product Name leading capital", 1, solr.query(new SolrQuery("text:Productname")).getResults().getNumFound());
+		assertEquals("Should match Product Name in context", 1, solr.query(new SolrQuery("text:The ProductNAME followed by text")).getResults().getNumFound());
+		// Will fail if using preserveOriginal="1".
+		assertEquals("Should match Product Name in context - Quoted", 1, solr.query(new SolrQuery("text:\"The ProductNAME followed by text\"")).getResults().getNumFound());
+		assertEquals("Should match Product Name lowercase in context - Quoted", 1, solr.query(new SolrQuery("text:\"The Productname followed by text\"")).getResults().getNumFound());
+
+		// Difficult to combine individual components with quoted search.
+		/*
+		assertEquals("Could match Product Name individual components", 1, solr.query(new SolrQuery("text:product")).getResults().getNumFound());
+		assertEquals("Could match Product Name individual components", 1, solr.query(new SolrQuery("text:name")).getResults().getNumFound());
+		assertEquals("Could match Product Name separated components", 1, solr.query(new SolrQuery("text:product name")).getResults().getNumFound());
+		*/
+	}
+
+	@Test
+	public void testFulltextSearchDelimiters() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc = new SolrInputDocument();
+		doc.addField("id", "1");
+		doc.addField("text", "word top-level");
+		solr.add(doc);
+		solr.commit();
+		
+		assertEquals("Should match simple word", 1, solr.query(new SolrQuery("text:word")).getResults().getNumFound());
+		assertEquals("Should match exact", 1, solr.query(new SolrQuery("text:top-level")).getResults().getNumFound());
+		assertEquals("Should match part 1", 1, solr.query(new SolrQuery("text:top")).getResults().getNumFound());
+		assertEquals("Should match part 2", 1, solr.query(new SolrQuery("text:level")).getResults().getNumFound());
+		
+		// Below assert just documents current behavior, would be fine if they also hit.
+		assertEquals("Unlikely to match catenated", 0, solr.query(new SolrQuery("text:toplevel")).getResults().getNumFound());
+	}
+	
+	
 	// Documents the effect of the caveat in http://wiki.apache.org/solr/Atomic_Updates
 	@Test
 	public void testHeadFlagUpdateEffect() throws Exception {
