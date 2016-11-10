@@ -82,6 +82,183 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	}
 	
 	@Test
+	public void testFilenameNumberedDelimiterNone() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc1 = new SolrInputDocument();
+		doc1.addField("id", "1");
+		doc1.addField("pathnamebase", "MAP12345678");
+		solr.add(doc1);
+		SolrInputDocument doc2 = new SolrInputDocument();
+		doc2.addField("id", "2");
+		doc2.addField("pathnamebase", "TOP12345678");
+		solr.add(doc2);
+		solr.commit();
+		
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:MAP12345678")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:TOP12345678")).getResults().getNumFound());
+		
+		assertEquals("lowercase match", 1, solr.query(new SolrQuery("name:map12345678")).getResults().getNumFound());
+		assertEquals("lowercase match", 1, solr.query(new SolrQuery("name:top12345678")).getResults().getNumFound());
+		
+		// no split on number - debatable but splitting will generate very spurious hits when searching to product names etc
+		assertEquals("no split on number", 0, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
+		assertEquals("no split on number", 0, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
+	}
+	
+	@Test
+	public void testFilenameNumberedDelimiterSpace() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc1 = new SolrInputDocument();
+		doc1.addField("id", "1");
+		doc1.addField("pathnamebase", "MAP 12345678");
+		solr.add(doc1);
+		SolrInputDocument doc2 = new SolrInputDocument();
+		doc2.addField("id", "2");
+		doc2.addField("pathnamebase", "TOP 12345678");
+		solr.add(doc2);
+		solr.commit();
+		
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:MAP\\ 12345678")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:TOP\\ 12345678")).getResults().getNumFound());
+		
+		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:MAP 12345678")).getResults().getNumFound());
+		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:TOP 12345678")).getResults().getNumFound());
+		
+		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:MAP-12345678")).getResults().getNumFound());
+		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:TOP-12345678")).getResults().getNumFound());
+
+		assertEquals("split on space", 1, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
+		assertEquals("split on space", 1, solr.query(new SolrQuery("name:top")).getResults().getNumFound());
+		assertEquals("split on space", 2, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
+	}
+	
+	@Test
+	public void testFilenameNumberedDelimiterUnderscore() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc1 = new SolrInputDocument();
+		doc1.addField("id", "1");
+		doc1.addField("pathnamebase", "MAP_12345678");
+		solr.add(doc1);
+		SolrInputDocument doc2 = new SolrInputDocument();
+		doc2.addField("id", "2");
+		doc2.addField("pathnamebase", "TOP_12345678");
+		solr.add(doc2);
+		solr.commit();
+		
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:MAP_12345678")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:TOP_12345678")).getResults().getNumFound());
+		
+		assertEquals("split on underscore", 1, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
+		assertEquals("split on underscore", 2, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
+		
+		// no split on underscore - debatable but good when using numbering (have the option to use space if splitting is desired)
+		/*
+		assertEquals("no split on underscore", 0, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
+		assertEquals("no split on underscore", 0, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
+		*/
+	}
+	
+	@Test
+	public void testFilenameNumberedDelimiterDash() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc1 = new SolrInputDocument();
+		doc1.addField("id", "1");
+		doc1.addField("pathnamebase", "MAP-12345678");
+		solr.add(doc1);
+		SolrInputDocument doc2 = new SolrInputDocument();
+		doc2.addField("id", "2");
+		doc2.addField("pathnamebase", "TOP-12345678");
+		solr.add(doc2);
+		solr.commit();
+		
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:MAP-12345678")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:TOP-12345678")).getResults().getNumFound());
+		// split on dash
+		assertEquals("split on dash", 1, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
+		assertEquals("split on dash", 2, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
+		assertEquals("split on dash", 1, solr.query(new SolrQuery("name:TOP 12345678")).getResults().getNumFound());
+	}
+	
+	@Test
+	public void testFilenameDescriptive() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc1 = new SolrInputDocument();
+		doc1.addField("id", "1");
+		doc1.addField("pathnamebase", "Large Machine");
+		solr.add(doc1);
+		SolrInputDocument doc2 = new SolrInputDocument();
+		doc2.addField("id", "2");
+		doc2.addField("pathnamebase", "Small machine");
+		solr.add(doc2);
+		solr.commit();
+		
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:Large\\ Machine")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:Small\\ machine")).getResults().getNumFound());
+		
+		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:Large Machine")).getResults().getNumFound());
+		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:Small machine")).getResults().getNumFound());
+		
+		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Large-Machine")).getResults().getNumFound());
+		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Small_machine")).getResults().getNumFound());
+		
+		assertEquals("lowercase", 1, solr.query(new SolrQuery("name:large machine")).getResults().getNumFound());
+		
+		assertEquals("", 1, solr.query(new SolrQuery("name:large huge machine")).getResults().getNumFound());
+		
+		assertEquals("one term", 2, solr.query(new SolrQuery("name:machine")).getResults().getNumFound());
+		//assertEquals("term order", 1, solr.query(new SolrQuery("name:machine large")).getResults().getNumFound());
+
+		// Makes no sense...
+		assertEquals("all terms must match?", 0, solr.query(new SolrQuery("name:huge machine")).getResults().getNumFound());
+		assertEquals("all terms must match - should be 0 hits??", 2, solr.query(new SolrQuery("name:machine huge")).getResults().getNumFound());
+	}
+	
+	@Test
+	public void testFilenameDescriptiveReverse() throws Exception {
+		SolrServer solr = getSolr();
+		SolrInputDocument doc1 = new SolrInputDocument();
+		doc1.addField("id", "1");
+		doc1.addField("pathnamebase", "Machine Large");
+		solr.add(doc1);
+		SolrInputDocument doc2 = new SolrInputDocument();
+		doc2.addField("id", "2");
+		doc2.addField("pathnamebase", "machine Small");
+		solr.add(doc2);
+		solr.commit();
+		
+		assertEquals("one term", 2, solr.query(new SolrQuery("name:machine")).getResults().getNumFound());
+		assertEquals("one term", 1, solr.query(new SolrQuery("name:large")).getResults().getNumFound());
+		assertEquals("one term", 1, solr.query(new SolrQuery("name:small")).getResults().getNumFound());
+		
+		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:Large\\ Machine")).getResults().getNumFound());
+		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:Small\\ machine")).getResults().getNumFound());
+		
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:Machine\\ Large")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:machine\\ Small")).getResults().getNumFound());
+		
+		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:Large Machine")).getResults().getNumFound());
+		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:Small machine")).getResults().getNumFound());
+		
+		// Strange result below this point.
+		// The first token seems to be special with solr.PatternTokenizerFactory		
+		assertEquals("tokenized match reverse", 2, solr.query(new SolrQuery("name:Machine Large")).getResults().getNumFound()); // Debatable
+		assertEquals("tokenized match reverse", 2, solr.query(new SolrQuery("name:machine Small")).getResults().getNumFound()); // Debatable
+/*		
+		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Large-Machine")).getResults().getNumFound());
+		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Small_machine")).getResults().getNumFound());
+	*/	
+		assertEquals("lowercase", 1, solr.query(new SolrQuery("name:large machine")).getResults().getNumFound());
+		
+		assertEquals("", 1, solr.query(new SolrQuery("name:large huge machine")).getResults().getNumFound());
+		
+		assertEquals("one term", 2, solr.query(new SolrQuery("name:machine")).getResults().getNumFound());
+
+		assertEquals("all terms must match? - first term must match?", 0, solr.query(new SolrQuery("name:huge machine")).getResults().getNumFound());
+		assertEquals("all terms must match - should be 0 hits??", 2, solr.query(new SolrQuery("name:machine huge")).getResults().getNumFound());
+	}
+	
+	
+	@Test
 	public void testPropertySearch() throws Exception {
 		SolrServer solr = getSolr();
 		SolrInputDocument doc = new SolrInputDocument();
