@@ -78,7 +78,7 @@ public class RepositoryIndexStatus {
 	 * @return started and completed revision, highest number
 	 */
 	public RepoRevision getIndexedRevisionHighestCompleted(CmsRepository repository) {
-		logger.debug("Checking higest clompleted revision for {}", repository);
+		logger.debug("Checking higest completed revision for {}", repository);
 		return getIndexedRevision(repository, "true", ORDER.desc);
 	}
 
