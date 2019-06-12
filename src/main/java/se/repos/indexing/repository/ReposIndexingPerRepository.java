@@ -315,6 +315,11 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 			doc.addField("revid", commitId);
 			
 			if (revprops != null && (item.isFile() || item.isFolder())) {
+				// Add all revprops to proprev_* with transformation of ':'
+				for (String key : revprops.getKeySet()) {
+					doc.addField(getPropRevKey(key), revprops.getString(key));
+				}
+				
 				doc.addField("revauthor", revprops.getString("svn:author"));
 				doc.addField("revcomment", revprops.getString("svn:log"));
 				if (item.isDerived()) {
@@ -348,6 +353,12 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		}
 		throw new UnsupportedOperationException("Use getRevision because this service can not see the difference between completed and in progress revisions");
 	}
+	
+	
+	protected String getPropRevKey(String key) {
+		return "proprev_".concat(key.replace(':', '.'));
+	}
+	
 	
 	/**
 	 * This is pretty internal.

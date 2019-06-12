@@ -172,9 +172,12 @@ public class RepositoryIndexStatus {
 		docStart.addField("t", new Date());
 		
 		if (revprops != null) {
+			// Add all revprops to proprev_* with transformation of ':'
 			for (String key : revprops.getKeySet()) {
 				docStart.addField(getPropRevKey(key), revprops.getString(key));
 			}
+			
+			// Specific fields for Author and History Comment.
 			if (revprops.containsProperty("svn:author")) {
 				docStart.addField("revauthor", revprops.getString("svn:author"));
 			}
