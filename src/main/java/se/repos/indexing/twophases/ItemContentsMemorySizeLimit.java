@@ -3,8 +3,6 @@
  */
 package se.repos.indexing.twophases;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,6 +24,7 @@ import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
 import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
+import se.simonsoft.cms.item.stream.ByteArrayInOutStream;
 
 /**
  * 
@@ -79,7 +78,8 @@ public class ItemContentsMemorySizeLimit implements ItemContentBufferStrategy {
 		private CmsItemPath path;
 		private int size;
 
-		private ByteArrayOutputStream buffer = null;
+		// Stream implementation that does not copy the buffer in memory (keeps one copy).
+		private ByteArrayInOutStream buffer = null;
 		
 		public BufferInMemory(CmsRepositoryInspection repository,
 				RepoRevision revision, CmsItemPath path, int size) {
@@ -92,7 +92,7 @@ public class ItemContentsMemorySizeLimit implements ItemContentBufferStrategy {
 		@Override
 		public InputStream getContents() {
 			if (buffer == null) {
-				buffer = new ByteArrayOutputStream(size);
+				buffer = new ByteArrayInOutStream(size);
 				reader.getContents(repository, revision, path, buffer);
 				try {
 					buffer.close();
@@ -100,7 +100,7 @@ public class ItemContentsMemorySizeLimit implements ItemContentBufferStrategy {
 					throw new RuntimeException(e);
 				}
 			}
-			return new ByteArrayInputStream(buffer.toByteArray());
+			return buffer.getInputStream();
 		}
 
 		@Override
