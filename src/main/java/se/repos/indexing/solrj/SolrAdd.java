@@ -5,7 +5,7 @@ package se.repos.indexing.solrj;
 
 import java.io.IOException;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -16,7 +16,7 @@ public class SolrAdd extends SolrOp {
 
 	private SolrInputDocument doc;
 
-	public SolrAdd(SolrServer core, IndexingDoc doc) {
+	public SolrAdd(SolrClient core, IndexingDoc doc) {
 		super(core);
 		if (doc instanceof IndexingDocIncrementalSolrj) {
 			this.doc = ((IndexingDocIncrementalSolrj) doc).getSolrDoc();
@@ -25,7 +25,7 @@ public class SolrAdd extends SolrOp {
 		}
 	}
 	
-	public SolrAdd(SolrServer core, SolrInputDocument doc) {
+	public SolrAdd(SolrClient core, SolrInputDocument doc) {
 		super(core);
 		this.doc = doc;
 	}

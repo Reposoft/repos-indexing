@@ -5,7 +5,7 @@ package se.repos.indexing.twophases;
 
 import java.io.IOException;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 
 import se.repos.indexing.CoreCommit;
@@ -17,9 +17,9 @@ import se.repos.indexing.IndexWriteException;
  */
 public class CoreCommitRevcomplete implements CoreCommit {
 
-	private SolrServer core;
+	private SolrClient core;
 
-	public CoreCommitRevcomplete(SolrServer core) {
+	public CoreCommitRevcomplete(SolrClient core) {
 		this.core = core;
 	}
 	

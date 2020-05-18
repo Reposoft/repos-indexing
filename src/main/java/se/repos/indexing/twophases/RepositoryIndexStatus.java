@@ -3,6 +3,7 @@
  */
 package se.repos.indexing.twophases;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +12,7 @@ import javax.inject.Inject;
 
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -46,11 +47,11 @@ public class RepositoryIndexStatus {
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-	private SolrServer repositem;
+	private SolrClient repositem;
 	private IdStrategy idStrategy;
 	
 	@Inject
-	public RepositoryIndexStatus(@Named("repositem") SolrServer repositem, IdStrategy idStrategy) {
+	public RepositoryIndexStatus(@Named("repositem") SolrClient repositem, IdStrategy idStrategy) {
 		this.repositem = repositem;
 		this.idStrategy = idStrategy;
 	}
@@ -108,6 +109,8 @@ public class RepositoryIndexStatus {
 			logger.trace("Running revision query {}", query);
 			resp = repositem.query(query);
 		} catch (SolrServerException e) {
+			throw new RuntimeException("Error not handled", e);
+		} catch (IOException e) {
 			throw new RuntimeException("Error not handled", e);
 		}
 		SolrDocumentList results = resp.getResults();

@@ -6,13 +6,13 @@ package se.repos.indexing.solrj;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 public class HandlerSendIncrementalSolrjRepositem extends
 		HandlerSendIncrementalSolrj {
 
 	@Inject
-	public HandlerSendIncrementalSolrjRepositem(@Named("repositem") SolrServer solrCore) {
+	public HandlerSendIncrementalSolrjRepositem(@Named("repositem") SolrClient solrCore) {
 		super(solrCore);
 	}
 

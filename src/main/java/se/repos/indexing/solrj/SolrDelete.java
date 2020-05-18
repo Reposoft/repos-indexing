@@ -5,7 +5,7 @@ package se.repos.indexing.solrj;
 
 import java.io.IOException;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ public class SolrDelete extends SolrOp {
 	
 	private String query;
 	
-	public SolrDelete(SolrServer core, String query) {
+	public SolrDelete(SolrClient core, String query) {
 		super(core);
 		this.query = query;
 	}

@@ -5,7 +5,7 @@ package se.repos.indexing.solrj;
 
 import java.util.Set;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,9 +19,9 @@ public class HandlerSendIncrementalSolrj implements IndexingItemHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	private SolrServer solr;
+	private SolrClient solr;
 
-	public HandlerSendIncrementalSolrj(SolrServer solrCore) {
+	public HandlerSendIncrementalSolrj(SolrClient solrCore) {
 		this.solr = solrCore;
 	}
 

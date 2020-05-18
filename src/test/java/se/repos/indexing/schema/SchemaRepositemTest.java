@@ -8,7 +8,7 @@ import java.util.Date;
 
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
 import org.apache.solr.common.SolrDocument;
@@ -32,7 +32,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 
 	public static String solrhome = "se/repos/indexing/solr";
 	
-	private SolrServer solrTestServer = null;
+	private SolrClient solrTestServer = null;
 
 	@BeforeClass
 	public static void beforeTests() throws Exception {
@@ -56,7 +56,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	}
 	
 	@SuppressWarnings("unused")
-	private void printHits(SolrQuery q) throws SolrServerException {
+	private void printHits(SolrQuery q) throws SolrServerException, IOException {
 		System.out.println("--- solr contents " + q.toString() + " ---");
 		SolrDocumentList results = getSolr().query(q).getResults();
 		if (results.size() == 0) {
@@ -74,7 +74,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	/**
 	 * @return instance for injection when integration testing our logic with solr, for index testing we do fine with SolrTestCaseJ4 helper methods
 	 */
-	public SolrServer getSolr() {
+	public SolrClient getSolr() {
 		if (solrTestServer == null) {
 			solrTestServer = new EmbeddedSolrServer(h.getCoreContainer(), h.getCore().getName());
 		}
@@ -83,7 +83,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFilenameNumberedDelimiterNone() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc1 = new SolrInputDocument();
 		doc1.addField("id", "1");
 		doc1.addField("pathnamebase", "MAP12345678");
@@ -107,7 +107,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFilenameNumberedDelimiterSpace() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc1 = new SolrInputDocument();
 		doc1.addField("id", "1");
 		doc1.addField("pathnamebase", "MAP 12345678");
@@ -134,7 +134,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFilenameNumberedDelimiterUnderscore() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc1 = new SolrInputDocument();
 		doc1.addField("id", "1");
 		doc1.addField("pathnamebase", "MAP_12345678");
@@ -160,7 +160,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFilenameNumberedDelimiterDash() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc1 = new SolrInputDocument();
 		doc1.addField("id", "1");
 		doc1.addField("pathnamebase", "MAP-12345678");
@@ -181,7 +181,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFilenameDescriptive() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc1 = new SolrInputDocument();
 		doc1.addField("id", "1");
 		doc1.addField("pathnamebase", "Large Machine");
@@ -215,7 +215,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFilenameDescriptiveReverse() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc1 = new SolrInputDocument();
 		doc1.addField("id", "1");
 		doc1.addField("pathnamebase", "Machine Large");
@@ -260,7 +260,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testPropertySearch() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.addField("id", "1");
 		doc.addField("prop_svn.ignore", "ignore1\nignore2");
@@ -297,7 +297,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFulltextSearchCamelCase() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.addField("id", "1");
 		doc.addField("text", "word JavaClassName getMethodName getMethod2Name The ProductNAME followed by text");
@@ -338,7 +338,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 
 	@Test
 	public void testFulltextSearchDelimiters() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.addField("id", "1");
 		doc.addField("text", "word top-level");
@@ -359,7 +359,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test @Ignore //Stem Possessive is a feature of the WDF.
 	public void testFulltextSearchEnglishPossessive() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.addField("id", "1");
 		doc.addField("text", "word Staffan's & Thomas' code");
@@ -387,7 +387,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFulltextSearchNumbers() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.addField("id", "1");
 		doc.addField("text", "word The SD500 product");
@@ -416,7 +416,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFulltextSearchNumbersHyphen() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.addField("id", "1");
 		doc.addField("text", "word The SD-500 product");
@@ -436,7 +436,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	
 	@Test
 	public void testFulltextSearchEmail() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		SolrInputDocument doc = new SolrInputDocument();
 		doc.addField("id", "1");
 		doc.addField("text", "contact support@example.com");
@@ -456,7 +456,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	// Documents the effect of the caveat in http://wiki.apache.org/solr/Atomic_Updates
 	@Test
 	public void testHeadFlagUpdateEffect() throws Exception {
-		SolrServer solr = getSolr();
+		SolrClient solr = getSolr();
 		
 		IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
 		doc.addField("id", "f#01");
@@ -494,7 +494,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 	@Test
 	@Ignore // very incomplete
 	public void testPathAnalysis() throws SolrServerException, IOException {
-		SolrServer solr = getSolr();		
+		SolrClient solr = getSolr();		
 		// Not really unit testing the schema here because the path logic in the handler is too relevant - could be switched to 
 		IndexingItemProgress p = mock(IndexingItemProgress.class);
 		CmsRepository repo = new CmsRepository("http://ex.ampl:444/s/rep1");

@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class IndexAdminPerRepositoryRepositemTest {
 	public void test() throws SolrServerException, IOException {
 		CmsRepository repository = new CmsRepository("http://localhost:1234/svn/r");
 		IdStrategy idStrategy = new IdStrategyDefault();
-		SolrServer repositem = mock(SolrServer.class);
+		SolrClient repositem = mock(SolrClient.class);
 		
 		IndexAdmin indexAdmin = new IndexAdminPerRepositoryRepositem(repository, idStrategy, repositem);
 		final List<Object> calls = new LinkedList<Object>();

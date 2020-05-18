@@ -69,7 +69,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	}
 	
 //	@Inject
-//	public void setSolrRepositem(@Named("repositem") SolrServer repositem) {
+//	public void setSolrRepositem(@Named("repositem") SolrClient repositem) {
 //		this.repositem = repositem;
 //	}
 //	
