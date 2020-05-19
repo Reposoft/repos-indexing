@@ -5,13 +5,13 @@ package se.repos.indexing.solrj;
 
 import org.apache.http.client.HttpClient;
 import org.apache.solr.client.solrj.ResponseParser;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;;
 
 /**
  * Default toString for HttpSolrServer is unhelpul in logs.
  * We often deal with multiple cores and share some code between them, so it is useful to log core name/identifier.
  */
-public class HttpSolrServerNamed extends HttpSolrServer {
+public class HttpSolrServerNamed extends HttpSolrClient {
 
 	public HttpSolrServerNamed(String baseURL) {
 		super(baseURL);

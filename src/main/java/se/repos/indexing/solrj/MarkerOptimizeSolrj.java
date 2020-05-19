@@ -5,7 +5,7 @@ package se.repos.indexing.solrj;
 
 import java.util.Set;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.item.IndexingItemProgress;
@@ -16,16 +16,16 @@ public class MarkerOptimizeSolrj implements MarkerWhenIdle {
 
 	public static final int DEFAULT_REVISION_INTERVAL = 1000;
 	
-	private SolrServer core;
+	private SolrClient core;
 	private int revisionInterval;
 
 	private RepoRevision revision = null;
 	
-	public MarkerOptimizeSolrj(SolrServer core) {
+	public MarkerOptimizeSolrj(SolrClient core) {
 		this(core, DEFAULT_REVISION_INTERVAL);
 	}
 	
-	public MarkerOptimizeSolrj(SolrServer core, int revisionInterval) {
+	public MarkerOptimizeSolrj(SolrClient core, int revisionInterval) {
 		this.core = core;
 		this.revisionInterval = revisionInterval;
 	}

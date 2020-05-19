@@ -5,7 +5,7 @@ package se.repos.indexing.solrj;
 
 import java.util.Set;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.Marker;
@@ -13,9 +13,9 @@ import se.repos.indexing.item.IndexingItemProgress;
 
 public class MarkerCommitSolrj implements Marker {
 
-	private SolrServer core;
+	private SolrClient core;
 
-	public MarkerCommitSolrj(SolrServer core) {
+	public MarkerCommitSolrj(SolrClient core) {
 		this.core = core;
 	}
 

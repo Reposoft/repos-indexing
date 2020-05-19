@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +35,12 @@ public class MarkerRevisionComplete implements Marker {
 		put("set", true);
 	}};
 	
-	private SolrServer repositem;
+	private SolrClient repositem;
 
 	private String commitIdCurrent = null;
 	
 	@Inject
-	public MarkerRevisionComplete(@Named("repositem") SolrServer repositem) {
+	public MarkerRevisionComplete(@Named("repositem") SolrClient repositem) {
 		this.repositem = repositem;
 	}
 

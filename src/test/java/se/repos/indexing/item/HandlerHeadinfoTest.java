@@ -9,7 +9,7 @@ import static org.mockito.Mockito.*;
 import java.io.IOException;
 import java.util.Date;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.Test;
@@ -67,10 +67,10 @@ public class HandlerHeadinfoTest {
 		when(b2p.getFields()).thenReturn(b2doc);
 		when(b2p.getItem()).thenReturn(b2i);
 		
-		SolrServer repositem = mock(SolrServer.class);
+		SolrClient repositem = mock(SolrClient.class);
 		
 		HandlerHeadinfo headinfo = new HandlerHeadinfo(null);
-		headinfo.setSolrServer(repositem);
+		headinfo.setSolrClient(repositem);
 		headinfo.setIdStrategy(new IdStrategyDefault());
 		// first sync
 		when(a1i.isOverwritten()).thenReturn(true);
@@ -122,9 +122,9 @@ public class HandlerHeadinfoTest {
 		when(a2i.isDelete()).thenReturn(true);
 		when(a2i.getRevisionObsoleted()).thenReturn(rev1);
 		
-		SolrServer repositem = mock(SolrServer.class);
+		SolrClient repositem = mock(SolrClient.class);
 		HandlerHeadinfo headinfo = new HandlerHeadinfo(null);
-		headinfo.setSolrServer(repositem);
+		headinfo.setSolrClient(repositem);
 		IdStrategyDefault idStrategy = new IdStrategyDefault();
 		headinfo.setIdStrategy(idStrategy);
 		

@@ -10,7 +10,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +28,13 @@ public class IndexAdminPerRepositoryRepositem implements IndexAdmin {
 	
 	private CmsRepository repository;
 	private IdStrategy idStrategy;
-	private SolrServer repositem;
+	private SolrClient repositem;
 	private List<IndexAdmin> postActions = new LinkedList<IndexAdmin>();
 	
 	@Inject
 	public IndexAdminPerRepositoryRepositem(CmsRepository repository,
 			IdStrategy idStrategy,
-			@Named("repositem") SolrServer repositem) {
+			@Named("repositem") SolrClient repositem) {
 		this.repository = repository;
 		this.idStrategy = idStrategy;
 		this.repositem = repositem;

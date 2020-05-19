@@ -6,7 +6,7 @@ package se.repos.indexing.repository;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.junit.Test;
 
 import se.repos.indexing.ReposIndexing;
@@ -30,7 +30,7 @@ public class ReposIndexingPerRepositoryTest {
 		CmsRepository repository = new CmsRepository("http://testing/svn/repo");
 		ReposIndexingPerRepository indexing = new ReposIndexingPerRepository(repository);
 		
-		IndexAdminPerRepositoryRepositem admin = new IndexAdminPerRepositoryRepositem(repository, new IdStrategyDefault(), mock(SolrServer.class));
+		IndexAdminPerRepositoryRepositem admin = new IndexAdminPerRepositoryRepositem(repository, new IdStrategyDefault(), mock(SolrClient.class));
 		indexing.setIndexAdmin(admin);
 		
 		IndexingSchedule schedule = mock(IndexingSchedule.class);

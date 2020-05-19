@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +42,7 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 	}};
 
 	private IdStrategy idStrategy;
-	private SolrServer repositem;
+	private SolrClient repositem;
 	private Map<CmsItemPath, RepoRevision> earlierMarkedOverwritten = new HashMap<CmsItemPath, RepoRevision>();
 	
 	@Inject
@@ -50,7 +50,7 @@ public class HandlerHeadinfo implements IndexingItemHandler {
 	}
 	
 	@Inject
-	public void setSolrServer(@Named("repositem") SolrServer repositem) {
+	public void setSolrClient(@Named("repositem") SolrClient repositem) {
 		this.repositem = repositem;
 	}
 	

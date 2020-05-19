@@ -3,8 +3,13 @@
  */
 package se.repos.indexing.repository;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,8 +18,8 @@ import java.util.Date;
 import java.util.HashMap;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -30,6 +35,14 @@ import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
+
+import com.google.inject.AbstractModule;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Key;
+import com.google.inject.Module;
+import com.google.inject.multibindings.Multibinder;
+import com.google.inject.name.Names;
 
 import se.repos.indexing.IndexAdmin;
 import se.repos.indexing.IndexingHandlers;
@@ -50,22 +63,13 @@ import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCacheDefault;
 import se.simonsoft.cms.backend.svnkit.svnlook.SvnlookClientProviderStateless;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
+import se.simonsoft.cms.item.indexing.IdStrategy;
+import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 import se.simonsoft.cms.item.info.CmsRepositoryLookup;
 import se.simonsoft.cms.item.inspection.CmsChangesetReader;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
 import se.simonsoft.cms.testing.svn.CmsTestRepository;
 import se.simonsoft.cms.testing.svn.SvnTestSetup;
-
-import com.google.inject.AbstractModule;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Module;
-import com.google.inject.multibindings.Multibinder;
-import com.google.inject.name.Names;
-
-import se.simonsoft.cms.item.indexing.IdStrategy;
-import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 
 public class ReposIndexingPerRepositoryIntegrationTest {
 
@@ -79,7 +83,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	
 	@Before
 	public void setUp() throws Exception {
-		final SolrServer repositem = setUpSolrRepositem();
+		final SolrClient repositem = setUpSolrRepositem();
 		
 		final CmsTestRepository repository = SvnTestSetup.getInstance().getRepository();
 		
@@ -97,7 +101,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		}};
 		
 		Module indexing = new AbstractModule() { @Override protected void configure() {
-			bind(SolrServer.class).annotatedWith(Names.named("repositem")).toInstance(repositem);
+			bind(SolrClient.class).annotatedWith(Names.named("repositem")).toInstance(repositem);
 			bind(ReposIndexing.class).to(ReposIndexingPerRepository.class);
 			bind(IndexingSchedule.class).to(IndexingScheduleBlockingOnly.class);
 			bind(IndexAdmin.class).to(IndexAdminPerRepositoryRepositem.class);
@@ -115,7 +119,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		context = Guice.createInjector(backend, indexing);
 	}
 
-	private SolrServer setUpSolrRepositem() throws IOException {
+	private SolrClient setUpSolrRepositem() throws IOException {
 		File coreSource = new File("src/main/resources/se/repos/indexing/solr/repositem/");
 		
 		if (instanceDir.exists()) { // instance dir is kept for inspection after each test but recreated before each new test
@@ -126,16 +130,16 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		FileUtils.copyDirectory(coreSource, new File(instanceDir, coreName));
 		FileUtils.copyFile(new File(coreSource.getParentFile(),  "testing-home/solr.xml"), new File(instanceDir, "solr.xml"));
 		
-		SolrResourceLoader solrResourceLoader = new SolrResourceLoader(instanceDir.getAbsolutePath());
+		SolrResourceLoader solrResourceLoader = new SolrResourceLoader(instanceDir.toPath());
 		CoreContainer solrCoreContainer = new CoreContainer(solrResourceLoader);
 		solrCoreContainer.load();
-		final SolrServer repositem = new EmbeddedSolrServer(solrCoreContainer, "repositem");
+		final SolrClient repositem = new EmbeddedSolrServer(solrCoreContainer, "repositem");
 		forTearDown = (EmbeddedSolrServer) repositem;
 		return repositem;
 	};
 	
-	private void tearDownSolrRepositem() {
-		forTearDown.shutdown();
+	private void tearDownSolrRepositem() throws IOException {
+		forTearDown.close();
 		
 		new File(instanceDir, "/repositem/core.properties").delete(); // Solr 4.5.0 won't load the core if core.properties is present
 		System.out.println("Load test core using:");
@@ -153,7 +157,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	}
 	
 	@Test
-	public void testMarkItemHead() throws SolrServerException {
+	public void testMarkItemHead() throws SolrServerException, IOException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
 				"se/repos/indexing/testrepo1r3.svndump");
 		assertNotNull(dumpfile);
@@ -164,7 +168,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		indexing.sync(new RepoRevision(1, new Date(1)));
 		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
 		
 		SolrDocumentList r1 = repositem.query(new SolrQuery("id:*@0000000001").setSort("path", ORDER.asc)).getResults();
 		assertEquals(3, r1.size());
@@ -249,7 +253,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 
 	
 	@Test
-	public void testMarkItemHeadCopy() throws SolrServerException {
+	public void testMarkItemHeadCopy() throws IOException, SolrServerException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
 				"se/repos/indexing/testrepo1r5-copy.svndump");
 		assertNotNull(dumpfile);
@@ -258,7 +262,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
 		context.getInstance(IndexingSchedule.class).start();
 		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
 		
 		// Confirmed that each revision is indexed with r5 as reference revision.
 		indexing.sync(new RepoRevision(5, new Date(5)));
@@ -273,7 +277,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	}
 	
 	@Test
-	public void testMarkItemHeadCopyDeleted() throws SolrServerException {
+	public void testMarkItemHeadCopyDeleted() throws SolrServerException, IOException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
 				"se/repos/indexing/testrepo1r6-copydeleted.svndump");
 		assertNotNull(dumpfile);
@@ -282,7 +286,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
 		context.getInstance(IndexingSchedule.class).start();
 		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
 		
 		// Confirmed that each revision is indexed with r5 as reference revision.
 		indexing.sync(new RepoRevision(6, new Date(6)));
@@ -299,7 +303,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	}
 	
 	@Test
-	public void testMarkItemHeadAddDeleted() throws SolrServerException {
+	public void testMarkItemHeadAddDeleted() throws SolrServerException, IOException {
 		String dumpFileName = "se/repos/indexing/testrepo1r7-adddeleted.svndump";
 		logger.info("Testing: {}", dumpFileName);
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(dumpFileName);
@@ -309,7 +313,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
 		context.getInstance(IndexingSchedule.class).start();
 		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
 		
 		// Indexing whole repo in batch does not reproduce the issue. 
 		// Batch index first era of t1.txt.
@@ -332,7 +336,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	}
 	
 	@Test
-	public void testMarkItemHeadAddDeletedSync4() throws SolrServerException {
+	public void testMarkItemHeadAddDeletedSync4() throws SolrServerException, IOException {
 		String dumpFileName = "se/repos/indexing/testrepo1r7-adddeleted.svndump";
 		logger.info("Testing: {}", dumpFileName);
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(dumpFileName);
@@ -342,7 +346,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
 		context.getInstance(IndexingSchedule.class).start();
 		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
 		
 		// Indexing whole repo in batch does not reproduce the issue. 
 		// Batch index first era of t1.txt.
@@ -378,7 +382,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
 		context.getInstance(IndexingSchedule.class).start();
 		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
 		
 		CmsChangesetReader changesetReader = spy(context.getInstance(CmsChangesetReader.class));
 		((ReposIndexingPerRepository) indexing).setCmsChangesetReader(changesetReader);
@@ -471,7 +475,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		indexing.sync(RepoRevision.parse("1/2012-09-27T12:05:34.040Z"));
 		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
 		
 		QueryResponse r1 = repositem.query(new SolrQuery("type:commit AND rev:1"));
 		assertEquals(true, r1.getResults().get(0).getFieldValue("complete"));
@@ -497,7 +501,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		indexing.sync(RepoRevision.parse("2/2013-03-21T19:16:28.271Z"));
 		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
 		
 		assertEquals(3, repositem.query(new SolrQuery("type:commit AND complete:true")).getResults().size());
 		
@@ -510,7 +514,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	}	
 	
 	@Test
-	public void testIndexingModeNone() throws SolrServerException {
+	public void testIndexingModeNone() throws SolrServerException, IOException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
 				"se/repos/indexing/testrepo1r3-indexing-mode-none.svndump");
 		assertNotNull(dumpfile);
@@ -522,7 +526,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		indexing.sync(RepoRevision.parse("3/2013-03-21T19:16:42.295Z"));
 		assertEquals("should have indexed up to the given revision", 3, indexing.getRevision().getNumber());
 		
-		SolrServer repositem = context.getInstance(Key.get(SolrServer.class, Names.named("repositem")));
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
 		assertEquals("should have indexed rev 1", 4, repositem.query(new SolrQuery("rev:1")).getResults().size());
 		assertEquals("should only index the commit for rev 2", 1, repositem.query(new SolrQuery("rev:2")).getResults().size());
 		assertEquals("should have indexed rev 3", 5, repositem.query(new SolrQuery("rev:3")).getResults().size());

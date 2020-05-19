@@ -5,7 +5,7 @@ package se.repos.indexing.solrj;
 
 import java.io.IOException;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,11 +15,11 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class SolrOp implements Runnable {
 
-	protected SolrServer core;
+	protected SolrClient core;
 	public final Logger logger = LoggerFactory.getLogger(this.getClass());
 	public final Long retryPause = 10000L;
 
-	public SolrOp(SolrServer core) {
+	public SolrOp(SolrClient core) {
 		this.core = core;
 	}
 

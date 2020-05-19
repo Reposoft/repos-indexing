@@ -5,11 +5,11 @@ package se.repos.indexing.solrj;
 
 import javax.inject.Named;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 public class MarkerOptimizeSolrjRepositem extends MarkerOptimizeSolrj {
 
-	public MarkerOptimizeSolrjRepositem(@Named("repositem") SolrServer core) {
+	public MarkerOptimizeSolrjRepositem(@Named("repositem") SolrClient core) {
 		super(core);
 	}
 
