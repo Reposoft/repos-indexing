@@ -78,7 +78,7 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 	
 	@Override
 	public CmsItemProperties getProperties() {
-		throw new UnsupportedOperationException("Not supported in standalone extraction, yet");
+		throw new UnsupportedOperationException("Not supported in classpath extraction, yet");
 	}
 	
 	@Override
@@ -107,7 +107,7 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 
 		@Override
 		public IndexingDoc deepCopy() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 		
 	}
@@ -137,67 +137,67 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 
 		@Override
 		public boolean isCopy() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isCopySource() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 		
 		@Override
 		public boolean isAdd() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isReplace() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isMove() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isContentModified() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isContent() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isPropertiesModified() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isProperties() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isExplicit() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isDerived() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public boolean isOverwritten() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public CmsItemPath getPath() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
@@ -207,27 +207,27 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 		
 		@Override
 		public RepoRevision getRevisionChanged() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public CmsItemPath getCopyFromPath() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public RepoRevision getCopyFromRevision() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public CmsChangesetItem getPreviousChange() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 
 		@Override
 		public RepoRevision getRevisionObsoleted() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
 		
 	}
