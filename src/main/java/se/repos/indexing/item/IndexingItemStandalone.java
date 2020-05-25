@@ -3,7 +3,11 @@
  */
 package se.repos.indexing.item;
 
+import java.io.IOException;
 import java.io.InputStream;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.NullOutputStream;
 
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
@@ -36,12 +40,28 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 		this.loader = getClass().getClassLoader();
 		this.resource = classLoaderResource;
 		this.fields = new Fields();
-		this.item = new ContentsOnlyItem();
+		this.item = new ContentsOnlyItem(getFilesizeResource());
 	}
 
 	@Override
 	public IndexingDoc getFields() {
 		return fields;
+	}
+	
+	private long getFilesizeResource() {
+		if (resource == null) {
+			throw new IllegalStateException("No resource provided for this item");
+		}
+		InputStream resourceAsStream = loader.getResourceAsStream(resource);
+		if (resourceAsStream == null) {
+			throw new IllegalArgumentException("Failed to load classpath resource: " + resource);
+		}
+		try {
+			long size = IOUtils.copyLarge(resourceAsStream, new NullOutputStream());
+			return size;
+		} catch (IOException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 	
 	@Override
@@ -93,6 +113,12 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 	}
 	
 	private class ContentsOnlyItem implements CmsChangesetItem {
+		
+		private final long filesize;
+		
+		public ContentsOnlyItem(long filesize) {
+			this.filesize = filesize;
+		}
 
 		@Override
 		public boolean isFile() {
@@ -176,7 +202,7 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 
 		@Override
 		public long getFilesize() {
-			throw new UnsupportedOperationException("Not supported in standalone extraction");
+			return filesize;
 		}
 		
 		@Override
