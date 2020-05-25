@@ -34,6 +34,7 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 		this.revision = indexingRevision;
 		this.fields = new Fields();
 		this.item = item;
+		// NOTE: Does not support getContents().
 	}
 	
 	public IndexingItemStandalone(String classLoaderResource) {
