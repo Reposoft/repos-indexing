@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import se.repos.indexing.IndexAdmin;
 import se.repos.indexing.solrj.SolrCommit;
-import se.repos.indexing.solrj.SolrDelete;
+import se.repos.indexing.solrj.SolrDeleteByQuery;
 import se.repos.indexing.solrj.SolrOptimize;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.indexing.IdStrategy;
@@ -51,7 +51,7 @@ public class IndexAdminPerRepositoryRepositem implements IndexAdmin {
 	public void clear() {
 		String query = "repoid:\"" + idStrategy.getIdRepository(repository).replace("\"", "\\\"") + '"';
 		logger.info("Clearing index for repository {} using query {}", repository, query);
-		new SolrDelete(repositem, query).run();
+		new SolrDeleteByQuery(repositem, query).run();
 		new SolrCommit(repositem).run();
 		for (IndexAdmin p : postActions) {
 			p.clear();

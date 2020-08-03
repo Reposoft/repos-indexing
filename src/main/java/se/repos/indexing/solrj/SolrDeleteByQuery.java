@@ -11,20 +11,20 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SolrDelete extends SolrOp {
+public class SolrDeleteByQuery extends SolrOp {
 	
-	private static final Logger logger = LoggerFactory.getLogger(SolrDelete.class);
+	private static final Logger logger = LoggerFactory.getLogger(SolrDeleteByQuery.class);
 	
-	private String id;
+	private String query;
 	
-	public SolrDelete(SolrClient core, String id) {
+	public SolrDeleteByQuery(SolrClient core, String query) {
 		super(core);
-		this.id = id;
+		this.query = query;
 	}
 
 	@Override
 	public void runOp() throws SolrServerException, IOException {
-		UpdateResponse delete = core.deleteById(id);
+		UpdateResponse delete = core.deleteByQuery(query);
 		logger.debug("Delete response: {}", delete);
 	}
 
