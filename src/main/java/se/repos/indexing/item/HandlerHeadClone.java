@@ -3,8 +3,6 @@
  */
 package se.repos.indexing.item;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -12,20 +10,15 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.MessageFormatter;
 
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.solrj.SolrAdd;
 import se.repos.indexing.solrj.SolrDelete;
-import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
-import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
-import se.simonsoft.cms.item.indexing.IdStrategy;
 
 /**
  * Add item to indexing with head=true and 'id' without revision. 
@@ -35,14 +28,12 @@ import se.simonsoft.cms.item.indexing.IdStrategy;
 public class HandlerHeadClone implements IndexingItemHandler {
 
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	
 
-	private IdStrategy idStrategy;
 	private SolrClient repositem;
-	private Map<CmsItemPath, RepoRevision> earlierMarkedOverwritten = new HashMap<CmsItemPath, RepoRevision>();
 	
 	@Inject
 	public HandlerHeadClone(CmsRepository repository) {
+		// No need for repository at this time.
 	}
 	
 	@Inject
@@ -50,10 +41,6 @@ public class HandlerHeadClone implements IndexingItemHandler {
 		this.repositem = repositem;
 	}
 	
-	@Inject
-	public void setIdStrategy(IdStrategy idStrategy) {
-		this.idStrategy = idStrategy;
-	}
 	
 	@Override
 	public void handle(IndexingItemProgress progress) {
@@ -78,17 +65,13 @@ public class HandlerHeadClone implements IndexingItemHandler {
 			new SolrDelete(repositem, idHead).run();
 			logger.debug("Removing head=true item on deleted path: {}", item.getPath());
 		} else {
-			
+			// Set ID to idHead for the purpose of adding the item representing latest.
 			fields.setField("id", idHead);
 			fields.setField("head", true);
-			// TODO: Consider removing idHead before sending head=true item.
 			new SolrAdd(repositem, fields).run();
 			
-			// Removing idHead field because subsequent handlers processes the head=false item.
-			fields.removeField("idhead");
 			// Restore the id with revision.
 			fields.setField("id", id);
-			
 		}
 		// Flag 'head' is always false when returning, subsequent handlers will add the item representing history.
 		fields.setField("head", false);
