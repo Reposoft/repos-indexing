@@ -646,14 +646,14 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals("should have indexed up to the given revision", 3, indexing.getRevision().getNumber());
 		
 		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
+		assertEquals("total head items is 3, but one is suppressed in r2", 3-1, repositem.query(new SolrQuery("head:true")).getResults().size());
 		assertEquals("should have indexed rev 1 (without commit item)", 3, repositem.query(new SolrQuery("id:*@0000000001")).getResults().size());
-		assertEquals("should have indexed rev 1, one item remains head", 1+3+1, repositem.query(new SolrQuery("rev:1")).getResults().size());
+		assertEquals("should have indexed rev 1, one item remains head but suppressed in r2", 1+3, repositem.query(new SolrQuery("rev:1")).getResults().size());
 		assertEquals("should only index the commit for rev 2", 1, repositem.query(new SolrQuery("rev:2")).getResults().size());
 		assertEquals("should have indexed rev 3 (commit item)", 1, repositem.query(new SolrQuery("id:*#0000000003")).getResults().size());
 		assertEquals("should have indexed rev 3 (rev items)", 4, repositem.query(new SolrQuery("id:*@0000000003")).getResults().size());
 		assertEquals("should have indexed rev 3 (head item)", 2, repositem.query(new SolrQuery("rev:3 AND head:true")).getResults().size());
 		assertEquals("should have indexed rev 3", 1+4+2, repositem.query(new SolrQuery("rev:3")).getResults().size());
-		assertEquals("total head items", 3, repositem.query(new SolrQuery("head:true")).getResults().size());
 		
 	}
 	

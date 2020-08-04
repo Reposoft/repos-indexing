@@ -66,6 +66,8 @@ public class HandlerHeadClone implements IndexingItemHandler {
 			logger.debug("Removing head=true item on deleted path: {}", item.getPath());
 		} else if (item.isOverwritten() && item.isFile()) {
 			// Overwritten detection is not stable for Folders.
+			// This optimization can have interesting effects (missing head item) in combination with indexing-mode = none.
+			// It is assumed that items suppressed by indexing-mode should be suppressed from head or iterated after the suppressed revision.
 			logger.trace("Suppressing head indexing for overwritten object: {}", item.getPath());
 		} else {
 			// Set ID to idHead for the purpose of adding the item representing latest.
