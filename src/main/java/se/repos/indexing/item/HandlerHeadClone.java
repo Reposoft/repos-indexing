@@ -64,6 +64,9 @@ public class HandlerHeadClone implements IndexingItemHandler {
 			
 			new SolrDelete(repositem, idHead).run();
 			logger.debug("Removing head=true item on deleted path: {}", item.getPath());
+		} else if (item.isOverwritten() && item.isFile()) {
+			// Overwritten detection is not stable for Folders.
+			logger.trace("Suppressing head indexing for overwritten object: {}", item.getPath());
 		} else {
 			// Set ID to idHead for the purpose of adding the item representing latest.
 			fields.setField("id", idHead);
