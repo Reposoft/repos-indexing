@@ -174,20 +174,13 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		SolrDocumentList r1 = repositem.query(new SolrQuery("id:*@0000000001").setSort("path", ORDER.asc)).getResults();
 		assertEquals(3, r1.size());
 		assertEquals("/dir", r1.get(0).getFieldValue("path"));
-		for (int i = 0; i < 3; i++) {
-			if ("folder".equals(r1.get(i).get("type"))) {
-				continue; // TODO use lookup on path + head=true to get historical folder revision and start marking head again
-				// TODO: likely easy to support folders now without update of head flag.
-			}
-			assertEquals("at " + r1.get(i).get("path"), false, r1.get(i).get("head"));
-		}
 		assertAllHeadFalse(r1);
 		r1 = null;
 		
 		// Verify r1 head:true
 		SolrDocumentList r1Head = repositem.query(new SolrQuery("head:true").setSort("path", ORDER.asc)).getResults();
 		assertEquals("head items after r1", 3, r1Head.size());
-		assertEquals("...", "/dir", r1Head.get(0).get("path"));
+		assertEquals("folders are also head:true now", "/dir", r1Head.get(0).get("path"));
 		assertEquals("...", "/dir/t2.txt", r1Head.get(1).get("path"));
 		assertEquals("...", "/t1.txt", r1Head.get(2).get("path"));
 		assertEquals("...", 1L, r1Head.get(0).get("rev"));
@@ -220,7 +213,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		// Verify r2 head:true
 		SolrDocumentList r2Head = repositem.query(new SolrQuery("head:true").setSort("path", ORDER.asc)).getResults();
 		assertEquals("head items after r2", 3, r2Head.size());
-		assertEquals("...", "/dir", r2Head.get(0).get("path"));
+		assertEquals("folders are also head:true now", "/dir", r2Head.get(0).get("path"));
 		assertEquals("...", "/dir/t2.txt", r2Head.get(1).get("path"));
 		assertEquals("...", "/t1.txt", r2Head.get(2).get("path"));
 		assertEquals("...", 1L, r2Head.get(0).get("rev"));
@@ -238,6 +231,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		SolrDocumentList r3r1 = repositem.query(new SolrQuery("id:*@0000000001").setSort("path", ORDER.asc)).getResults();		
 		assertEquals("/dir", r3r1.get(0).get("path"));
 		assertEquals("/dir/t2.txt", r3r1.get(1).get("path"));
+		assertEquals("A", r3r1.get(0).get("pathstat"));
 		assertEquals("A", r3r1.get(1).get("pathstat")); // Passes despite JSON response contains "java.lang.Character:A"
 		assertEquals("/t1.txt", r3r1.get(2).get("path"));
 		assertEquals("Should have revauthor.", "solsson", r3r1.get(2).getFieldValue("revauthor"));
@@ -261,26 +255,26 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		
 		// Verify r3 head:false
 		SolrDocumentList r3r3 = repositem.query(new SolrQuery("id:*@0000000003").setSort("path", ORDER.asc)).getResults();
+		assertEquals("Moved folder in rev 3, 2*2 changes with derived file.", 4, r3r3.size());
 		assertEquals("Deletions should be indexed so we know when an item disappeared", "/dir", r3r3.get(0).get("path"));
+		assertEquals("Derived delete", "/dir/t2.txt", r3r3.get(1).get("path"));
+		assertEquals("Folder copy", "/dir2", r3r3.get(2).get("path"));
+		assertEquals("Derived", "/dir2/t2.txt", r3r3.get(3).get("path"));
+		
 		assertEquals("Should have revauthor.", "test", r3r3.get(0).getFieldValue("revauthor"));
 		assertEquals("Should have revcomment.", "folder move without changes to the contained file", r3r3.get(0).getFieldValue("revcomment"));
 		assertEquals("Should have revcauthor when not 'derived' from folder copy", "test", r3r3.get(0).getFieldValue("revcauthor"));
 		assertEquals("Should have revccomment when not 'derived' from folder copy", "folder move without changes to the contained file", r3r3.get(0).getFieldValue("revccomment"));		
 		assertEquals("Deletions should always be !head", false, r3r3.get(0).get("head"));
 		assertEquals("Deletions should always be !head", false, r3r3.get(1).get("head"));
-		assertEquals("Derived delete", "/dir/t2.txt", r3r3.get(1).get("path"));
 		assertEquals(false, r3r3.get(1).get("head"));
-		assertEquals("Folder copy", "/dir2", r3r3.get(2).get("path"));
-		// TODO assertEquals("This revision is HEAD", true, r3r3.get(2).get("head"));
-		assertEquals("Derived", "/dir2/t2.txt", r3r3.get(3).get("path"));
-		//assertEquals(true, r3r3.get(3).get("head"));
 		assertAllHeadFalse(r3r3);
 		r3r3 = null;
 
 		// Verify r3 head:true
 		SolrDocumentList r3Head = repositem.query(new SolrQuery("head:true").setSort("path", ORDER.asc)).getResults();
 		assertEquals("head items after r3", 3, r3Head.size());
-		assertEquals("...", "/dir2", r3Head.get(0).get("path"));
+		assertEquals("folders are also head:true now", "/dir2", r3Head.get(0).get("path"));
 		assertEquals("...", "/dir2/t2.txt", r3Head.get(1).get("path"));
 		assertEquals("...", "/t1.txt", r3Head.get(2).get("path"));
 		assertEquals("...", 3L, r3Head.get(0).get("rev"));

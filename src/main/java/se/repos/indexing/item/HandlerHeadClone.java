@@ -72,6 +72,7 @@ public class HandlerHeadClone implements IndexingItemHandler {
 		} else {
 			// Set ID to idHead for the purpose of adding the item representing latest.
 			fields.setField("id", idHead);
+			// Setting head = true on folders as well.
 			fields.setField("head", true);
 			new SolrAdd(repositem, fields).run();
 			
