@@ -316,6 +316,38 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	}	
 
 	
+	// Demonstrate path revision of folders.
+	// TODO: Should path revision behave same as Subversion?
+	@Test
+	public void testMarkItemHeadFolderFileModified() throws IOException, SolrServerException {
+		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
+				"se/repos/indexing/testrepo1r4-filemodified.svndump");
+		assertNotNull(dumpfile);
+		context.getInstance(CmsTestRepository.class).load(dumpfile);
+		
+		ReposIndexing indexing = context.getInstance(ReposIndexing.class);
+		context.getInstance(IndexingSchedule.class).start();
+		
+		SolrClient repositem = context.getInstance(Key.get(SolrClient.class, Names.named("repositem")));
+		
+		indexing.sync(new RepoRevision(4, new Date(4)));
+	
+		// Verify r4 head:true
+		SolrDocumentList r4Head = repositem.query(new SolrQuery("head:true").setSort("path", ORDER.asc)).getResults();
+		assertEquals("head items after r4", 3, r4Head.size());
+		assertEquals("folders are also head:true now", "/dir2", r4Head.get(0).get("path"));
+		assertEquals("...", "/dir2/t2.txt", r4Head.get(1).get("path"));
+		assertEquals("...", "/t1.txt", r4Head.get(2).get("path"));
+		assertEquals("TODO? path rev should be r4 due to modified file", 3L, r4Head.get(0).get("rev"));
+		assertEquals("file modified in r4", 4L, r4Head.get(1).get("rev"));
+		assertEquals("...", 2L, r4Head.get(2).get("rev"));
+		assertEquals("commit rev should be r3", 3L, r4Head.get(0).get("revc"));
+		assertEquals("file modified in r4", 4L, r4Head.get(1).get("revc"));
+		assertEquals("...", 2L, r4Head.get(2).get("revc"));
+		r4Head = null;
+	}
+	
+	
 	@Test
 	public void testMarkItemHeadCopy() throws IOException, SolrServerException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
