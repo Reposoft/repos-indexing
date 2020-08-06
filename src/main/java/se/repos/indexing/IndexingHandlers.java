@@ -12,6 +12,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import se.repos.indexing.item.HandlerChecksum;
+import se.repos.indexing.item.HandlerHeadClone;
 import se.repos.indexing.item.HandlerHeadinfo;
 import se.repos.indexing.item.HandlerIndexTime;
 import se.repos.indexing.item.HandlerPathinfo;
@@ -64,7 +65,8 @@ public abstract class IndexingHandlers {
 			}}));
 			put(Group.Structure, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
 				add(HandlerIndexTime.class);
-				add(HandlerHeadinfo.class);
+				// No longer need to update head flag of previous revision.
+				/*add(HandlerHeadinfo.class);*/
 				add(HandlerPathinfo.class);
 			}}));
 			put(Group.Fast, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
@@ -82,6 +84,7 @@ public abstract class IndexingHandlers {
 			}}));
 			put(Group.Final, Collections.unmodifiableList(new LinkedList<Class<? extends IndexingItemHandler>>() {{
 				add(HandlerContentDisable.class);
+				add(HandlerHeadClone.class); // Send head=true item, subsequent handlers processes the head=false item.
 				add(HandlerSendSolrjRepositem.class);
 				add(MarkerRevisionComplete.class);
 				add(MarkerCommitSolrjRepositem.class);

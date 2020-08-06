@@ -5,14 +5,13 @@ package se.repos.indexing.twophases;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -21,17 +20,12 @@ import org.apache.solr.common.SolrInputDocument;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Named;
-
 import se.repos.indexing.IndexingItemHandler;
-import se.repos.indexing.item.HandlerHeadinfo;
 import se.repos.indexing.repository.ReposIndexingPerRepository;
 import se.repos.indexing.solrj.SolrAdd;
 import se.repos.indexing.solrj.SolrCommit;
-import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
-import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.indexing.IdStrategy;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
@@ -129,30 +123,6 @@ public class RepositoryIndexStatus {
 		return new RepoRevision(rev, revt);
 	}
 
-	/**
-	 * No easy way to run this as a handler becuase handlers can't create new solr documents.
-	 * @param repository
-	 * @param revision
-	 * @param item
-	 * @deprecated Use {@link HandlerHeadinfo}
-	 */
-	public void indexItemMarkPrevious(CmsRepository repository, RepoRevision revision, CmsChangesetItem item) {
-		if (item.isFolder()) {
-			logger.warn("Flagging !head on folder is unreliable, see issue in SvnlookItem");
-		}
-		CmsItemPath path = item.getPath();
-		RepoRevision revisionObsoleted = item.getRevisionObsoleted();
-		if (revisionObsoleted == null) {
-			logger.warn("Unknown obsoleted revision for {}, no existing item will be marked as non-HEAD", item);
-			return;
-		}
-		String query = repository.getHost() + repository.getUrlAtHost() + (path == null ? "" : path) + "@" + revisionObsoleted.getNumber(); // From ItemPathInfo
-		IndexingDocIncrementalSolrj mark = new IndexingDocIncrementalSolrj();
-		mark.addField("id", query);		
-		mark.setUpdateMode(true);
-		mark.setField("head", false);
-		this.solrAdd(mark.getSolrDoc());
-	}
 
 	/**
 	 * @return Commit ID field value
@@ -212,18 +182,5 @@ public class RepositoryIndexStatus {
 		new SolrCommit(repositem).run();
 	}
 	
-	@Deprecated // has been moved to MarkerRevisionComplete
-	public void indexRevComplete(String id) {
-		SolrInputDocument docComplete = new SolrInputDocument();
-		docComplete.addField("id", id);
-		docComplete.setField("complete", partialUpdateToTrue);
-		this.solrAdd(docComplete);
-	}
-	
-	// http://mail-archives.apache.org/mod_mbox/lucene-solr-user/201209.mbox/%3C7E0464726BD046488B66D661770F9C2F01B02EFF0C@TLVMBX01.nice.com%3E
-	@SuppressWarnings("serial")
-	final Map<String, Boolean> partialUpdateToTrue = new HashMap<String, Boolean>() {{
-		put("set", true);
-	}};
 
 }
