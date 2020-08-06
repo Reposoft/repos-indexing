@@ -19,7 +19,6 @@ import se.repos.indexing.item.ItemContentBuffer;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
-import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 public class ItemContentsMemorySizeLimitTest {
@@ -30,11 +29,7 @@ public class ItemContentsMemorySizeLimitTest {
 		CmsItemPath path = new CmsItemPath("/file.txt");
 
 		CmsContentsReader reader = new CmsContentsReader() {
-			@Override
-			public CmsItemProperties getProperties(CmsRepositoryInspection repository,
-					RepoRevision revision, CmsItemPath path) {
-				throw new UnsupportedOperationException();
-			}
+
 			@Override
 			public CmsItemProperties getProperties(RepoRevision arg0, CmsItemPath arg1) {
 				throw new UnsupportedOperationException();
@@ -43,11 +38,7 @@ public class ItemContentsMemorySizeLimitTest {
 			public void getDiff(RepoRevision arg0, OutputStream arg1) {
 				throw new UnsupportedOperationException();
 			}
-			@Override
-			public void getContents(CmsRepositoryInspection repository,
-					RepoRevision revision, CmsItemPath path, OutputStream out) {
-				getContents(revision, path, out);
-			}
+
 			@Override
 			public void getContents(RepoRevision revision, CmsItemPath path,
 					OutputStream out) {
