@@ -74,7 +74,7 @@ public class ItemContentsMemorySizeLimitTest {
 		
 		IndexingDoc doc = mock(IndexingDoc.class);
 		when(doc.getFieldValue("size")).thenReturn(11L);
-		ItemContentBuffer buf = buffer.getBuffer(null, rev, path, doc);
+		ItemContentBuffer buf = buffer.getBuffer(rev, path, doc);
 		InputStream c1 = buf.getContents();
 		assertEquals("1".getBytes()[0], c1.read());
 		assertEquals("Expected a new temp file", numbefore + 1, expectedtempfolder.list().length); // this can be affected by other system activities so if it fails a lot we must get the path from the buffer

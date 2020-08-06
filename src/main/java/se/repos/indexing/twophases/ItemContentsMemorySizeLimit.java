@@ -23,8 +23,6 @@ import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
-import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
-import se.simonsoft.cms.item.stream.ByteArrayInOutStream;
 
 /**
  * 
@@ -55,75 +53,31 @@ public class ItemContentsMemorySizeLimit implements ItemContentBufferStrategy {
 	}
 	
 	@Override
-	public ItemContentBuffer getBuffer(CmsRepositoryInspection repository,
+	public ItemContentBuffer getBuffer(
 			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
 		Long size = (Long) pathinfo.getFieldValue("size");
 		if (size == null) {
 			throw new IllegalStateException("No size information in indexing doc " + path + ". Use a different buffer strategy.");
 		}
 		if (size <= limit) {
-			return new BufferInMemory(repository, revision, path, size.intValue());
+			return new ItemContentsMemory.BufferInMemory(reader, revision, path, size.intValue());
 		} else {
-			return new BufferTempFile(repository, revision, path);
+			return new BufferTempFile(revision, path);
 		}
 	}
-	
-	/**
-	 * @deprecated Share with {@link ItemContentsMemory} after transition to per-repository is complete
-	 */
-	public class BufferInMemory implements ItemContentBuffer {
-		
-		private CmsRepositoryInspection repository;
-		private RepoRevision revision;
-		private CmsItemPath path;
-		private int size;
 
-		// Stream implementation that does not copy the buffer in memory (keeps one copy).
-		private ByteArrayInOutStream buffer = null;
-		
-		public BufferInMemory(CmsRepositoryInspection repository,
-				RepoRevision revision, CmsItemPath path, int size) {
-			this.repository = repository;
-			this.revision = revision;
-			this.path = path;
-			this.size = size;
-		}
-		
-		@Override
-		public InputStream getContents() {
-			if (buffer == null) {
-				buffer = new ByteArrayInOutStream(size);
-				reader.getContents(repository, revision, path, buffer);
-				try {
-					buffer.close();
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-			return buffer.getInputStream();
-		}
-
-		@Override
-		public void destroy() {
-			buffer = null;
-		}		
-		
-	}
-	
 	/**
 	 * Buffer to temp file.
 	 */
 	public class BufferTempFile implements ItemContentBuffer {
 
-		private CmsRepositoryInspection repository;
 		private RepoRevision revision;
 		private CmsItemPath path;
 
 		private File tempfile = null;
 		
-		public BufferTempFile(CmsRepositoryInspection repository,
+		public BufferTempFile(
 				RepoRevision revision, CmsItemPath path) {
-			this.repository = repository;
 			this.revision = revision;
 			this.path = path;
 		}
@@ -148,7 +102,7 @@ public class ItemContentsMemorySizeLimit implements ItemContentBufferStrategy {
 				} catch (FileNotFoundException e1) {
 					throw new IllegalStateException("Failed to write to templ file for contents buffer");
 				}
-				reader.getContents(repository, revision, path, out);			
+				reader.getContents(revision, path, out);			
 			}
 			try {
 				return new FileInputStream(tempfile);

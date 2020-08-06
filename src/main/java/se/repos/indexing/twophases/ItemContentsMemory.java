@@ -14,7 +14,6 @@ import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
-import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 import se.simonsoft.cms.item.stream.ByteArrayInOutStream;
 
 public class ItemContentsMemory implements ItemContentBufferStrategy {
@@ -28,7 +27,7 @@ public class ItemContentsMemory implements ItemContentBufferStrategy {
 	}
 	
 	@Override
-	public ItemContentBuffer getBuffer(CmsRepositoryInspection repository,
+	public ItemContentBuffer getBuffer(
 			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
 		Long size = (Long) pathinfo.getFieldValue("size");
 		if (size == null) {
