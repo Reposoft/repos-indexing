@@ -19,7 +19,6 @@ import se.repos.indexing.item.ItemContentBufferStrategy;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
-import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 
 /**
  * Only suitable for testing, will fill up the disk with temp files in large indexing jobs.
@@ -35,9 +34,9 @@ public class ItemContentsNocache implements ItemContentBufferStrategy {
 	}
 	
 	@Override
-	public ItemContentBuffer getBuffer(CmsRepositoryInspection repository,
+	public ItemContentBuffer getBuffer(
 			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
-		return new BufferMinimizeMemoryUse(repository, revision, path);
+		return new BufferMinimizeMemoryUse(revision, path);
 	}	
 	
 	/**
@@ -45,13 +44,11 @@ public class ItemContentsNocache implements ItemContentBufferStrategy {
 	 */
 	public class BufferMinimizeMemoryUse implements ItemContentBuffer {
 
-		private CmsRepositoryInspection repository;
 		private RepoRevision revision;
 		private CmsItemPath path;
 
-		public BufferMinimizeMemoryUse(CmsRepositoryInspection repository,
+		public BufferMinimizeMemoryUse(
 				RepoRevision revision, CmsItemPath path) {
-			this.repository = repository;
 			this.revision = revision;
 			this.path = path;
 		}
@@ -75,7 +72,7 @@ public class ItemContentsNocache implements ItemContentBufferStrategy {
 			} catch (FileNotFoundException e1) {
 				throw new IllegalStateException("Failed to produce temp file destination for contents buffer");
 			}
-			reader.getContents(repository, revision, path, out);
+			reader.getContents(revision, path, out);
 			try {
 				return new FileInputStream(tempfile);
 			} catch (FileNotFoundException e) {

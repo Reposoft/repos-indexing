@@ -9,7 +9,6 @@ import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
-import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 /**
@@ -26,13 +25,10 @@ public class ItemPropertiesImmediate implements ItemPropertiesBufferStrategy {
 	}
 
 	@Override
-	public CmsItemProperties getProperties(CmsRepositoryInspection repository,
+	public CmsItemProperties getProperties(
 			RepoRevision revision, CmsItemPath path) {
-		if (repository == null) {
-			return reader.getProperties(revision, path);
-		}
-		// the deprecated way
-		return reader.getProperties(repository, revision, path);
+		
+		return reader.getProperties(revision, path);
 	}
 	
 }

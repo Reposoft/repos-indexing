@@ -40,7 +40,7 @@ public class HandlerContentEnable extends IndexingItemHandlerInternal<IndexingIt
 		if (progress.getItem().isFolder()) {
 			return ITEM_IS_FOLDER;
 		}
-		return strategy.getBuffer(null, progress.getRevision(), progress.getItem().getPath(), progress.getFields());
+		return strategy.getBuffer(progress.getRevision(), progress.getItem().getPath(), progress.getFields());
 	}
 
 }

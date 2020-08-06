@@ -19,7 +19,6 @@ import se.repos.indexing.item.ItemContentBuffer;
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.inspection.CmsContentsReader;
-import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 public class ItemContentsMemorySizeLimitTest {
@@ -30,11 +29,7 @@ public class ItemContentsMemorySizeLimitTest {
 		CmsItemPath path = new CmsItemPath("/file.txt");
 
 		CmsContentsReader reader = new CmsContentsReader() {
-			@Override
-			public CmsItemProperties getProperties(CmsRepositoryInspection repository,
-					RepoRevision revision, CmsItemPath path) {
-				throw new UnsupportedOperationException();
-			}
+
 			@Override
 			public CmsItemProperties getProperties(RepoRevision arg0, CmsItemPath arg1) {
 				throw new UnsupportedOperationException();
@@ -43,11 +38,7 @@ public class ItemContentsMemorySizeLimitTest {
 			public void getDiff(RepoRevision arg0, OutputStream arg1) {
 				throw new UnsupportedOperationException();
 			}
-			@Override
-			public void getContents(CmsRepositoryInspection repository,
-					RepoRevision revision, CmsItemPath path, OutputStream out) {
-				getContents(revision, path, out);
-			}
+
 			@Override
 			public void getContents(RepoRevision revision, CmsItemPath path,
 					OutputStream out) {
@@ -74,7 +65,7 @@ public class ItemContentsMemorySizeLimitTest {
 		
 		IndexingDoc doc = mock(IndexingDoc.class);
 		when(doc.getFieldValue("size")).thenReturn(11L);
-		ItemContentBuffer buf = buffer.getBuffer(null, rev, path, doc);
+		ItemContentBuffer buf = buffer.getBuffer(rev, path, doc);
 		InputStream c1 = buf.getContents();
 		assertEquals("1".getBytes()[0], c1.read());
 		assertEquals("Expected a new temp file", numbefore + 1, expectedtempfolder.list().length); // this can be affected by other system activities so if it fails a lot we must get the path from the buffer

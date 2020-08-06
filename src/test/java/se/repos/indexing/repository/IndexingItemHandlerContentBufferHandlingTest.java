@@ -24,7 +24,7 @@ public class IndexingItemHandlerContentBufferHandlingTest {
 		CmsChangesetItem item = mock(CmsChangesetItem.class);
 		ItemContentBufferStrategy strategy = mock(ItemContentBufferStrategy.class);
 		ItemContentBuffer buffer = mock(ItemContentBuffer.class);
-		when(strategy.getBuffer(null, null, null, null)).thenReturn(buffer);
+		when(strategy.getBuffer(null, null, null)).thenReturn(buffer);
 		ByteArrayInputStream b = new ByteArrayInputStream("".getBytes());
 		when(buffer.getContents()).thenReturn(b);
 		IndexingItemHandler enable = new HandlerContentEnable(strategy);
