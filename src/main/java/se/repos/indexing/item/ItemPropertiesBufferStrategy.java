@@ -5,7 +5,6 @@ package se.repos.indexing.item;
 
 import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.RepoRevision;
-import se.simonsoft.cms.item.inspection.CmsRepositoryInspection;
 import se.simonsoft.cms.item.properties.CmsItemProperties;
 
 public interface ItemPropertiesBufferStrategy {
@@ -17,6 +16,6 @@ public interface ItemPropertiesBufferStrategy {
 	 * @param path
 	 * @return the property data, or proxy for delayed reading of it
 	 */
-	CmsItemProperties getProperties(CmsRepositoryInspection repository, RepoRevision revision, CmsItemPath path);
+	CmsItemProperties getProperties(RepoRevision revision, CmsItemPath path);
 	
 }

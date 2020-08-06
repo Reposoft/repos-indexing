@@ -22,7 +22,7 @@ public class IndexingItemHandlerPropertiesEnable extends IndexingItemHandlerInte
 		if (progress.getItem().isDelete()) {
 			return;
 		}
-		progress.setProperties(strategy.getProperties(null, progress.getRevision(), progress.getItem().getPath()));
+		progress.setProperties(strategy.getProperties(progress.getRevision(), progress.getItem().getPath()));
 	}
 
 }
