@@ -148,8 +148,11 @@ public class HandlerPathinfo implements IndexingItemHandler {
 		}
 		
 		CmsItemId url = repository.getItemId().withRelPath(path);
-		d.setField("url", url.getUrl());
-		d.setField("urlpath", url.getUrlAtHost());
+		String urlRevSuffix = "?p=".concat(Long.toString(revision.getNumber()));
+		d.setField("url", url.getUrl().concat(urlRevSuffix));
+		d.setField("urlhead", url.getUrl());
+		d.setField("urlpath", url.getUrlAtHost().concat(urlRevSuffix));
+		d.setField("urlpathhead", url.getUrlAtHost());
 	}
 	
 	@Override

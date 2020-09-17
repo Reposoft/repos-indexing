@@ -83,8 +83,10 @@ public class HandlerPathinfoTest {
 		assertEquals(rev.getNumber() - 2, f.getFieldValue("revc"));
 		assertEquals(new Date(rev.getDate().getTime() - 1000), f.getFieldValue("revct"));
 		
-		assertEquals("https://h.ost:1080/svn/repo1/my/dir/a%20file.txt", f.getFieldValue("url"));
-		assertEquals("/svn/repo1/my/dir/a%20file.txt", f.getFieldValue("urlpath"));
+		assertEquals("https://h.ost:1080/svn/repo1/my/dir/a%20file.txt?p=10", f.getFieldValue("url"));
+		assertEquals("https://h.ost:1080/svn/repo1/my/dir/a%20file.txt", f.getFieldValue("urlhead"));
+		assertEquals("/svn/repo1/my/dir/a%20file.txt?p=10", f.getFieldValue("urlpath"));
+		assertEquals("/svn/repo1/my/dir/a%20file.txt", f.getFieldValue("urlpathhead"));
 		
 		assertEquals("repo1", f.getFieldValue("repo"));
 		assertEquals("h.ost:1080", f.getFieldValue("repohost"));
@@ -171,7 +173,7 @@ public class HandlerPathinfoTest {
 		pathinfo.handle(p);
 		
 		assertEquals("Should use CmsRepository's URL encoding",
-				"https://h.ost:1080/svn/repo1/my%20file$txt", p.getFields().getFieldValue("url"));
+				"https://h.ost:1080/svn/repo1/my%20file$txt", p.getFields().getFieldValue("urlhead"));
 	}
 	
 	@Test

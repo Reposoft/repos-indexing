@@ -61,12 +61,13 @@
 		
 		<!-- URL of the resource -->
 		<field name="url"       type="string" indexed="true" stored="true" multiValued="false"/>
-		<!-- URL, with ?p=[revision] -->
-		<!-- any practical use? <field name="urlrev"    type="string" indexed="true" stored="true" multiValued="false"/>  -->
+		<field name="urlhead"   type="string" indexed="true" stored="true" multiValued="false"/>
 		<!-- URL at host, encoded (unlike pathfull if we keep that one), without revision -->
 		<field name="urlpath"       type="string" indexed="true" stored="true" multiValued="false"/>
+		<field name="urlpathhead"   type="string" indexed="true" stored="true" multiValued="false"/>
 		<!-- Logical ID -->
 		<field name="urlid"       type="string" indexed="true" stored="true" multiValued="false"/>
+		<field name="urlidhead"   type="string" indexed="true" stored="true" multiValued="false"/>
 		
 		<!-- repository name, no slashes -->
 		<field name="repo"       type="string" indexed="true" stored="true" multiValued="false"/>
