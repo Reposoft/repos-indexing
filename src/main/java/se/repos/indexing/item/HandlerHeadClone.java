@@ -50,6 +50,14 @@ public class HandlerHeadClone implements IndexingItemHandler {
 		IndexingDoc fields = progress.getFields();
 		String id = (String) fields.getFieldValue("id");
 		String idHead = (String) fields.getFieldValue("idhead");
+		String url = (String) fields.getFieldValue("url");
+		String urlHead = (String) fields.getFieldValue("urlhead");
+		String urlPath = (String) fields.getFieldValue("urlpath");
+		String urlPathHead = (String) fields.getFieldValue("urlpathhead");
+		// Needed when using an urlid handler.
+		String urlId = (String) fields.getFieldValue("urlid");
+		String urlIdHead = (String) fields.getFieldValue("urlidhead");
+		
 		
 		if (id == null) {
 			throw new IllegalStateException("Field 'id' must be set by preceeding handler.");
@@ -72,12 +80,18 @@ public class HandlerHeadClone implements IndexingItemHandler {
 		} else {
 			// Set ID to idHead for the purpose of adding the item representing latest.
 			fields.setField("id", idHead);
+			fields.setField("url", urlHead);
+			fields.setField("urlpath", urlPathHead);
+			fields.setField("urlid", urlIdHead);
 			// Setting head = true on folders as well.
 			fields.setField("head", true);
 			new SolrAdd(repositem, fields).run();
 			
 			// Restore the id with revision.
 			fields.setField("id", id);
+			fields.setField("url", url);
+			fields.setField("urlpath", urlPath);
+			fields.setField("urlid", urlId);
 		}
 		// Flag 'head' is always false when returning, subsequent handlers will add the item representing history.
 		fields.setField("head", false);

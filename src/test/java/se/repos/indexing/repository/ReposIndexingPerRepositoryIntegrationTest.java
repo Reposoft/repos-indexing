@@ -5,6 +5,7 @@ package se.repos.indexing.repository;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.spy;
@@ -156,6 +157,13 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		tearDownSolrRepositem();
 	}
 	
+	private String getTail(Object id) {
+		
+		String str = (String) id;
+		String[] split = str.split("/");
+		return split[split.length-1];
+	}
+	
 	@Test
 	public void testMarkItemHead() throws SolrServerException, IOException {
 		InputStream dumpfile = this.getClass().getClassLoader().getResourceAsStream(
@@ -208,6 +216,14 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		SolrDocumentList r2 = repositem.query(new SolrQuery("id:*@0000000002").setSort("path", ORDER.asc)).getResults();
 		assertEquals("all rev items have head=false, " + r2.get(0), false, r2.get(0).get("head"));
 		assertAllHeadFalse(r2);
+		assertEquals("id has rev when head=false, " + r2.get(0), "t1.txt@0000000002", getTail(r2.get(0).get("id")));
+		assertEquals("idhead never has rev, " + r2.get(0), "t1.txt", getTail(r2.get(0).get("idhead")));
+		// url never had revision before repos-indexing 0.20
+		assertEquals("url has rev when head=false, " + r2.get(0), "t1.txt?p=2", getTail(r2.get(0).get("url")));
+		assertEquals("urlhead never has rev, " + r2.get(0), "t1.txt", getTail(r2.get(0).get("urlhead")));
+		assertEquals("url has rev when head=false, " + r2.get(0), "t1.txt?p=2", getTail(r2.get(0).get("urlpath")));
+		assertEquals("urlhead never has rev, " + r2.get(0), "t1.txt", getTail(r2.get(0).get("urlpathhead")));
+		assertNull("urlid is null because the handler is not in repos-indexing core, " + r2.get(0), r2.get(0).get("urlid"));
 		r2 = null;
 		
 		// Verify r2 head:true
@@ -222,6 +238,13 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals("...", 1L, r2Head.get(0).get("revc"));
 		assertEquals("...", 1L, r2Head.get(1).get("revc"));
 		assertEquals("...", 2L, r2Head.get(2).get("revc"));
+		assertEquals("id has no rev when head=true, " + r2Head.get(2), "t1.txt", getTail(r2Head.get(2).get("id")));
+		assertEquals("idhead never has rev, " + r2Head.get(2), "t1.txt", getTail(r2Head.get(2).get("idhead")));
+		assertEquals("id has no rev when head=true, " + r2Head.get(2), "t1.txt", getTail(r2Head.get(2).get("url")));
+		assertEquals("idhead never has rev, " + r2Head.get(2), "t1.txt", getTail(r2Head.get(2).get("urlhead")));
+		assertEquals("id has no rev when head=true, " + r2Head.get(2), "t1.txt", getTail(r2Head.get(2).get("urlpath")));
+		assertEquals("idhead never has rev, " + r2Head.get(2), "t1.txt", getTail(r2Head.get(2).get("urlpathhead")));
+		assertNull("urlid is null because the handler is not in repos-indexing core, " + r2Head.get(2), r2Head.get(2).get("urlid"));
 		r2Head = null;
 		
 				
