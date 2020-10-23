@@ -90,7 +90,7 @@
 		<!-- file or folder name before extension, , i.e. the part before the last dot -->
 		<field name="pathnamebase" type="string" indexed="true"  stored="true" multiValued="false"/>
 		<!-- extension, i.e. the part after the last dot -->
-		<field name="pathext"  type="string" indexed="true"  stored="true" multiValued="false"/>
+		<field name="pathext"  type="metadata" indexed="true"  stored="true" multiValued="false"/>
 		<!-- path in repository up to parent (including for folders), no trailing slash -->
 		<field name="pathdir"  type="string" indexed="true"  stored="true" multiValued="false"/>
 		<!-- all parent folders -->

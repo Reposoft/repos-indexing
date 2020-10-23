@@ -8,6 +8,7 @@ import java.util.Date;
 
 import org.apache.solr.SolrTestCaseJ4;
 import org.apache.solr.client.solrj.SolrQuery;
+import org.apache.solr.client.solrj.SolrQuery.ORDER;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer;
@@ -229,6 +230,8 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		assertEquals("one term", 2, solr.query(new SolrQuery("name:machine")).getResults().getNumFound());
 		assertEquals("one term", 1, solr.query(new SolrQuery("name:large")).getResults().getNumFound());
 		assertEquals("one term", 1, solr.query(new SolrQuery("name:small")).getResults().getNumFound());
+
+		assertEquals("one term, uppercase", 2, solr.query(new SolrQuery("name:MACHINE")).getResults().getNumFound());
 		
 		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:Large\\ Machine")).getResults().getNumFound());
 		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:Small\\ machine")).getResults().getNumFound());
@@ -255,6 +258,36 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 
 		assertEquals("all terms must match? - first term must match?", 0, solr.query(new SolrQuery("name:huge machine")).getResults().getNumFound());
 		assertEquals("all terms must match - should be 0 hits??", 2, solr.query(new SolrQuery("name:machine huge")).getResults().getNumFound());
+	}
+	
+	@Test
+	public void testFileextCase() throws Exception {
+		SolrClient solr = getSolr();
+		SolrInputDocument doc1 = new SolrInputDocument();
+		doc1.addField("id", "1");
+		doc1.addField("pathnamebase", "Machine Large");
+		doc1.addField("pathext", "PNG");
+		solr.add(doc1);
+		SolrInputDocument doc2 = new SolrInputDocument();
+		doc2.addField("id", "2");
+		doc2.addField("pathnamebase", "machine Small");
+		doc2.addField("pathext", "png");
+		solr.add(doc2);
+		solr.commit();
+		
+		assertEquals("one term", 2, solr.query(new SolrQuery("name:machine")).getResults().getNumFound());
+		assertEquals("one term", 1, solr.query(new SolrQuery("name:large")).getResults().getNumFound());
+		assertEquals("one term", 1, solr.query(new SolrQuery("name:small")).getResults().getNumFound());
+	
+		assertEquals("one term", 2, solr.query(new SolrQuery("pathext:png")).getResults().getNumFound());
+		assertEquals("one term", 2, solr.query(new SolrQuery("pathext:PNG")).getResults().getNumFound());
+		
+		SolrDocumentList r = solr.query(new SolrQuery("pathext:png").setSort("pathnamebase", ORDER.asc)).getResults();
+		SolrDocument r1 = r.get(0);
+		SolrDocument r2 = r.get(1);
+		assertEquals("case preserving but insensitive", "PNG", r1.getFieldValue("pathext"));
+		assertEquals("Machine Large", r1.getFieldValue("pathnamebase"));
+		assertEquals("png", r2.getFieldValue("pathext"));
 	}
 	
 	
