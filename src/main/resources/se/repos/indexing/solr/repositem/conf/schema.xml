@@ -171,6 +171,9 @@
 		-->
 		<field name="relid" type="string" indexed="true" stored="true" multiValued="true"/>
 		
+		<!-- Transformation of the data, just for storage. -->
+		<dynamicField name="tf_*" type="transform" indexed="false" stored="true" multiValued="false"/>
+		
 		<!-- Custom tags from added handlers, normally used for filtering -->
 		<field name="flag" type="string" indexed="true" stored="true" multiValued="true"/>
 		
@@ -232,6 +235,10 @@
 				<!-- <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true" /> -->
 				<filter class="solr.LowerCaseFilterFactory" />
 			</analyzer>
+		</fieldType>
+		
+		<fieldType name="transform" class="solr.TextField">
+			<!-- No analysis, just storage. -->
 		</fieldType>	
 	</types>
 	
