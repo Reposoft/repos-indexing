@@ -7,10 +7,11 @@ import java.io.IOException;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SolrOptimize extends SolrOp {
+public class SolrOptimize extends SolrOp<UpdateResponse> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SolrOptimize.class);
 	
@@ -19,9 +20,9 @@ public class SolrOptimize extends SolrOp {
 	}
 
 	@Override
-	protected void runOp() throws SolrServerException, IOException {
+	protected UpdateResponse runOp() throws SolrServerException, IOException {
 		logger.info("Optimizing {}", core);
-		core.optimize(); // TODO use wait flags?
+		return core.optimize(); // TODO use wait flags?
 	}
 
 }

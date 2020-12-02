@@ -5,7 +5,6 @@ package se.repos.indexing.solrj;
 
 import java.io.IOException;
 
-import org.apache.http.HttpStatus;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
@@ -15,7 +14,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Shared error handling for solr operations.
  */
-public abstract class SolrOp implements Runnable {
+public abstract class SolrOp<T> implements Runnable {
 
 	protected SolrClient core;
 	public final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -76,6 +75,6 @@ public abstract class SolrOp implements Runnable {
 		
 	}
 	
-	protected abstract void runOp() throws SolrServerException, IOException;
+	protected abstract T runOp() throws SolrServerException, IOException;
 	
 }
