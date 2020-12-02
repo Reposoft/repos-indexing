@@ -3,7 +3,6 @@
  */
 package se.repos.indexing.twophases;
 
-import java.io.IOException;
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -12,7 +11,6 @@ import javax.inject.Named;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrQuery.ORDER;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -24,6 +22,7 @@ import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.repository.ReposIndexingPerRepository;
 import se.repos.indexing.solrj.SolrAdd;
 import se.repos.indexing.solrj.SolrCommit;
+import se.repos.indexing.solrj.SolrQueryOp;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.indexing.IdStrategy;
@@ -98,15 +97,8 @@ public class RepositoryIndexStatus {
 		query.setRows(1);
 		query.setFields("rev", "revt");
 		query.setSort("rev", order); // the timestamp might be in a different order in svn, if revprops or loading has been used irregularly
-		QueryResponse resp;
-		try {
-			logger.trace("Running revision query {}", query);
-			resp = repositem.query(query);
-		} catch (SolrServerException e) {
-			throw new RuntimeException("Error not handled", e);
-		} catch (IOException e) {
-			throw new RuntimeException("Error not handled", e);
-		}
+		// #1358 SolrOp provides retry logic.		
+		QueryResponse resp = new SolrQueryOp(repositem, query).run();
 		SolrDocumentList results = resp.getResults();
 		if (results.getNumFound() == 0) {
 			return null;
