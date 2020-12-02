@@ -245,7 +245,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	 */
 	protected void onSync(RepoRevision lock, RepoRevision revision) {
 		// quick fix for subsequent sync, i.e. hook call if current indexing has not completed
-		logger.info("Immediately marking {} as started, current sync HEAD for {}, previous was", revision, repository, lock);
+		logger.info("Immediately marking {} as started, previous completed {}, current sync HEAD for {}", revision, lock, repository);
 		// maybe index some kind of lock using IdStrategy#getIdEntry(CmsRepository, String) and https://wiki.apache.org/solr/RealTimeGet		
 		repositoryStatus.indexRevStartAndCommit(repository, revision, null);
 	}
