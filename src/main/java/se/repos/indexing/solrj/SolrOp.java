@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Shared error handling for solr operations.
  */
-public abstract class SolrOp<T> implements Runnable {
+public abstract class SolrOp<T> {
 
 	protected SolrClient core;
 	public final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -24,33 +24,32 @@ public abstract class SolrOp<T> implements Runnable {
 		this.core = core;
 	}
 
-	@Override
-	public void run() {
+	public T run() {
 		try {
-			runOp();
+			return runOp();
 		} catch (RemoteSolrException e) {
 			// #1358 Thrown when response != 200, unexpected content type, invalid response body.
 			// #1358 This extends RuntimeException (via SolrException) so it was never handled here before.
 			logger.warn("Solr first attempt failed with RemoteSolrException HTTP {}, retry in {} ms: {}", e.code(), retryPause, e.getMessage());
 			logger.debug("Solr first attempt failed with RemoteSolrException HTTP {}: ", e.code(), e);
-			retry();
+			return retry();
 		} catch (SolrServerException e) {
 			// Retry here as well, seems like IOExceptions sometimes are wrapped.
 			// #1358 SolR 6.6.6 and SolR 8 seems to always wrap IOException in SolrServerException.
 			// See: https://github.com/apache/lucene-solr/blame/branch_6_6/solr/solrj/src/java/org/apache/solr/client/solrj/impl/HttpSolrClient.java
 			logger.warn("Solr first attempt failed with SolrServerException, retry in {} ms: {}", retryPause, e.getMessage());
 			logger.debug("Solr first attempt failed with SolrServerException: ", e);
-			retry();
+			return retry();
 		} catch (IOException e) {
 			// #1358 Likely never happens.
 			logger.warn("Solr first attempt failed with IOException, retry in {} ms: {}", retryPause, e.getMessage());
 			logger.debug("Solr first attempt failed with IOException: ", e);
-			retry();
+			return retry();
 		}
 	}
 	
-	private void retry() {
-
+	private T retry() {
+		T result = null;
 		try {
 			Thread.sleep(retryPause);
 		} catch (InterruptedException e) {
@@ -59,7 +58,7 @@ public abstract class SolrOp<T> implements Runnable {
 		
 		logger.info("Solr second attempt...");
 		try {
-			runOp();
+			result = runOp();
 		} catch (RemoteSolrException e) {
 			logger.warn("Solr second attempt failed with RemoteSolrException HTTP {}", e.code(), e.getMessage());
 			logger.debug("Solr second attempt failed with RemoteSolrException HTTP {}: ", e.code(), e);
@@ -72,7 +71,7 @@ public abstract class SolrOp<T> implements Runnable {
 			throw new RuntimeException("Solr exception during retry", e);
 		}
 		logger.info("Solr second attempt successful");
-		
+		return result;
 	}
 	
 	protected abstract T runOp() throws SolrServerException, IOException;
