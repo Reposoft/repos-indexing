@@ -156,6 +156,11 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		
 		 */
 		
+		// #1358 Perform a SolR ping to ensure connectivity.
+		// Uses SolrOp to ensure retry logic which slows things down when SolR is not ready or under heavy load.
+		// Getting index status below now also has retry but will not be performed after startup.
+		repositoryStatus.indexPing();
+		
 		if (lock == null) {
 			logger.info("Unknown index completion status for repository {}. Polling.", repository);
 			RepoRevision completedHighest = repositoryStatus.getIndexedRevisionHighestCompleted(repository);

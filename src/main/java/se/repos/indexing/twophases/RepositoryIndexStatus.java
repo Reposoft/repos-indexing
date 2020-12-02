@@ -22,6 +22,7 @@ import se.repos.indexing.IndexingItemHandler;
 import se.repos.indexing.repository.ReposIndexingPerRepository;
 import se.repos.indexing.solrj.SolrAdd;
 import se.repos.indexing.solrj.SolrCommit;
+import se.repos.indexing.solrj.SolrPingOp;
 import se.repos.indexing.solrj.SolrQueryOp;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
@@ -174,5 +175,8 @@ public class RepositoryIndexStatus {
 		new SolrCommit(repositem).run();
 	}
 	
+	public void indexPing() {
+		new SolrPingOp(repositem).run();
+	}
 
 }
