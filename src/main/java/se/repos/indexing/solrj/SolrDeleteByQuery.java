@@ -11,7 +11,7 @@ import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SolrDeleteByQuery extends SolrOp {
+public class SolrDeleteByQuery extends SolrOp<UpdateResponse> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SolrDeleteByQuery.class);
 	
@@ -23,9 +23,10 @@ public class SolrDeleteByQuery extends SolrOp {
 	}
 
 	@Override
-	public void runOp() throws SolrServerException, IOException {
+	public UpdateResponse runOp() throws SolrServerException, IOException {
 		UpdateResponse delete = core.deleteByQuery(query);
 		logger.debug("Delete response: {}", delete);
+		return delete;
 	}
 
 }

@@ -7,10 +7,11 @@ import java.io.IOException;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SolrCommit extends SolrOp {
+public class SolrCommit extends SolrOp<UpdateResponse> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SolrCommit.class);
 	
@@ -19,9 +20,9 @@ public class SolrCommit extends SolrOp {
 	}
 
 	@Override
-	public void runOp() throws SolrServerException, IOException {
+	public UpdateResponse runOp() throws SolrServerException, IOException {
 		logger.debug("Committing {}", core);
-		core.commit();
+		return core.commit();
 	}
 
 }
