@@ -62,6 +62,7 @@ public abstract class SolrOp<T> {
 		} catch (RemoteSolrException e) {
 			logger.warn("Solr second attempt failed with RemoteSolrException HTTP {}", e.code(), e.getMessage());
 			logger.debug("Solr second attempt failed with RemoteSolrException HTTP {}: ", e.code(), e);
+			throw new RuntimeException("Solr exception during retry", e);
 		} catch (SolrServerException e) {
 			logger.warn("Solr second attempt failed with SolrServerException: ", e);
 			throw new RuntimeException("Solr exception during retry", e);
