@@ -7,13 +7,17 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Date;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
@@ -24,6 +28,14 @@ import se.simonsoft.cms.item.events.change.CmsChangesetItem;
 import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 
 public class HandlerHeadinfoTest {
+	
+	@Captor
+    private ArgumentCaptor<Collection<SolrInputDocument>> addCaptor;
+	
+	@Before
+    public void init(){
+        MockitoAnnotations.initMocks(this);
+    }
 
 	@Test
 	public void testHandle() throws SolrServerException, IOException {
@@ -88,7 +100,6 @@ public class HandlerHeadinfoTest {
 		when(b2i.getRevisionObsoleted()).thenReturn(rev1);
 		headinfo.handle(b2p);
 		
-		ArgumentCaptor<SolrInputDocument> addCaptor = ArgumentCaptor.forClass(SolrInputDocument.class);
 		verify(repositem).add(addCaptor.capture());
 		verifyNoMoreInteractions(repositem);
 		assertEquals("Should only have done one head status update, because internal state shold say that a1 was already marked as non-head at 1", 1, addCaptor.getAllValues().size());
@@ -133,10 +144,10 @@ public class HandlerHeadinfoTest {
 		headinfo.handle(a2p);
 		assertEquals("Index should contain delete entries, set to head=false", false, a2p.getFields().getFieldValue("head"));
 		
-		ArgumentCaptor<SolrInputDocument> addCaptor = ArgumentCaptor.forClass(SolrInputDocument.class);
+		//ArgumentCaptor<SolrInputDocument> addCaptor = ArgumentCaptor.forClass(Collection<SolrInputDocument.class>.class);
 		verify(repositem).add(addCaptor.capture());
 		assertEquals("Should have set head=false for the deleted", 1, addCaptor.getAllValues().size());
-		SolrInputDocument deleted = addCaptor.getValue();
+		SolrInputDocument deleted = addCaptor.getValue().iterator().next();
 		assertEquals(idStrategy.getId(repository, rev1, a1i.getPath()), deleted.getFieldValue("id"));
 		assertEquals("Should be a field update request, not overwriting values", "{set=false}", deleted.getFieldValue("head").toString());
 		assertEquals("Shouldn't do anything else with the deleted", 2, deleted.getFieldNames().size());
