@@ -45,4 +45,11 @@ public class SolrAdd extends SolrOp<UpdateResponse> {
 		return core.add(documents);
 	}
 
+	@Override
+	protected boolean isRetryAllowed() {
+		// Allowing retry for add operations at this time. 
+		// Needs more investigation whether a SolR restart here could loose Adds.
+		return true;
+	}
+
 }

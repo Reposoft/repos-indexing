@@ -32,23 +32,27 @@ public abstract class SolrOp<T> {
 			// #1358 This extends RuntimeException (via SolrException) so it was never handled here before.
 			logger.warn("Solr first attempt failed with RemoteSolrException HTTP {}, retry in {} ms: {}", e.code(), retryPause, e.getMessage());
 			logger.debug("Solr first attempt failed with RemoteSolrException HTTP {}: ", e.code(), e);
-			return retry();
+			return retry(e);
 		} catch (SolrServerException e) {
 			// Retry here as well, seems like IOExceptions sometimes are wrapped.
 			// #1358 SolR 6.6.6 and SolR 8 seems to always wrap IOException in SolrServerException.
 			// See: https://github.com/apache/lucene-solr/blame/branch_6_6/solr/solrj/src/java/org/apache/solr/client/solrj/impl/HttpSolrClient.java
 			logger.warn("Solr first attempt failed with SolrServerException, retry in {} ms: {}", retryPause, e.getMessage());
 			logger.debug("Solr first attempt failed with SolrServerException: ", e);
-			return retry();
+			return retry(e);
 		} catch (IOException e) {
 			// #1358 Likely never happens.
 			logger.warn("Solr first attempt failed with IOException, retry in {} ms: {}", retryPause, e.getMessage());
 			logger.debug("Solr first attempt failed with IOException: ", e);
-			return retry();
+			return retry(e);
 		}
 	}
 	
-	private T retry() {
+	private T retry(Exception exceptionFirst) {
+		if (!isRetryAllowed()) {
+			throw new RuntimeException("Solr exception (retry not allowed for this op)", exceptionFirst);
+		}
+		
 		T result = null;
 		try {
 			Thread.sleep(retryPause);
@@ -76,5 +80,7 @@ public abstract class SolrOp<T> {
 	}
 	
 	protected abstract T runOp() throws SolrServerException, IOException;
+	
+	protected abstract boolean isRetryAllowed();
 	
 }

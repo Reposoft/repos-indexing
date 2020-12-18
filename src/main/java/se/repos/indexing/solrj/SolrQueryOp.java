@@ -30,4 +30,8 @@ public class SolrQueryOp extends SolrOp<QueryResponse> {
 		return resp;
 	}
 
+	@Override
+	protected boolean isRetryAllowed() {
+		return true;
+	}
 }

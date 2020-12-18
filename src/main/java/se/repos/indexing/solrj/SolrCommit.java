@@ -24,5 +24,10 @@ public class SolrCommit extends SolrOp<UpdateResponse> {
 		logger.debug("Committing {}", core);
 		return core.commit();
 	}
-
+	
+	@Override
+	protected boolean isRetryAllowed() {
+		// Retry is a risk for commit, could indicate a SolR restart that can loose pending changes.
+		return false;
+	}
 }

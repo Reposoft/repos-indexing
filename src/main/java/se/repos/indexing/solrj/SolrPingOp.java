@@ -26,4 +26,8 @@ public class SolrPingOp extends SolrOp<SolrPingResponse> {
 		return ping;
 	}
 
+	@Override
+	protected boolean isRetryAllowed() {
+		return true;
+	}
 }
