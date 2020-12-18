@@ -4,6 +4,8 @@
 package se.repos.indexing.solrj;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -15,12 +17,12 @@ import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
 
 public class SolrAdd extends SolrOp<UpdateResponse> {
 
-	private SolrInputDocument doc;
+	private Collection<SolrInputDocument> documents;
 
 	public SolrAdd(SolrClient core, IndexingDoc doc) {
 		super(core);
 		if (doc instanceof IndexingDocIncrementalSolrj) {
-			this.doc = ((IndexingDocIncrementalSolrj) doc).getSolrDoc();
+			this.documents = Arrays.asList(((IndexingDocIncrementalSolrj) doc).getSolrDoc());
 		} else {
 			throw new IllegalArgumentException("Unrecognized fields type " + doc.getClass());
 		}
@@ -28,12 +30,26 @@ public class SolrAdd extends SolrOp<UpdateResponse> {
 	
 	public SolrAdd(SolrClient core, SolrInputDocument doc) {
 		super(core);
-		this.doc = doc;
+		this.documents = Arrays.asList(doc);
 	}
+
+	public SolrAdd(SolrClient core, Collection<SolrInputDocument> documents) {
+		super(core);
+		this.documents = documents;
+	}
+	
+	
 
 	@Override
 	public UpdateResponse runOp() throws SolrServerException, IOException {
-		return core.add(doc);
+		return core.add(documents);
+	}
+
+	@Override
+	protected boolean isRetryAllowed() {
+		// Allowing retry for add operations at this time. 
+		// Needs more investigation whether a SolR restart here could loose Adds.
+		return true;
 	}
 
 }

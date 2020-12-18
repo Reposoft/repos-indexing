@@ -28,5 +28,11 @@ public class SolrDelete extends SolrOp<UpdateResponse> {
 		logger.debug("Delete response: {}", delete);
 		return delete;
 	}
+	
+	@Override
+	protected boolean isRetryAllowed() {
+		// Allowing retry for delete operations. 
+		return true;
+	}
 
 }

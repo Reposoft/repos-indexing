@@ -24,5 +24,10 @@ public class SolrOptimize extends SolrOp<UpdateResponse> {
 		logger.info("Optimizing {}", core);
 		return core.optimize(); // TODO use wait flags?
 	}
-
+	
+	@Override
+	protected boolean isRetryAllowed() {
+		// Allowing retry for optimize operations, likely no risk. 
+		return true;
+	}
 }
