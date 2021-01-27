@@ -13,7 +13,6 @@ import java.util.Map;
 
 import se.repos.indexing.item.HandlerChecksum;
 import se.repos.indexing.item.HandlerHeadClone;
-import se.repos.indexing.item.HandlerHeadinfo;
 import se.repos.indexing.item.HandlerIndexTime;
 import se.repos.indexing.item.HandlerPathinfo;
 import se.repos.indexing.item.HandlerProperties;
