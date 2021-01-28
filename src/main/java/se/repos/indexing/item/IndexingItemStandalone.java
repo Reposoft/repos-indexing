@@ -222,11 +222,6 @@ public class IndexingItemStandalone implements IndexingItemProgress {
 		}
 
 		@Override
-		public CmsChangesetItem getPreviousChange() {
-			throw new UnsupportedOperationException("Not supported in classpath extraction");
-		}
-
-		@Override
 		public RepoRevision getRevisionObsoleted() {
 			throw new UnsupportedOperationException("Not supported in classpath extraction");
 		}
