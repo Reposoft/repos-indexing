@@ -140,7 +140,8 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			d.setField("pathstatprop", STAT_MODIFY);
 		}
 		
-		d.setField("copyhas", item.isCopySource());
+		// #789 #919 Suppressing "copyhas" field for now, awaiting specification for move tracking.
+		//d.setField("copyhas", item.isCopySource());
 		if (item.isCopy()) {
 			d.setField("copyfrom", item.getCopyFromPath().toString());
 			d.setField("copyfromrev", item.getCopyFromRevision().getNumber());

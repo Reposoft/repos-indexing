@@ -114,7 +114,7 @@ public class HandlerPathinfoTest {
 		when(item.isContentModified()).thenReturn(false);
 		when(item.isProperties()).thenReturn(true);
 		when(item.isPropertiesModified()).thenReturn(true);
-		when(item.isCopySource()).thenReturn(true);
+		//when(item.isCopySource()).thenReturn(true);
 		
 		pathinfo.handle(p);
 		
@@ -122,7 +122,7 @@ public class HandlerPathinfoTest {
 		
 		assertEquals(null, f.getFieldValue("pathstat"));
 		assertEquals("M", f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but does it matter to search?
-		assertEquals(true, f.getFieldValue("copyhas"));
+		//assertEquals(true, f.getFieldValue("copyhas")); // #789 #919 Suppressing "copyhas" field for now
 		
 		CmsChangesetItem item2 = mock(CmsChangesetItem.class);
 		IndexingItemProgress p2 = new IndexingItemStandalone(repo, rev, item2);
@@ -137,7 +137,7 @@ public class HandlerPathinfoTest {
 		when(item2.isContentModified()).thenReturn(false);
 		when(item2.isProperties()).thenReturn(true);
 		when(item2.isPropertiesModified()).thenReturn(false);
-		when(item2.isCopySource()).thenReturn(false);
+		//when(item2.isCopySource()).thenReturn(false);
 		when(item2.isCopy()).thenReturn(true);
 		when(item2.getCopyFromPath()).thenReturn(new CmsItemPath("/my/dir/a file.txt"));
 		when(item2.getCopyFromRevision()).thenReturn(new RepoRevision(rev.getNumber() - 4, new Date(rev.getDate().getTime() - 4000)));
@@ -146,7 +146,7 @@ public class HandlerPathinfoTest {
 		IndexingDoc f2 = p2.getFields();
 		assertEquals("Must be String in order to get correct JSON from SolR", "A", f2.getFieldValue("pathstat"));
 		assertEquals(null, f2.getFieldValue("pathstatprop"));
-		assertEquals(false, f2.getFieldValue("copyhas"));
+		//assertEquals(false, f2.getFieldValue("copyhas")); // #789 #919 Suppressing "copyhas" field for now
 		assertEquals("/my/dir/a file.txt", f2.getFieldValue("copyfrom"));
 		assertEquals(6L, f2.getFieldValue("copyfromrev"));
 		assertNotNull(f2.getFieldValue("copyfromrevt"));
