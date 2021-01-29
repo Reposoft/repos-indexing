@@ -34,10 +34,6 @@ public class ItemContentsMemorySizeLimitTest {
 			public CmsItemProperties getProperties(RepoRevision arg0, CmsItemPath arg1) {
 				throw new UnsupportedOperationException();
 			}
-			@Override
-			public void getDiff(RepoRevision arg0, OutputStream arg1) {
-				throw new UnsupportedOperationException();
-			}
 
 			@Override
 			public void getContents(RepoRevision revision, CmsItemPath path,
