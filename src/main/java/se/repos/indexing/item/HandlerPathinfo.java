@@ -136,9 +136,12 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			d.setField("pathstat", STAT_MODIFY);
 		}
 		
+		// #919 Suppressing "pathstatprop" field for now, challenging to determine via http (SVNKit 1.10.2).
+		/*
 		if (item.isPropertiesModified()) { // NOTE: This is using a different field, which makes propstat empty sometimes.
 			d.setField("pathstatprop", STAT_MODIFY);
 		}
+		*/
 		
 		// #789 #919 Suppressing "copyhas" field for now, awaiting specification for move tracking.
 		//d.setField("copyhas", item.isCopySource());
