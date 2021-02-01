@@ -235,7 +235,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 	 */
 	protected RepoRevision indexFirst() {
 		logger.debug("No revision status in index. Starting from 0.");
-		RepoRevision first = new RepoRevision(0, revisionLookup.getRevisionTimestamp(repository, 0));
+		RepoRevision first = new RepoRevision(0, revisionLookup.getRevisionTimestamp(repository, 0L));
 		CmsItemProperties revprops0 = null;
 		repositoryStatus.indexRevEmpty(repository, first, revprops0, null);
 		return first;
