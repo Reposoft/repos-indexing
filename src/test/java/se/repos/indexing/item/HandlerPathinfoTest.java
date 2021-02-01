@@ -121,7 +121,9 @@ public class HandlerPathinfoTest {
 		IndexingDoc f = p.getFields();
 		
 		assertEquals(null, f.getFieldValue("pathstat"));
+		/* #919 Suppressing "pathstatprop" field for now, challenging to determine via http (SVNKit 1.10.2).
 		assertEquals("M", f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but does it matter to search?
+		*/
 		//assertEquals(true, f.getFieldValue("copyhas")); // #789 #919 Suppressing "copyhas" field for now
 		
 		CmsChangesetItem item2 = mock(CmsChangesetItem.class);
