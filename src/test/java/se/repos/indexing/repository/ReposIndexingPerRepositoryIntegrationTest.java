@@ -64,9 +64,9 @@ import se.simonsoft.cms.backend.svnkit.config.SvnKitAuthManagerProvider;
 import se.simonsoft.cms.backend.svnkit.config.SvnKitLowLevelProvider;
 import se.simonsoft.cms.backend.svnkit.info.change.CmsChangesetReaderSvnkit;
 import se.simonsoft.cms.backend.svnkit.info.change.CmsContentsReaderSvnkit;
+import se.simonsoft.cms.backend.svnkit.info.change.CommitRevisionCache;
+import se.simonsoft.cms.backend.svnkit.info.change.CommitRevisionCacheRepo;
 import se.simonsoft.cms.backend.svnkit.svnlook.CmsRepositoryLookupSvnkitLook;
-import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCache;
-import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCacheDefault;
 import se.simonsoft.cms.backend.svnkit.svnlook.SvnlookClientProviderStateless;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
@@ -100,13 +100,15 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 			bind(CmsRepositorySvn.class).toInstance(configRepository);
 			bind(CmsTestRepository.class).toInstance(repository); // should there really be services that expect this type?
 			
+			// Production use will not require Auth if connecting to an Apache without authn/authz.
+			// Need a specific SVNKit provider.
 			bind(RestAuthentication.class).toInstance(new RestAuthenticationSimple(repository.getAuthenticatedUser(), repository.getAuthenticatedPassword()));
 			bind(ISVNAuthenticationManager.class).toProvider(SvnKitAuthManagerProvider.class);
 			//bind(SVNClientManager.class).toProvider(SvnKitClientManagerProvider.class);
 			
 			bind(CmsChangesetReader.class).to(CmsChangesetReaderSvnkit.class);
 			bind(CmsContentsReader.class).to(CmsContentsReaderSvnkit.class);
-			bind(CommitRevisionCache.class).to(CommitRevisionCacheDefault.class);
+			bind(CommitRevisionCache.class).toInstance(new CommitRevisionCacheRepo()); // Bind an instance of the cache.
 			bind(CmsRepositoryLookup.class).annotatedWith(Names.named("inspection")).to(CmsRepositoryLookupSvnkitLook.class);
 			bind(SVNLookClient.class).toProvider(SvnlookClientProviderStateless.class);
 			bind(SVNRepository.class).toProvider(SvnKitLowLevelProvider.class);
