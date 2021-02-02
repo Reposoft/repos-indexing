@@ -296,6 +296,7 @@ public class ReposIndexingPerRepository implements ReposIndexing {
 		List<CmsChangesetItem> changesetItems = new LinkedList<CmsChangesetItem>();
 		if (changeset != null) {
 			changesetItems = changeset.getItems(); 
+			logger.info("Read changeset {} - items: {}", revision, changesetItems.size());
 			if (!changeset.isDeriveEnabled()) {
 				logger.warn("Derived (copy/move) paths are not indexed.");
 			}
