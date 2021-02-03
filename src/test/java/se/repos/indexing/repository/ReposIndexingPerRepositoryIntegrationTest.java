@@ -35,7 +35,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
+import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
+import org.tmatesoft.svn.core.io.SVNRepository;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -55,13 +56,16 @@ import se.repos.indexing.scheduling.IndexingSchedule;
 import se.repos.indexing.scheduling.IndexingScheduleBlockingOnly;
 import se.repos.indexing.twophases.ItemContentsMemory;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
+import se.repos.restclient.RestAuthentication;
+import se.repos.restclient.auth.RestAuthenticationSimple;
 import se.simonsoft.cms.backend.svnkit.CmsRepositorySvn;
-import se.simonsoft.cms.backend.svnkit.svnlook.CmsChangesetReaderSvnkitLookRepo;
-import se.simonsoft.cms.backend.svnkit.svnlook.CmsContentsReaderSvnkitLookRepo;
-import se.simonsoft.cms.backend.svnkit.svnlook.CmsRepositoryLookupSvnkitLook;
-import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCache;
-import se.simonsoft.cms.backend.svnkit.svnlook.CommitRevisionCacheDefault;
-import se.simonsoft.cms.backend.svnkit.svnlook.SvnlookClientProviderStateless;
+import se.simonsoft.cms.backend.svnkit.config.SvnKitAuthManagerProvider;
+import se.simonsoft.cms.backend.svnkit.config.SvnKitLowLevelProvider;
+import se.simonsoft.cms.backend.svnkit.info.CmsRepositoryLookupSvnkit;
+import se.simonsoft.cms.backend.svnkit.info.change.CmsChangesetReaderSvnkit;
+import se.simonsoft.cms.backend.svnkit.info.change.CmsContentsReaderSvnkit;
+import se.simonsoft.cms.backend.svnkit.info.change.CommitRevisionCache;
+import se.simonsoft.cms.backend.svnkit.info.change.CommitRevisionCacheRepo;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.indexing.IdStrategy;
@@ -94,11 +98,17 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 			bind(CmsRepositorySvn.class).toInstance(configRepository);
 			bind(CmsTestRepository.class).toInstance(repository); // should there really be services that expect this type?
 			
-			bind(CmsChangesetReader.class).to(CmsChangesetReaderSvnkitLookRepo.class);
-			bind(CmsContentsReader.class).to(CmsContentsReaderSvnkitLookRepo.class);
-			bind(CommitRevisionCache.class).to(CommitRevisionCacheDefault.class);
-			bind(CmsRepositoryLookup.class).annotatedWith(Names.named("inspection")).to(CmsRepositoryLookupSvnkitLook.class);
-			bind(SVNLookClient.class).toProvider(SvnlookClientProviderStateless.class);
+			// Production use will not require Auth if connecting to an Apache without authn/authz.
+			// Need a specific SVNKit provider.
+			bind(RestAuthentication.class).toInstance(new RestAuthenticationSimple(repository.getAuthenticatedUser(), repository.getAuthenticatedPassword()));
+			bind(ISVNAuthenticationManager.class).toProvider(SvnKitAuthManagerProvider.class);
+			//bind(SVNClientManager.class).toProvider(SvnKitClientManagerProvider.class);
+			
+			bind(CmsChangesetReader.class).to(CmsChangesetReaderSvnkit.class);
+			bind(CmsContentsReader.class).to(CmsContentsReaderSvnkit.class);
+			bind(CommitRevisionCache.class).toInstance(new CommitRevisionCacheRepo()); // Bind an instance of the cache.
+			bind(CmsRepositoryLookup.class).annotatedWith(Names.named("inspection")).to(CmsRepositoryLookupSvnkit.class);
+			bind(SVNRepository.class).toProvider(SvnKitLowLevelProvider.class);
 		}};
 		
 		Module indexing = new AbstractModule() { @Override protected void configure() {
