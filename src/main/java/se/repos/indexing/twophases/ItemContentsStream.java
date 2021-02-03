@@ -3,7 +3,6 @@
  */
 package se.repos.indexing.twophases;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -24,66 +23,71 @@ import se.simonsoft.cms.item.inspection.CmsContentsReader;
 public class ItemContentsStream implements ItemContentBufferStrategy {
 
 	private static final Logger logger = LoggerFactory.getLogger(ItemContentsStream.class);
-	
+
 	private CmsContentsReader reader;
-	
+
 	@Inject
 	public ItemContentsStream setCmsContentsReader(CmsContentsReader reader) {
 		this.reader = reader;
 		return this;
 	}
-	
+
 	@Override
-	public ItemContentBuffer getBuffer(
-			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
+	public ItemContentBuffer getBuffer(RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
 		Long size = (Long) pathinfo.getFieldValue("size");
 		if (size == null) {
 			throw new IllegalStateException("No size information in indexing doc " + path + ". Use a different buffer strategy.");
-		}		
+		}
 		return new BufferStream(reader, revision, path, size.intValue());
 	}
-	
-	
+
+	// http://io-tools.sourceforge.net/easystream/user_guide/convert_outputstream_to_inputstream.html
+	public static class ItemContentsInputStreamFromOutputStream extends InputStreamFromOutputStream<String> {
+
+		private CmsContentsReader reader;
+		private RepoRevision revision;
+		private CmsItemPath path;
+		private int size;
+
+		public ItemContentsInputStreamFromOutputStream(CmsContentsReader reader, RepoRevision revision, CmsItemPath path, int size) {
+			this.reader = reader;
+			this.revision = revision;
+			this.path = path;
+			this.size = size;
+		}
+
+		@Override
+		protected String produce(OutputStream dataSink) throws Exception {
+			logger.trace("Contents into easystream ({}): {}", size, path);
+			reader.getContents(revision, path, dataSink);
+			return null;
+		}
+	};
+
 	public static class BufferStream implements ItemContentBuffer {
 
 		private CmsContentsReader reader;
 		private RepoRevision revision;
 		private CmsItemPath path;
 		private int size;
-		
-		private InputStreamFromOutputStream<String> isOs = new InputStreamFromOutputStream<String>() {
-			
-			@Override
-			protected String produce(OutputStream dataSink) throws Exception {
-				logger.info("Contents into easystream ({}): {}", size, path);
-				reader.getContents(revision, path, dataSink);
-				return null;
-			}
-		};
 
-		
+
 		public BufferStream(CmsContentsReader reader, RepoRevision revision, CmsItemPath path, int size) {
 			this.reader = reader;
 			this.revision = revision;
 			this.path = path;
 			this.size = size;
 		}
-		
+
 		@Override
 		public InputStream getContents() {
-			return isOs;
+			return new ItemContentsInputStreamFromOutputStream(reader, revision, path, size);
 		}
 
 		@Override
 		public void destroy() {
-			try {
-				isOs.close();
-			} catch (IOException e) {
-				logger.error("Failed to close easystream: {}", e.getMessage(), e);
-				throw new RuntimeException("Failed to close easystream: " + e.getMessage(), e);
-			}
 		}
-		
+
 	}
 
 }
