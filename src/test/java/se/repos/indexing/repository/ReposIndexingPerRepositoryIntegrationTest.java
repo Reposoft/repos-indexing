@@ -55,6 +55,7 @@ import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.scheduling.IndexingSchedule;
 import se.repos.indexing.scheduling.IndexingScheduleBlockingOnly;
 import se.repos.indexing.twophases.ItemContentsMemory;
+import se.repos.indexing.twophases.ItemContentsStream;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
 import se.repos.restclient.RestAuthentication;
 import se.repos.restclient.auth.RestAuthenticationSimple;
@@ -123,6 +124,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 			IndexingHandlers.configureLast(handlers);
 			
 			bind(IdStrategy.class).to(IdStrategyDefault.class);
+			//bind(ItemContentBufferStrategy.class).to(ItemContentsStream.class);
 			bind(ItemContentBufferStrategy.class).to(ItemContentsMemory.class); // we shuld have a memory-only impl
 			bind(ItemPropertiesBufferStrategy.class).to(ItemPropertiesImmediate.class);
 		}};

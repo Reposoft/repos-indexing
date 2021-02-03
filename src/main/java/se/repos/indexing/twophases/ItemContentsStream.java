@@ -1,0 +1,89 @@
+/**
+ * Copyright (C) 2004-2012 Repos Mjukvara AB
+ */
+package se.repos.indexing.twophases;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.gc.iotools.stream.is.InputStreamFromOutputStream;
+
+import se.repos.indexing.IndexingDoc;
+import se.repos.indexing.item.ItemContentBuffer;
+import se.repos.indexing.item.ItemContentBufferStrategy;
+import se.simonsoft.cms.item.CmsItemPath;
+import se.simonsoft.cms.item.RepoRevision;
+import se.simonsoft.cms.item.inspection.CmsContentsReader;
+
+public class ItemContentsStream implements ItemContentBufferStrategy {
+
+	private static final Logger logger = LoggerFactory.getLogger(ItemContentsStream.class);
+	
+	private CmsContentsReader reader;
+	
+	@Inject
+	public ItemContentsStream setCmsContentsReader(CmsContentsReader reader) {
+		this.reader = reader;
+		return this;
+	}
+	
+	@Override
+	public ItemContentBuffer getBuffer(
+			RepoRevision revision, CmsItemPath path, IndexingDoc pathinfo) {
+		Long size = (Long) pathinfo.getFieldValue("size");
+		if (size == null) {
+			throw new IllegalStateException("No size information in indexing doc " + path + ". Use a different buffer strategy.");
+		}		
+		return new BufferStream(reader, revision, path, size.intValue());
+	}
+	
+	
+	public static class BufferStream implements ItemContentBuffer {
+
+		private CmsContentsReader reader;
+		private RepoRevision revision;
+		private CmsItemPath path;
+		private int size;
+		
+		private InputStreamFromOutputStream<String> isOs = new InputStreamFromOutputStream<String>() {
+			
+			@Override
+			protected String produce(OutputStream dataSink) throws Exception {
+				logger.info("Contents into easystream ({}): {}", size, path);
+				reader.getContents(revision, path, dataSink);
+				return null;
+			}
+		};
+
+		
+		public BufferStream(CmsContentsReader reader, RepoRevision revision, CmsItemPath path, int size) {
+			this.reader = reader;
+			this.revision = revision;
+			this.path = path;
+			this.size = size;
+		}
+		
+		@Override
+		public InputStream getContents() {
+			return isOs;
+		}
+
+		@Override
+		public void destroy() {
+			try {
+				isOs.close();
+			} catch (IOException e) {
+				logger.error("Failed to close easystream: {}", e.getMessage(), e);
+				throw new RuntimeException("Failed to close easystream: " + e.getMessage(), e);
+			}
+		}
+		
+	}
+
+}
