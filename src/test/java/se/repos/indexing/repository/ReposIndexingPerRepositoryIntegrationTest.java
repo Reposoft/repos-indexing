@@ -37,7 +37,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.io.SVNRepository;
-import org.tmatesoft.svn.core.wc.admin.SVNLookClient;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
@@ -62,12 +61,11 @@ import se.repos.restclient.auth.RestAuthenticationSimple;
 import se.simonsoft.cms.backend.svnkit.CmsRepositorySvn;
 import se.simonsoft.cms.backend.svnkit.config.SvnKitAuthManagerProvider;
 import se.simonsoft.cms.backend.svnkit.config.SvnKitLowLevelProvider;
+import se.simonsoft.cms.backend.svnkit.info.CmsRepositoryLookupSvnkit;
 import se.simonsoft.cms.backend.svnkit.info.change.CmsChangesetReaderSvnkit;
 import se.simonsoft.cms.backend.svnkit.info.change.CmsContentsReaderSvnkit;
 import se.simonsoft.cms.backend.svnkit.info.change.CommitRevisionCache;
 import se.simonsoft.cms.backend.svnkit.info.change.CommitRevisionCacheRepo;
-import se.simonsoft.cms.backend.svnkit.svnlook.CmsRepositoryLookupSvnkitLook;
-import se.simonsoft.cms.backend.svnkit.svnlook.SvnlookClientProviderStateless;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.indexing.IdStrategy;
@@ -109,8 +107,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 			bind(CmsChangesetReader.class).to(CmsChangesetReaderSvnkit.class);
 			bind(CmsContentsReader.class).to(CmsContentsReaderSvnkit.class);
 			bind(CommitRevisionCache.class).toInstance(new CommitRevisionCacheRepo()); // Bind an instance of the cache.
-			bind(CmsRepositoryLookup.class).annotatedWith(Names.named("inspection")).to(CmsRepositoryLookupSvnkitLook.class);
-			bind(SVNLookClient.class).toProvider(SvnlookClientProviderStateless.class);
+			bind(CmsRepositoryLookup.class).annotatedWith(Names.named("inspection")).to(CmsRepositoryLookupSvnkit.class);
 			bind(SVNRepository.class).toProvider(SvnKitLowLevelProvider.class);
 		}};
 		
