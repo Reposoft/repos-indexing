@@ -269,6 +269,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		assertEquals("/t1.txt", r3r1.get(2).get("path"));
 		assertEquals("Should have revauthor.", "solsson", r3r1.get(2).getFieldValue("revauthor"));
 		assertEquals("Should have revcomment.", "Two files with two lines each", r3r1.get(2).getFieldValue("revcomment"));
+		assertNull("should be null, unable to reproduce", r3r1.get(2).getFieldValue("prop_svn.entry.uuid"));
 		assertEquals("Revision 1 had only these files, nothing else should have been indexed on rev 1 since then", 3, r3r1.size());
 
 		// TODO support folders assertEquals("Folder is deleted and thus no longer in head", false, r3r1.get(0).get("head"));
