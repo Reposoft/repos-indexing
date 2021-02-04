@@ -11,8 +11,6 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.gc.iotools.stream.is.InputStreamFromOutputStream;
-
 import se.repos.indexing.IndexingDoc;
 import se.repos.indexing.item.ItemContentBuffer;
 import se.repos.indexing.item.ItemContentBufferStrategy;
@@ -38,10 +36,14 @@ public class ItemContentsStream implements ItemContentBufferStrategy {
 		if (size == null) {
 			throw new IllegalStateException("No size information in indexing doc " + path + ". Use a different buffer strategy.");
 		}
-		return new BufferStream(reader, revision, path, size.intValue());
+		//return new BufferStream(reader, revision, path, size.intValue());
+		throw new UnsupportedOperationException("Buffer impl based on easystream not available");
+		// Did not provide any performance improvement (GC time was likely not significant enough).
+		// Problems with failures for large files (or just eps?), likely over 2,5 MB approx.
 	}
 
 	// http://io-tools.sourceforge.net/easystream/user_guide/convert_outputstream_to_inputstream.html
+	/*
 	public static class ItemContentsInputStreamFromOutputStream extends InputStreamFromOutputStream<String> {
 
 		private CmsContentsReader reader;
@@ -58,7 +60,7 @@ public class ItemContentsStream implements ItemContentBufferStrategy {
 
 		@Override
 		protected String produce(OutputStream dataSink) throws Exception {
-			logger.trace("Contents into easystream ({}): {}", size, path);
+			logger.info("Contents into easystream ({}): {}", size, path);
 			reader.getContents(revision, path, dataSink);
 			return null;
 		}
@@ -89,5 +91,5 @@ public class ItemContentsStream implements ItemContentBufferStrategy {
 		}
 
 	}
-
+	*/
 }
