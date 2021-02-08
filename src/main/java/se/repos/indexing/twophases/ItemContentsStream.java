@@ -3,9 +3,6 @@
  */
 package se.repos.indexing.twophases;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -20,8 +17,10 @@ import se.simonsoft.cms.item.inspection.CmsContentsReader;
 
 public class ItemContentsStream implements ItemContentBufferStrategy {
 
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(ItemContentsStream.class);
 
+	@SuppressWarnings("unused")
 	private CmsContentsReader reader;
 
 	@Inject

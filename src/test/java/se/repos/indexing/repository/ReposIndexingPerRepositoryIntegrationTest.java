@@ -55,7 +55,6 @@ import se.repos.indexing.item.ItemPropertiesBufferStrategy;
 import se.repos.indexing.scheduling.IndexingSchedule;
 import se.repos.indexing.scheduling.IndexingScheduleBlockingOnly;
 import se.repos.indexing.twophases.ItemContentsMemory;
-import se.repos.indexing.twophases.ItemContentsStream;
 import se.repos.indexing.twophases.ItemPropertiesImmediate;
 import se.repos.restclient.RestAuthentication;
 import se.repos.restclient.auth.RestAuthenticationSimple;
