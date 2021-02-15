@@ -39,6 +39,7 @@ public class ItemContentsStream implements ItemContentBufferStrategy {
 		throw new UnsupportedOperationException("Buffer impl based on easystream not available");
 		// Did not provide any performance improvement (GC time was likely not significant enough).
 		// Problems with failures for large files (or just eps?), likely over 2,5 MB approx.
+		// - Might have been caused by Tika closing without reading the whole stream?
 	}
 
 	// http://io-tools.sourceforge.net/easystream/user_guide/convert_outputstream_to_inputstream.html
