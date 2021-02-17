@@ -86,9 +86,9 @@
 		<!-- path from repository root, starting with slash -->
 		<field name="path"     type="string" indexed="true"  stored="true"  multiValued="false"/>
 		<!-- file or folder name -->
-		<field name="pathname" type="string" indexed="true"  stored="true" multiValued="false"/>
+		<field name="pathname" docValues="true" type="string" indexed="true"  stored="true" multiValued="false"/>
 		<!-- file or folder name before extension, , i.e. the part before the last dot -->
-		<field name="pathnamebase" type="string" indexed="true"  stored="true" multiValued="false"/>
+		<field name="pathnamebase" docValues="true" type="string" indexed="true"  stored="true" multiValued="false"/>
 		<!-- extension, i.e. the part after the last dot -->
 		<field name="pathext"  type="metadata" indexed="true"  stored="true" multiValued="false"/>
 		<!-- path in repository up to parent (including for folders), no trailing slash -->
@@ -104,9 +104,9 @@
 		<field name="pathfullin"   type="string" indexed="true"  stored="true" multiValued="true"/>
 		
 		<!-- classifies item as belonging to 1+ areas of the file hierarchy, such as "trunk"/"branch"/"tag"/"release"/"translation"/"template" -->
-		<field name="patharea" type="string" indexed="true" stored="true" multiValued="true" />
+		<field name="patharea" docValues="true" type="string" indexed="true" stored="true" multiValued="true" />
 		<!-- identifies the "main" area, i.e. main branch, i.e trunk with the purpose of filtering out endless amount of copies, but does not recognize if copies have changed or not -->
-		<field name="pathmain" type="boolean" indexed="true" stored="true" multiValued="false" />
+		<field name="pathmain" docValues="true" type="boolean" indexed="true" stored="true" multiValued="false" />
 		
 		<!-- copy and move information -->
 		<field name="copyfrom" type="string" indexed="true" stored="true" multiValued="false" />
