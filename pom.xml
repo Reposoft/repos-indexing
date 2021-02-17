@@ -34,6 +34,10 @@
 		</repository>		
 	</repositories>
 
+	<properties>
+		<solr-version>6.6.6</solr-version>
+	</properties>	
+
 	<dependencies>
 		<dependency>
 			<groupId>se.simonsoft</groupId>
@@ -43,7 +47,7 @@
 		<dependency>
 			<groupId>org.apache.solr</groupId>
 			<artifactId>solr-solrj</artifactId>
-			<version>6.6.6</version>
+			<version>${solr-version}</version>
 		</dependency>
 		<!-- Not used at this time. See ItemContentsStream. 
 		<dependency>
@@ -55,7 +59,7 @@
 		<dependency>
 			<groupId>org.apache.solr</groupId>
 			<artifactId>solr-test-framework</artifactId>
-			<version>6.6.6</version>
+			<version>${solr-version}</version>
 			<scope>test</scope>
 			<exclusions>
 				<exclusion>

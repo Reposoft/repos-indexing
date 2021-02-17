@@ -28,7 +28,6 @@ import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.CoreContainer;
-import org.apache.solr.core.SolrResourceLoader;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -142,9 +141,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		FileUtils.copyDirectory(coreSource, new File(instanceDir, coreName));
 		FileUtils.copyFile(new File(coreSource.getParentFile(),  "testing-home/solr.xml"), new File(instanceDir, "solr.xml"));
 		
-		SolrResourceLoader solrResourceLoader = new SolrResourceLoader(instanceDir.toPath());
-		CoreContainer solrCoreContainer = new CoreContainer(solrResourceLoader);
-		solrCoreContainer.load();
+		CoreContainer solrCoreContainer = CoreContainer.createAndLoad(instanceDir.toPath());
 		final SolrClient repositem = new EmbeddedSolrServer(solrCoreContainer, "repositem");
 		forTearDown = (EmbeddedSolrServer) repositem;
 		return repositem;

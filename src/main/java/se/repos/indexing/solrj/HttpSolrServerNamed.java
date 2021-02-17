@@ -3,8 +3,6 @@
  */
 package se.repos.indexing.solrj;
 
-import org.apache.http.client.HttpClient;
-import org.apache.solr.client.solrj.ResponseParser;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;;
 
 /**
@@ -13,10 +11,18 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;;
  */
 public class HttpSolrServerNamed extends HttpSolrClient {
 
+	// SolR 8.8.0
+	/*
+	public HttpSolrServerNamed(String baseURL) {
+		super(new Builder(baseURL));
+	}
+	*/
+	// SolR 6.6.6
 	public HttpSolrServerNamed(String baseURL) {
 		super(baseURL);
 	}
 
+	/*
 	public HttpSolrServerNamed(String baseURL, HttpClient client) {
 		super(baseURL, client);
 	}
@@ -24,6 +30,7 @@ public class HttpSolrServerNamed extends HttpSolrClient {
 	public HttpSolrServerNamed(String arg0, HttpClient arg1, ResponseParser arg2) {
 		super(arg0, arg1, arg2);
 	}
+	*/
 
 	private static final long serialVersionUID = 1L;
 

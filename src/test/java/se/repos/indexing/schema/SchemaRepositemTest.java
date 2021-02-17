@@ -122,9 +122,11 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:MAP\\ 12345678")).getResults().getNumFound());
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:TOP\\ 12345678")).getResults().getNumFound());
 		
-		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:MAP 12345678")).getResults().getNumFound());
-		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:TOP 12345678")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"MAP 12345678\"")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"TOP 12345678\"")).getResults().getNumFound());
 		
+		// tokenized match (use edismax in order to use space with tokenized)
+		// Not working: should provide more hits if actually tokenized.
 		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:MAP-12345678")).getResults().getNumFound());
 		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:TOP-12345678")).getResults().getNumFound());
 
@@ -177,7 +179,8 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		// split on dash
 		assertEquals("split on dash", 1, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
 		assertEquals("split on dash", 2, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
-		assertEquals("split on dash", 1, solr.query(new SolrQuery("name:TOP 12345678")).getResults().getNumFound());
+		assertEquals("split on dash, even hit with quote query", 1, solr.query(new SolrQuery("name:\"TOP 12345678\"")).getResults().getNumFound());
+		assertEquals("split on dash", 2, solr.query(new SolrQuery("name:TOP OR name:12345678")).getResults().getNumFound());
 	}
 	
 	@Test
@@ -191,27 +194,51 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		doc2.addField("id", "2");
 		doc2.addField("pathnamebase", "Small machine");
 		solr.add(doc2);
+		/* Used when experimenting
+		SolrInputDocument doc3 = new SolrInputDocument();
+		doc3.addField("id", "3");
+		doc3.addField("pathnamebase", "large tractor");
+		solr.add(doc3);
+		*/
 		solr.commit();
 		
+		// SolR 6: sow=true (exact match works with both quotes and escaping space)
+		// SolR 7: sow=false ("enabling proper function of analysis filters")
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:Large\\ Machine")).getResults().getNumFound());
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:Small\\ machine")).getResults().getNumFound());
+
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"Large Machine\"")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"Small machine\"")).getResults().getNumFound());
 		
-		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:Large Machine")).getResults().getNumFound());
-		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:Small machine")).getResults().getNumFound());
-		
+		// tokenized match (analysis not working in SolR 6 and before)
 		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Large-Machine")).getResults().getNumFound());
 		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Small_machine")).getResults().getNumFound());
 		
-		assertEquals("lowercase", 1, solr.query(new SolrQuery("name:large machine")).getResults().getNumFound());
+		assertEquals("lowercase, exact match", 1, solr.query(new SolrQuery("name:\"large machine\"")).getResults().getNumFound());
 		
+		assertEquals("one term, first", 1, solr.query(new SolrQuery("name:large")).getResults().getNumFound());
+		assertEquals("one term, not first", 2, solr.query(new SolrQuery("name:machine")).getResults().getNumFound());
+		
+		// This can't work since removing defaultSearchField = id.
+		// It never worked as expected, only the first token was searched in 'name', following tokens searched in 'id'.
+		/*
 		assertEquals("", 1, solr.query(new SolrQuery("name:large huge machine")).getResults().getNumFound());
+		*/
+		// Can be achieved with OR
+		assertEquals("need OR notation since removing defaultSearchField", 2, solr.query(new SolrQuery("name:large OR name:huge OR name:machine")).getResults().getNumFound());
+		// Can be achieved with edismax
+		assertEquals("need edismax since removing defaultSearchField", 2, solr.query(new SolrQuery("large huge machine").add("defType", "edismax").add("qf", "name")).getResults().getNumFound());
+		assertEquals("need edismax since removing defaultSearchField", 2, solr.query(new SolrQuery("huge large odd machine").add("defType", "edismax").add("qf", "name")).getResults().getNumFound());
 		
 		assertEquals("one term", 2, solr.query(new SolrQuery("name:machine")).getResults().getNumFound());
 		//assertEquals("term order", 1, solr.query(new SolrQuery("name:machine large")).getResults().getNumFound());
 
 		// Makes no sense...
+		// Resolved: made no sense because of defaultSearchField = id.
+		/*
 		assertEquals("all terms must match?", 0, solr.query(new SolrQuery("name:huge machine")).getResults().getNumFound());
 		assertEquals("all terms must match - should be 0 hits??", 2, solr.query(new SolrQuery("name:machine huge")).getResults().getNumFound());
+		*/
 	}
 	
 	@Test
@@ -233,31 +260,19 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 
 		assertEquals("one term, uppercase", 2, solr.query(new SolrQuery("name:MACHINE")).getResults().getNumFound());
 		
+		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:\"Large Machine\"")).getResults().getNumFound());
+		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:\"Small machine\"")).getResults().getNumFound());
+
+		// Different in 8.8.0
 		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:Large\\ Machine")).getResults().getNumFound());
 		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:Small\\ machine")).getResults().getNumFound());
 		
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:Machine\\ Large")).getResults().getNumFound());
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:machine\\ Small")).getResults().getNumFound());
 		
-		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:Large Machine")).getResults().getNumFound());
-		assertEquals("tokenized match", 1, solr.query(new SolrQuery("name:Small machine")).getResults().getNumFound());
-		
-		// Strange result below this point.
-		// The first token seems to be special with solr.PatternTokenizerFactory		
-		assertEquals("tokenized match reverse", 2, solr.query(new SolrQuery("name:Machine Large")).getResults().getNumFound()); // Debatable
-		assertEquals("tokenized match reverse", 2, solr.query(new SolrQuery("name:machine Small")).getResults().getNumFound()); // Debatable
-/*		
-		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Large-Machine")).getResults().getNumFound());
-		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Small_machine")).getResults().getNumFound());
-	*/	
-		assertEquals("lowercase", 1, solr.query(new SolrQuery("name:large machine")).getResults().getNumFound());
-		
-		assertEquals("", 1, solr.query(new SolrQuery("name:large huge machine")).getResults().getNumFound());
-		
-		assertEquals("one term", 2, solr.query(new SolrQuery("name:machine")).getResults().getNumFound());
-
-		assertEquals("all terms must match? - first term must match?", 0, solr.query(new SolrQuery("name:huge machine")).getResults().getNumFound());
-		assertEquals("all terms must match - should be 0 hits??", 2, solr.query(new SolrQuery("name:machine huge")).getResults().getNumFound());
+		// tokenized match (analysis not working in SolR 6 and before)
+		assertEquals("tokenized match, different delimiter", 0, solr.query(new SolrQuery("name:Large-Machine")).getResults().getNumFound());
+		assertEquals("tokenized match, different delimiter", 0, solr.query(new SolrQuery("name:Small_machine")).getResults().getNumFound());
 	}
 	
 	@Test
@@ -307,7 +322,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		solr.commit();
 		
 		assertEquals("Should tokenize on newline", 1, solr.query(new SolrQuery("prop_svn.ignore:ignore2")).getResults().getNumFound());
-		assertEquals("Should still match the full value", 1, solr.query(new SolrQuery("prop_svn.ignore:ignore1\nignore2")).getResults().getNumFound());
+		assertEquals("Should still match the full value", 1, solr.query(new SolrQuery("prop_svn.ignore:ignore1\\\nignore2")).getResults().getNumFound());
 		//assertEquals("What id the full value has one token that doesn't match?", 0, solr.query(new SolrQuery("prop_svn.ignore:ignore1\nignore0")).getResults().getNumFound());
 		assertEquals("Should tokenize on whitespace", 1, solr.query(new SolrQuery("prop_svn.externals:\"^/some/folder\"")).getResults().getNumFound());
 		assertEquals("Should tokenize on tab", 1, solr.query(new SolrQuery("prop_svn.externals:\"^/some/other/folder\"")).getResults().getNumFound());
@@ -338,7 +353,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		solr.commit();
 		
 		assertEquals("Should match simple word", 1, solr.query(new SolrQuery("text:word")).getResults().getNumFound());
-		assertEquals("Should match words in sequence", 1, solr.query(new SolrQuery("text:followed by text")).getResults().getNumFound());
+		assertEquals("Should match words in sequence", 1, solr.query(new SolrQuery("text:followed\\ by\\ text")).getResults().getNumFound());
 		assertEquals("Should match quoted words in sequence", 1, solr.query(new SolrQuery("text:\"followed by text\"")).getResults().getNumFound());
 		assertEquals("Should not match quoted words out of sequence", 0, solr.query(new SolrQuery("text:\"followed text\"")).getResults().getNumFound());
 
@@ -356,7 +371,7 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		assertEquals("Should match Product Name case-switch", 1, solr.query(new SolrQuery("text:ProductNAME")).getResults().getNumFound());
 		assertEquals("Should match Product Name lowercase", 1, solr.query(new SolrQuery("text:productname")).getResults().getNumFound());
 		assertEquals("Should match Product Name leading capital", 1, solr.query(new SolrQuery("text:Productname")).getResults().getNumFound());
-		assertEquals("Should match Product Name in context", 1, solr.query(new SolrQuery("text:The ProductNAME followed by text")).getResults().getNumFound());
+		assertEquals("Should match Product Name in context (actually matching 'The')", 1, solr.query(new SolrQuery("text:The\\ ProductNAME\\ followed\\ by\\ text")).getResults().getNumFound());
 		// Will fail if using preserveOriginal="1".
 		assertEquals("Should match Product Name in context - Quoted", 1, solr.query(new SolrQuery("text:\"The ProductNAME followed by text\"")).getResults().getNumFound());
 		assertEquals("Should match Product Name lowercase in context - Quoted", 1, solr.query(new SolrQuery("text:\"The Productname followed by text\"")).getResults().getNumFound());
