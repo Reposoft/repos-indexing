@@ -141,8 +141,15 @@
 		<!-- Useful commonality that can be found in prop_* or embd_* or somewhere else added as copyField or custom indexing handler -->
 		<field name="title" type="text_general" indexed="true" stored="true" multiValued="false" />
 		<field name="keywords" type="metadata" indexed="true" stored="true" multiValued="false" />
+		
 		<!-- High level categorization suitable for the users of the system, e.g.: image, office, text, programming. -->
 		<field name="category" type="string" docValues="true" indexed="true" stored="true" multiValued="true" />
+		
+		<!-- Experimental metadata extraction fields suitable for faceting, typically pre-analyzed. -->
+		<!-- s: string, m: multivalue -->
+		<field name="meta_s_m_*" type="string" docValues="true" indexed="true" stored="true" multiValued="true" />
+		<!-- l: long, m: multivalue -->
+		<field name="meta_l_m_*" type="string" docValues="true" indexed="true" stored="true" multiValued="true" />
 		
 		<!-- 
 			References, free form per type.
