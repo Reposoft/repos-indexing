@@ -12,14 +12,8 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;;
 public class HttpSolrServerNamed extends HttpSolrClient {
 
 	// SolR 8.8.0
-	/*
 	public HttpSolrServerNamed(String baseURL) {
 		super(new Builder(baseURL));
-	}
-	*/
-	// SolR 6.6.6
-	public HttpSolrServerNamed(String baseURL) {
-		super(baseURL);
 	}
 
 	/*

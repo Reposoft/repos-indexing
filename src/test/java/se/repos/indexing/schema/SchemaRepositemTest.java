@@ -119,16 +119,18 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		solr.add(doc2);
 		solr.commit();
 		
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:MAP\\ 12345678")).getResults().getNumFound());
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:TOP\\ 12345678")).getResults().getNumFound());
+		// exact match requires quotes in SolR 8
+		assertEquals("no longer exact match", 2, solr.query(new SolrQuery("name:MAP\\ 12345678")).getResults().getNumFound());
+		assertEquals("no longer exact match", 2, solr.query(new SolrQuery("name:TOP\\ 12345678")).getResults().getNumFound());
 		
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"MAP 12345678\"")).getResults().getNumFound());
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"TOP 12345678\"")).getResults().getNumFound());
 		
 		// tokenized match (use edismax in order to use space with tokenized)
 		// Not working: should provide more hits if actually tokenized.
-		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:MAP-12345678")).getResults().getNumFound());
-		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:TOP-12345678")).getResults().getNumFound());
+		// Working in SolR 8
+		assertEquals("different delimiter", 2, solr.query(new SolrQuery("name:MAP-12345678")).getResults().getNumFound());
+		assertEquals("different delimiter", 2, solr.query(new SolrQuery("name:TOP-12345678")).getResults().getNumFound());
 
 		assertEquals("split on space", 1, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
 		assertEquals("split on space", 1, solr.query(new SolrQuery("name:top")).getResults().getNumFound());
@@ -148,17 +150,17 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		solr.add(doc2);
 		solr.commit();
 		
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:MAP_12345678")).getResults().getNumFound());
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:TOP_12345678")).getResults().getNumFound());
+		// exact match requires quotes in SolR 8
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"MAP_12345678\"")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"TOP_12345678\"")).getResults().getNumFound());
 		
 		assertEquals("split on underscore", 1, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
 		assertEquals("split on underscore", 2, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
 		
 		// no split on underscore - debatable but good when using numbering (have the option to use space if splitting is desired)
-		/*
-		assertEquals("no split on underscore", 0, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
-		assertEquals("no split on underscore", 0, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
-		*/
+		// Now splitting on underscore (changed with SolR 8?)
+		assertEquals("no split on underscore", 1, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
+		assertEquals("no split on underscore", 2, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
 	}
 	
 	@Test
@@ -174,8 +176,9 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		solr.add(doc2);
 		solr.commit();
 		
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:MAP-12345678")).getResults().getNumFound());
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:TOP-12345678")).getResults().getNumFound());
+		// exact match requires quotes in SolR 8
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"MAP-12345678\"")).getResults().getNumFound());
+		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"TOP-12345678\"")).getResults().getNumFound());
 		// split on dash
 		assertEquals("split on dash", 1, solr.query(new SolrQuery("name:TOP")).getResults().getNumFound());
 		assertEquals("split on dash", 2, solr.query(new SolrQuery("name:12345678")).getResults().getNumFound());
@@ -204,15 +207,17 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		
 		// SolR 6: sow=true (exact match works with both quotes and escaping space)
 		// SolR 7: sow=false ("enabling proper function of analysis filters")
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:Large\\ Machine")).getResults().getNumFound());
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:Small\\ machine")).getResults().getNumFound());
+		assertEquals("no longer exact match", 2, solr.query(new SolrQuery("name:Large\\ Machine")).getResults().getNumFound());
+		assertEquals("no longer exact match", 2, solr.query(new SolrQuery("name:Small\\ machine")).getResults().getNumFound());
 
+		// exact match requires quotes in SolR 8
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"Large Machine\"")).getResults().getNumFound());
 		assertEquals("exact match", 1, solr.query(new SolrQuery("name:\"Small machine\"")).getResults().getNumFound());
 		
 		// tokenized match (analysis not working in SolR 6 and before)
-		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Large-Machine")).getResults().getNumFound());
-		assertEquals("different delimiter", 1, solr.query(new SolrQuery("name:Small_machine")).getResults().getNumFound());
+		// analysis working in SolR 8
+		assertEquals("different delimiter", 2, solr.query(new SolrQuery("name:Large-Machine")).getResults().getNumFound());
+		assertEquals("different delimiter", 2, solr.query(new SolrQuery("name:Small_machine")).getResults().getNumFound());
 		
 		assertEquals("lowercase, exact match", 1, solr.query(new SolrQuery("name:\"large machine\"")).getResults().getNumFound());
 		
@@ -260,19 +265,21 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 
 		assertEquals("one term, uppercase", 2, solr.query(new SolrQuery("name:MACHINE")).getResults().getNumFound());
 		
+		// exact match requires quotes in SolR 8
 		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:\"Large Machine\"")).getResults().getNumFound());
 		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:\"Small machine\"")).getResults().getNumFound());
 
 		// Different in 8.8.0
-		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:Large\\ Machine")).getResults().getNumFound());
-		assertEquals("no exact match reverse", 0, solr.query(new SolrQuery("name:Small\\ machine")).getResults().getNumFound());
+		assertEquals("no exact match reverse", 2, solr.query(new SolrQuery("name:Large\\ Machine")).getResults().getNumFound());
+		assertEquals("no exact match reverse", 2, solr.query(new SolrQuery("name:Small\\ machine")).getResults().getNumFound());
 		
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:Machine\\ Large")).getResults().getNumFound());
-		assertEquals("exact match", 1, solr.query(new SolrQuery("name:machine\\ Small")).getResults().getNumFound());
+		assertEquals("no longer exact match", 2, solr.query(new SolrQuery("name:Machine\\ Large")).getResults().getNumFound());
+		assertEquals("no longer exact match", 2, solr.query(new SolrQuery("name:machine\\ Small")).getResults().getNumFound());
 		
 		// tokenized match (analysis not working in SolR 6 and before)
-		assertEquals("tokenized match, different delimiter", 0, solr.query(new SolrQuery("name:Large-Machine")).getResults().getNumFound());
-		assertEquals("tokenized match, different delimiter", 0, solr.query(new SolrQuery("name:Small_machine")).getResults().getNumFound());
+		// analysis working in SolR 8
+		assertEquals("tokenized match, different delimiter", 2, solr.query(new SolrQuery("name:Large-Machine")).getResults().getNumFound());
+		assertEquals("tokenized match, different delimiter", 2, solr.query(new SolrQuery("name:Small_machine")).getResults().getNumFound());
 	}
 	
 	@Test
