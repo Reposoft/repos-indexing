@@ -8,6 +8,7 @@ import java.io.IOException;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient.RemoteSolrException;
+import org.apache.solr.client.solrj.response.SolrResponseBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,13 @@ public abstract class SolrOp<T> {
 		this.core = core;
 	}
 
+	protected void doLogSlowQuery(String opName, String query, SolrResponseBase response) {
+		long eTime = response.getElapsedTime();
+		if (eTime > 1000) {
+			logger.warn("Slow SolR operation {} (eTime: {} qTime: {}): {}", opName, eTime, response.getQTime(), query);
+		}
+	}
+	
 	public T run() {
 		try {
 			return runOp();

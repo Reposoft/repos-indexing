@@ -22,7 +22,9 @@ public class SolrCommit extends SolrOp<UpdateResponse> {
 	@Override
 	public UpdateResponse runOp() throws SolrServerException, IOException {
 		logger.debug("Committing {}", core);
-		return core.commit();
+		UpdateResponse response = core.commit();
+		doLogSlowQuery("commit", "-", response);
+		return response; 
 	}
 	
 	@Override
