@@ -29,6 +29,9 @@ public abstract class SolrOp<T> {
 		long eTime = response.getElapsedTime();
 		if (eTime > 1000) {
 			String coreName = core.toString();
+			if (core instanceof HttpSolrServerNamed) {
+				coreName = ((HttpSolrServerNamed) core).getName();
+			}
 			logger.warn("Slow SolR operation {} [{}] (eTime: {} qTime: {}): {}", opName, coreName, eTime, response.getQTime(), query);
 		}
 	}

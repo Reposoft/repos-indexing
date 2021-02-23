@@ -34,6 +34,10 @@ public class HttpSolrServerNamed extends HttpSolrClient {
 		this.identifier = identifier;
 		return this;
 	}
+	
+	public String getName() {
+		return this.identifier;
+	}
 
 	@Override
 	public String toString() {
