@@ -43,7 +43,7 @@ public class SolrAdd extends SolrOp<UpdateResponse> {
 	@Override
 	public UpdateResponse runOp() throws SolrServerException, IOException {
 		UpdateResponse response = core.add(documents);
-		doLogSlowQuery("add", Integer.toString(documents.size()), response);
+		doLogSlowQuery(core, "add", Integer.toString(documents.size()), response);
 		return response;
 	}
 

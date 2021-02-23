@@ -25,10 +25,11 @@ public abstract class SolrOp<T> {
 		this.core = core;
 	}
 
-	protected void doLogSlowQuery(String opName, String query, SolrResponseBase response) {
+	protected void doLogSlowQuery(SolrClient core, String opName, String query, SolrResponseBase response) {
 		long eTime = response.getElapsedTime();
 		if (eTime > 1000) {
-			logger.warn("Slow SolR operation {} (eTime: {} qTime: {}): {}", opName, eTime, response.getQTime(), query);
+			String coreName = core.toString();
+			logger.warn("Slow SolR operation {} [{}] (eTime: {} qTime: {}): {}", opName, coreName, eTime, response.getQTime(), query);
 		}
 	}
 	

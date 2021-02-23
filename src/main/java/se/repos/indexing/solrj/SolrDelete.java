@@ -26,7 +26,7 @@ public class SolrDelete extends SolrOp<UpdateResponse> {
 	public UpdateResponse runOp() throws SolrServerException, IOException {
 		UpdateResponse delete = core.deleteById(id);
 		logger.debug("Delete response: {}", delete);
-		doLogSlowQuery("deleteById", id, delete);
+		doLogSlowQuery(core, "deleteById", id, delete);
 		return delete;
 	}
 	

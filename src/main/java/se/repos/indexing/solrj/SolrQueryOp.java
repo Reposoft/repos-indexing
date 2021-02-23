@@ -27,7 +27,7 @@ public class SolrQueryOp extends SolrOp<QueryResponse> {
 	public QueryResponse runOp() throws SolrServerException, IOException {
 		QueryResponse response = core.query(this.query);
 		logger.debug("Query response: {}", query);
-		doLogSlowQuery("query", this.query.getQuery(), response);
+		doLogSlowQuery(core, "query", this.query.getQuery(), response);
 		return response;
 	}
 
