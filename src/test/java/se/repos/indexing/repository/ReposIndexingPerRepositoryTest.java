@@ -6,8 +6,13 @@ package se.repos.indexing.repository;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+import java.io.IOException;
+
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.junit.Test;
+import org.mockito.Mock;
 
 import se.repos.indexing.ReposIndexing;
 import se.repos.indexing.scheduling.IndexingSchedule;
@@ -26,11 +31,16 @@ public class ReposIndexingPerRepositoryTest {
 	}
 	
 	@Test
-	public void testClear() {
+	public void testClear() throws SolrServerException, IOException {
 		CmsRepository repository = new CmsRepository("http://testing/svn/repo");
 		ReposIndexingPerRepository indexing = new ReposIndexingPerRepository(repository);
 		
-		IndexAdminPerRepositoryRepositem admin = new IndexAdminPerRepositoryRepositem(repository, new IdStrategyDefault(), mock(SolrClient.class));
+		SolrClient client = mock(SolrClient.class);
+		UpdateResponse response = new UpdateResponse();
+		response.setElapsedTime(10);
+		when(client.deleteByQuery(any())).thenReturn(response);
+		when(client.commit()).thenReturn(response);
+		IndexAdminPerRepositoryRepositem admin = new IndexAdminPerRepositoryRepositem(repository, new IdStrategyDefault(), client);
 		indexing.setIndexAdmin(admin);
 		
 		IndexingSchedule schedule = mock(IndexingSchedule.class);

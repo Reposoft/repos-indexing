@@ -4,6 +4,7 @@
 package se.repos.indexing.repository;
 
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.junit.Test;
 
 import se.repos.indexing.IndexAdmin;
@@ -26,6 +28,10 @@ public class IndexAdminPerRepositoryRepositemTest {
 		CmsRepository repository = new CmsRepository("http://localhost:1234/svn/r");
 		IdStrategy idStrategy = new IdStrategyDefault();
 		SolrClient repositem = mock(SolrClient.class);
+		UpdateResponse response = new UpdateResponse();
+		response.setElapsedTime(10);
+		when(repositem.deleteByQuery(any())).thenReturn(response);
+		when(repositem.commit()).thenReturn(response);
 		
 		IndexAdmin indexAdmin = new IndexAdminPerRepositoryRepositem(repository, idStrategy, repositem);
 		final List<Object> calls = new LinkedList<Object>();
