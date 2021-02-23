@@ -5,6 +5,7 @@ package se.repos.indexing.repository;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -32,6 +33,7 @@ public class IndexAdminPerRepositoryRepositemTest {
 		response.setElapsedTime(10);
 		when(repositem.deleteByQuery(any())).thenReturn(response);
 		when(repositem.commit()).thenReturn(response);
+		when(repositem.commit(anyBoolean(), anyBoolean(), anyBoolean())).thenReturn(response);
 		
 		IndexAdmin indexAdmin = new IndexAdminPerRepositoryRepositem(repository, idStrategy, repositem);
 		final List<Object> calls = new LinkedList<Object>();
@@ -49,7 +51,7 @@ public class IndexAdminPerRepositoryRepositemTest {
 		indexAdmin.clear();
 		
 		verify(repositem).deleteByQuery("repoid:\"localhost:1234/svn/r\"");
-		verify(repositem).commit();
+		verify(repositem).commit(false, true, false);
 		assertEquals("Should notify", 1, calls.size());
 	}
 

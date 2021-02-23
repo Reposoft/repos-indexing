@@ -15,15 +15,23 @@ public class SolrCommit extends SolrOp<UpdateResponse> {
 
 	private static final Logger logger = LoggerFactory.getLogger(SolrCommit.class);
 	
+	private boolean waitSearcher = true; // Traditionally defaults to true.
+	private boolean softCommit = true; // Moving towards softCommit with periodic hard commit managed by SolR.
+	
 	public SolrCommit(SolrClient core) {
 		super(core);
+	}
+	
+	public SolrCommit(SolrClient core, boolean softCommit) {
+		super(core);
+		this.softCommit = softCommit;
 	}
 
 	@Override
 	public UpdateResponse runOp() throws SolrServerException, IOException {
 		logger.debug("Committing {}", core);
-		UpdateResponse response = core.commit();
-		doLogSlowQuery(core, "commit", "-", response);
+		UpdateResponse response = core.commit(false, waitSearcher, softCommit);
+		doLogSlowQuery(core, "commit", "softCommit=" + softCommit, response);
 		return response; 
 	}
 	
