@@ -40,6 +40,7 @@ public class ReposIndexingPerRepositoryTest {
 		response.setElapsedTime(10);
 		when(client.deleteByQuery(any())).thenReturn(response);
 		when(client.commit()).thenReturn(response);
+		when(client.commit(anyBoolean(), anyBoolean(), anyBoolean())).thenReturn(response);
 		IndexAdminPerRepositoryRepositem admin = new IndexAdminPerRepositoryRepositem(repository, new IdStrategyDefault(), client);
 		indexing.setIndexAdmin(admin);
 		

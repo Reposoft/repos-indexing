@@ -172,6 +172,7 @@ public class RepositoryIndexStatus {
 	public void indexRevStartAndCommit(CmsRepository repository,
 			RepoRevision revision, CmsItemProperties revprops) {
 		indexRevStart(repository, revision, revprops, null);
+		// TODO: Consider commitWithin during add instead of commit.
 		new SolrCommit(repositem).run();
 	}
 	

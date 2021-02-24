@@ -52,7 +52,7 @@ public class IndexAdminPerRepositoryRepositem implements IndexAdmin {
 		String query = "repoid:\"" + idStrategy.getIdRepository(repository).replace("\"", "\\\"") + '"';
 		logger.info("Clearing index for repository {} using query {}", repository, query);
 		new SolrDeleteByQuery(repositem, query).run();
-		new SolrCommit(repositem).run();
+		new SolrCommit(repositem, false).run();
 		for (IndexAdmin p : postActions) {
 			p.clear();
 		}
