@@ -4,6 +4,8 @@
 package se.repos.indexing.solrj;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -15,18 +17,23 @@ public class SolrDelete extends SolrOp<UpdateResponse> {
 	
 	private static final Logger logger = LoggerFactory.getLogger(SolrDelete.class);
 	
-	private String id;
+	private List<String> ids;
 	
 	public SolrDelete(SolrClient core, String id) {
 		super(core);
-		this.id = id;
+		this.ids = Arrays.asList(id);
+	}
+	
+	public SolrDelete(SolrClient core, List<String> ids) {
+		super(core);
+		this.ids = ids;
 	}
 
 	@Override
 	public UpdateResponse runOp() throws SolrServerException, IOException {
-		UpdateResponse delete = core.deleteById(id);
+		UpdateResponse delete = core.deleteById(ids);
 		logger.debug("Delete response: {}", delete);
-		doLogSlowQuery(core, "deleteById", id, delete);
+		doLogSlowQuery(core, "deleteById", "(no of IDs: " + ids.size() + ")" + ids.get(0), delete);
 		return delete;
 	}
 	
