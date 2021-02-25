@@ -130,6 +130,8 @@
 		
 		<!-- From fulltext extraction -->
 		<field name="text" type="text_general" indexed="true" stored="false" multiValued="false" />
+		<!-- Stored fulltext, likely limited in length. Useful for highlighting. -->
+		<field name="text_stored" type="text_general" indexed="false" stored="true" multiValued="false" />
 		<!-- If fulltext and/or embedded metadata extraction fails. Extended to also contain failures from other handlers. -->
 		<field name="text_error" type="text_general" indexed="true" stored="true" multiValued="true" />
 		<!-- General field for embedded metadata, colon on field name replaced with dot  -->
@@ -141,7 +143,6 @@
 		<!-- Useful commonality that can be found in prop_* or embd_* or somewhere else added as copyField or custom indexing handler -->
 		<field name="title" type="text_general" indexed="true" stored="true" multiValued="false" />
 		<field name="keywords" type="metadata" indexed="true" stored="true" multiValued="false" />
-		
 		<!-- High level categorization suitable for the users of the system, e.g.: image, office, text, programming. -->
 		<field name="category" type="string" docValues="true" indexed="true" stored="true" multiValued="true" />
 		
@@ -193,7 +194,7 @@
 	
 	<!-- Name from pathnamebase (no extension), with different word delimiter. -->
 	<copyField source="pathnamebase" dest="name"/>
-
+	
 	<!-- field to use to determine and enforce document uniqueness. -->
 	<uniqueKey>id</uniqueKey>
 	
