@@ -95,6 +95,8 @@ public class HandlerHeadClone implements IndexingItemHandler {
 		}
 		// Flag 'head' is always false when returning, subsequent handlers will add the item representing history.
 		fields.setField("head", false);
+		// Remove 'text_stored' from item representing history.
+		fields.removeField("text_stored");
 	}
 
 	@Override
