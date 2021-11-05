@@ -17,7 +17,7 @@ import se.repos.indexing.twophases.IndexingDocIncrementalSolrj;
 
 public class SolrAdd extends SolrOp<UpdateResponse> {
 
-	private Collection<SolrInputDocument> documents;
+	protected Collection<SolrInputDocument> documents;
 
 	public SolrAdd(SolrClient core, IndexingDoc doc) {
 		super(core);
