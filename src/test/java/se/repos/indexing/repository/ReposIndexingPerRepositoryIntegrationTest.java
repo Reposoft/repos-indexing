@@ -78,12 +78,31 @@ import se.simonsoft.cms.testing.svn.SvnTestSetup;
 public class ReposIndexingPerRepositoryIntegrationTest {
 
 	// reuse solr instance dir
-	private final File instanceDir = new File(System.getProperty("java.io.tmpdir") + "/solr-" + this.getClass().getSimpleName());
+	private File instanceDir = new File(System.getProperty("java.io.tmpdir") + "/solr-" + this.getClass().getSimpleName());
 	private EmbeddedSolrServer forTearDown = null;
 	
 	private Injector context = null;
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	
+	
+	/**
+	 * Creates the cores and configuration needed for lookup.
+	 * @return
+	 */
+	protected File createHome() {
+		File instanceDir;
+		try {
+			instanceDir = File.createTempFile("reposindexing-", ".dir");
+		} catch (IOException e) {
+			throw new RuntimeException("not handled", e);
+		}
+		instanceDir.delete();
+		instanceDir.mkdir();
+		logger.debug("Test server instance dir is {}", instanceDir);
+		//extractResourceFolder(HOMECONFIG, instanceDir);
+		return instanceDir;
+	}
 	
 	@Before
 	public void setUp() throws Exception {
@@ -133,6 +152,8 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 	private SolrClient setUpSolrRepositem() throws IOException {
 		File coreSource = new File("src/main/resources/se/repos/indexing/solr/repositem/");
 		
+		this.instanceDir = createHome();
+		
 		if (instanceDir.exists()) { // instance dir is kept for inspection after each test but recreated before each new test
 			FileUtils.deleteDirectory(instanceDir);
 		}
@@ -147,7 +168,7 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		CoreContainer solrCoreContainer = new CoreContainer(instanceDir.toPath(), null);
 		logger.info("Loading SolR container...");
 		solrCoreContainer.load();
-		logger.info("Loaded SolR container.");
+		logger.info("Loaded SolR container, status: {}", solrCoreContainer.getStatus());
 		final SolrClient repositem = new EmbeddedSolrServer(solrCoreContainer, "repositem");
 		logger.info("Created EmbeddedSolrServer.");
 		forTearDown = (EmbeddedSolrServer) repositem;
