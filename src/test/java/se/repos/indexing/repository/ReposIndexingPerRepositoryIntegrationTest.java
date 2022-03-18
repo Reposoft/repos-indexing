@@ -140,14 +140,22 @@ public class ReposIndexingPerRepositoryIntegrationTest {
 		String coreName = "repositem";
 		FileUtils.copyDirectory(coreSource, new File(instanceDir, coreName));
 		FileUtils.copyFile(new File(coreSource.getParentFile(),  "testing-home/solr.xml"), new File(instanceDir, "solr.xml"));
-		
+
+		/*
 		CoreContainer solrCoreContainer = CoreContainer.createAndLoad(instanceDir.toPath());
+		*/
+		CoreContainer solrCoreContainer = new CoreContainer(instanceDir.toPath(), null);
+		logger.info("Loading SolR container...");
+		solrCoreContainer.load();
+		logger.info("Loaded SolR container.");
 		final SolrClient repositem = new EmbeddedSolrServer(solrCoreContainer, "repositem");
+		logger.info("Created EmbeddedSolrServer.");
 		forTearDown = (EmbeddedSolrServer) repositem;
 		return repositem;
 	};
 	
 	private void tearDownSolrRepositem() throws IOException {
+		logger.info("Closing EmbeddedSolrServer...");
 		forTearDown.close();
 		
 		new File(instanceDir, "/repositem/core.properties").delete(); // Solr 4.5.0 won't load the core if core.properties is present
