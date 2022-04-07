@@ -78,6 +78,10 @@ public class HandlerPathinfo implements IndexingItemHandler {
 			d.setField("pathfull", repopath + path.toString());
 			for (String segment : path.getPathSegments()) {
 				d.addField("pathpart", segment);
+				int pos = path.getPathSegments().indexOf(segment);
+				if (pos < 9) {
+					d.addField("pathsegment".concat(Integer.toString(pos+1)), segment);
+				}
 			}
 			parent = path.getParent();
 		}

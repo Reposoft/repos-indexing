@@ -72,6 +72,12 @@ public class HandlerPathinfoTest {
 		assertEquals("a file.txt", partit.next());
 		assertEquals(3, part.size());
 		
+		assertNull(f.getFieldValue("pathsegment0"));
+		assertEquals("my", f.getFieldValue("pathsegment1"));
+		assertEquals("dir", f.getFieldValue("pathsegment2"));
+		assertEquals("a file.txt", f.getFieldValue("pathsegment3"));
+		assertNull(f.getFieldValue("pathsegment4"));
+		
 		assertEquals("Must be String in order to get correct JSON from SolR", "A", f.getFieldValue("pathstat"));
 		assertEquals(null, f.getFieldValue("pathstatprop")); // schema comment can be interpreted as "" but does it matter to search?
 		assertEquals("file", f.getFieldValue("type"));
