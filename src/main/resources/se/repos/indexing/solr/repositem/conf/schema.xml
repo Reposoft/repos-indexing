@@ -147,10 +147,15 @@
 		<field name="category" type="string" docValues="true" indexed="true" stored="true" multiValued="true" />
 		
 		<!-- Experimental metadata extraction fields suitable for faceting, typically pre-analyzed. -->
+		<!-- CMS #1531: Faceting should use multivalue field while certain consumers need singlevalue. -->
 		<!-- s: string, m: multivalue -->
 		<dynamicField name="meta_s_m_*" type="string" docValues="true" indexed="true" stored="true" multiValued="true" />
+		<!-- s: string, s: singlevalue -->
+		<dynamicField name="meta_s_s_*" type="string" docValues="true" indexed="true" stored="true" multiValued="false" />
 		<!-- l: long, m: multivalue -->
 		<dynamicField name="meta_l_m_*" type="long" docValues="true" indexed="true" stored="true" multiValued="true" />
+		<!-- l: long, m: singlevalue -->
+		<dynamicField name="meta_l_s_*" type="long" docValues="true" indexed="true" stored="true" multiValued="false" />
 		
 		<!-- 
 			References, free form per type.
