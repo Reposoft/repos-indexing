@@ -148,9 +148,9 @@
 		
 		<!-- Experimental metadata extraction fields suitable for faceting, typically pre-analyzed. -->
 		<!-- s: string, m: multivalue -->
-		<field name="meta_s_m_*" type="string" docValues="true" indexed="true" stored="true" multiValued="true" />
+		<dynamicField name="meta_s_m_*" type="string" docValues="true" indexed="true" stored="true" multiValued="true" />
 		<!-- l: long, m: multivalue -->
-		<field name="meta_l_m_*" type="long" docValues="true" indexed="true" stored="true" multiValued="true" />
+		<dynamicField name="meta_l_m_*" type="long" docValues="true" indexed="true" stored="true" multiValued="true" />
 		
 		<!-- 
 			References, free form per type.
