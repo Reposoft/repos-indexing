@@ -97,6 +97,9 @@
 		<field name="pathin"   type="string" indexed="true"  stored="true" multiValued="true"/>
 		<!-- all path components -->
 		<field name="pathpart" type="string" indexed="true"  stored="true" multiValued="true"/>
+		<!-- all path components in numbered fields, where first folder is pathsegment1. -->
+		<dynamicField name="pathsegment*" type="string" indexed="true"  stored="true" multiValued="false"/>
+		
 		
 		<!-- path from server root, URL-encoded?, url-at-host/urlpath? -->
 		<field name="pathfull"  type="string" indexed="true"  stored="true" multiValued="false"/>
