@@ -28,6 +28,7 @@ import se.simonsoft.cms.item.CmsItemPath;
 import se.simonsoft.cms.item.CmsRepository;
 import se.simonsoft.cms.item.RepoRevision;
 import se.simonsoft.cms.item.events.change.CmsChangesetItem;
+import se.simonsoft.cms.item.indexing.IdStrategyDefault;
 
 public class SchemaRepositemTest extends SolrTestCaseJ4 {
 
@@ -545,6 +546,27 @@ public class SchemaRepositemTest extends SolrTestCaseJ4 {
 		//assertEquals("Historical should still be searchable on text after head flag update",
 				0, solr.query(new SolrQuery("text:secret")).getResults().getNumFound());
 	}
+	
+	
+	public void testHandleRepeatedPathSegments() throws SolrServerException, IOException {
+		SolrClient solr = getSolr();		
+		// Not really unit testing the schema here because the path logic in the handler is too relevant - could be switched to 
+		IndexingItemProgress p = mock(IndexingItemProgress.class);
+		CmsRepository repo = new CmsRepository("http://ex.ampl:444/s/rep1");
+		when(p.getRepository()).thenReturn(repo);
+		when(p.getRevision()).thenReturn(new RepoRevision(35L, new Date()));
+		CmsChangesetItem item = mock(CmsChangesetItem.class);
+		when(item.getPath()).thenReturn(new CmsItemPath("/xml/something/xml/doc.xml"));
+		when(item.getRevisionChanged()).thenReturn(new RepoRevision(35L, new Date()));
+		IndexingDocIncrementalSolrj doc = new IndexingDocIncrementalSolrj();
+		when(p.getFields()).thenReturn(doc);
+		when(p.getItem()).thenReturn(item);
+		HandlerPathinfo handlerPathinfo = new HandlerPathinfo();
+		handlerPathinfo.setIdStrategy(new IdStrategyDefault());
+		handlerPathinfo.handle(p);
+		solr.add(doc.getSolrDoc());
+	}
+	
 
 	@Test
 	@Ignore // very incomplete
