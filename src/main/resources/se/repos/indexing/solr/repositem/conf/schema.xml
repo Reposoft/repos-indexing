@@ -133,7 +133,9 @@
 		
 		<!-- From fulltext extraction -->
 		<field name="text" type="text_general" indexed="true" stored="false" multiValued="false" />
-		<!-- Stored fulltext, likely limited in length. Useful for highlighting. -->
+		<!-- Intro fulltext, stored, limited in length. Useful for highlighting. (experimental) -->
+		<field name="text_intro_*" type="text_general" indexed="true" stored="true" multiValued="false" />
+		<!-- Stored fulltext, not indexed, likely limited in length. Useful for highlighting. (experimental) -->
 		<field name="text_stored" type="text_general" indexed="false" stored="true" multiValued="false" />
 		<!-- If fulltext and/or embedded metadata extraction fails. Extended to also contain failures from other handlers. -->
 		<field name="text_error" type="text_general" indexed="true" stored="true" multiValued="true" />
